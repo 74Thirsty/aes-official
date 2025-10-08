@@ -18,8 +18,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   </head>
-  <body>
-    <div class="page-shell">
+  <body class="auto-gaap-body">
+    <div class="page-shell auto-gaap-shell">
       <header id="top" class="site-header">
         <nav class="top-nav">
           <a class="brand" href="../../index.html#top">
@@ -122,6 +122,71 @@
             </article>
           </div>
         </div>
+
+        <section class="card auto-gaap-howto" aria-labelledby="howToTitle">
+          <div class="howto-intro">
+            <span class="eyebrow">Getting started</span>
+            <h2 id="howToTitle">How to put Auto GAAP to work in minutes</h2>
+            <p>
+              Launch the sandbox with your own ledger or the provided sample file, then let AutoLedger narrate every
+              reconciliation step. Each stage is adaptive, so finance, revenue, and engineering partners stay in sync.
+            </p>
+          </div>
+          <div class="howto-steps" role="list">
+            <details class="howto-step" open>
+              <summary>
+                <span class="step-index" aria-hidden="true">1</span>
+                <div>
+                  <h3>Upload or connect your ledger</h3>
+                  <p>Drop in a CSV, connect an ERP source, or load the sample ledger to explore the control room.</p>
+                </div>
+              </summary>
+              <p>
+                Auto GAAP ingests structured and semi-structured journal data. Use the sample ledger to see baseline
+                flows, or authenticate a live data source when you are ready for full automation.
+              </p>
+            </details>
+            <details class="howto-step" open>
+              <summary>
+                <span class="step-index" aria-hidden="true">2</span>
+                <div>
+                  <h3>Choose your accounting mode</h3>
+                  <p>Select cash or accrual handling so AutoLedger applies the right recognition cadence.</p>
+                </div>
+              </summary>
+              <p>
+                Toggle policy packs for cash or accrual workflows. The sandbox updates balances, scheduling, and
+                disclosure prompts instantly so you can validate controls before production rollout.
+              </p>
+            </details>
+            <details class="howto-step" open>
+              <summary>
+                <span class="step-index" aria-hidden="true">3</span>
+                <div>
+                  <h3>Run the Auto GAAP analyzer</h3>
+                  <p>Click <strong>Analyze</strong> to surface narratives, recommendations, and trial balance views.</p>
+                </div>
+              </summary>
+              <p>
+                The analyzer inspects every entry, grouping line items by GAAP category and highlighting imbalances,
+                stale policies, or missing evidence so you can act before close deadlines.
+              </p>
+            </details>
+            <details class="howto-step" open>
+              <summary>
+                <span class="step-index" aria-hidden="true">4</span>
+                <div>
+                  <h3>Let AutoLedger categorize transactions</h3>
+                  <p>Activate auto-categorization to balance the books and push updates into your ledger view.</p>
+                </div>
+              </summary>
+              <p>
+                AutoLedger monitors every journal event, applying policy graph rules, syncing recurring entries, and
+                exporting ledger or trial balance snapshots that remain audit-ready by design.
+              </p>
+            </details>
+          </div>
+        </section>
       </header>
 
       <main class="site-main">
