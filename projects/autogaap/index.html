@@ -1,654 +1,455 @@
 <!DOCTYPE html>
 <html lang="en">
-<link rel="stylesheet" href="../../styles/global.css">
-<link rel="stylesheet" href="../../styles/neon.css">
-
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-			<title>autoGAAP - Accounting Made Easy</title>
-
-<!-- Libraries -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/p5@1.4.2/lib/p5.min.js"></script>
-<!-- Core app and shared utilities -->
-<script src="../../scripts/base_app.js"></script>
-<script src="../../scripts/global.js"></script>
-
-<!-- Functional modules -->
-<script src="../../scripts/journal.js"></script>
-<script src="../../scripts/balance.js"></script>
-<script src="../../scripts/depreciation.js"></script>
-<script src="../../scripts/recurring.js"></script>
-<script src="../../scripts/export.js"></script>
-<script src="../../scripts/chart.js"></script>
-<script src="../../scripts/gaap_expansion.js"></script>
-<script src="../../scripts/geo_location.js"></script>
-
-<!-- Main orchestrator -->
-<script src="../../scripts/main.js"></script>
-
-<!-- AutoGAAP logic -->
-<script src="../../scripts/autogaap.js"></script>
-		
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
-
-/* Dialog layer */
-#gaap-dialog {
-z-index: 9999 !important;
-}
-</style>
-</head>
-	<body>
-		<div class="container">
-			<div class="form-container">
-				<div class="form-column">
-					<h2>Journal Entry Form</h2>
-
-				<div class="form-group">
-					<button onclick="loadLedgerJson()">🔁 Load Ledger JSON</button>
-				</div>
-					<form id="journalForm">
-						<div class="form-group">
-							<label for="postDate">Post Date:</label>
-							<input type="date" id="postDate" required />
-						</div>
-
-						<div class="form-group">
-							<label for="description">Description:</label>
-							<textarea id="description" rows="2" required></textarea>
-						</div>
-						<div class="form-group">
-							<label>Account 1:</label>
-							<select id="account1Type" required>
-								<option value="">Select Account Type</option>
-								<option value="asset">Asset</option>
-								<option value="liability">Liability</option>
-								<option value="revenue">Revenue</option>
-								<option value="expense">Expense</option>
-							</select>
-							<select id="account1SubType" required>
-								<option value="">Select Sub-category</option>
-								<option value="current">Current</option>
-								<option value="non-current">Non-Current</option>
-							</select>
-								<input type="text" id="account1Name" placeholder="Account Name" required />
-								<input type="number" id="debitAmount1" placeholder="Debit Amount" min="0" />
-								<input type="number" id="creditAmount1" placeholder="Credit Amount" min="0" />
-
-							<div class="checkbox-group">
-								<label for="apply-depreciation">
-								<input type="checkbox" id="apply-depreciation" />
-									Apply Depreciation
-								</label>
-							</div>
-							<div id="asset-details" style="display: none;">
-								<label for="asset-name">Asset Name:</label>
-								<input type="text" id="asset-name" /><br />
-								<label for="asset-value">Asset Value:</label>
-								<input type="number" id="asset-value" /><br />
-								<label for="useful-life">Useful Life (in years):</label>
-								<input type="number" id="useful-life" /><br />
-							</div>
-						</div>
-
-						<div class="form-group">
-							<label>Account 2:</label>
-							<select id="account2Type" required>
-								<option value="">Select Account Type</option>
-								<option value="asset">Asset</option>
-								<option value="liability">Liability</option>
-								<option value="revenue">Revenue</option>
-								<option value="expense">Expense</option>
-							</select>
-							<select id="account2SubType" required>
-								<option value="">Select Sub-category</option>
-								<option value="current">Current</option>
-								<option value="non-current">Non-Current</option>
-							</select>
-								<input type="text" id="account2Name" placeholder="Account Name" required />
-								<input type="number" id="debitAmount2" placeholder="Debit Amount" min="0" />
-								<input type="number" id="creditAmount2" placeholder="Credit Amount" min="0" />
-							</div>
-
-						<div class="checkbox-group">
-							<label><input type="checkbox" id="isAccrued" /> Accrued</label>
-							<label><input type="checkbox" id="isPrepaid" /> Prepaid</label>
-						</div>
-
-						<div id="accrual-details" style="display: none;">
-							<label for="accrued-due-date">Due Date:</label>
-							<input type="date" id="accrued-due-date" /><br />
-							<label for="accrued-account">Recognition Account:</label>
-							<input type="text" id="accrued-account" /><br />
-							<label for="accrued-period">Recognition Period:</label>
-							<input type="text" id="accrued-period" /><br />
-						</div>
-
-						<div id="prepaid-details" style="display: none;">
-							<label for="prepaid-start-date">Start Date:</label>
-							<input type="date" id="prepaid-start-date" /><br />
-							<label for="prepaid-end-date">End Date:</label>
-							<input type="date" id="prepaid-end-date" /><br />
-							<label for="prepaid-account">Amortization Account:</label>
-							<input type="text" id="prepaid-account" /><br />
-						</div>
-
-						
-<div class="form-group" style="display: flex; gap: 10px;">
-  <button type="submit">Add Entry</button>
-  <button type="button" onclick="runAutoGAAP()">📘 Check GAAP</button>
-</div>
-
-					</form>
-				</div> <!-- close form-column -->
-
-								
-				<div class="instructions-container">
-					<h3>📘 How to Journalize (Paper Examples)</h3>
-						<pre style="font-family: 'Fira Code', monospace; font-size: 0.85em;">
-							Vehicle .................... Dr. $18,000
-							Cash ............................. Cr. $15,000
-							Loan Payable .................... Cr. $3,000
-							(Purchase with partial cash & loan)
-
-							Depreciation Expense .... Dr. $300
-							Accum. Depreciation ....... Cr. $300
-							(Monthly depreciation)
-
-							Prepaid Insurance ........... Dr. $600
-							Cash ............................. Cr. $600
-							(Six month policy prepaid)
-
-							Insurance Expense .......... Dr. $100
-							Prepaid Insurance ............ Cr. $100
-							(Recognize 1 month used)
-
-							Wages Expense ................ Dr. $500
-							Wages Payable .................. Cr. $500
-							(Accrued payroll owed)
-						</pre>
-
-					<h3>📘 ALCDRE Rules</h3>
-						<ul style="padding-left: 1em; font-size: 0.85em;">
-							<li><strong>A</strong>ssets – Debit to increase</li>
-							<li><strong>L</strong>iabilities – Credit to increase</li>
-							<li><strong>C</strong>apital – Credit to increase</li>
-							<li><strong>D</strong>rawing – Debit to increase</li>
-							<li><strong>R</strong>evenue – Credit to increase</li>
-							<li><strong>E</strong>xpense – Debit to increase</li>
-						</ul>
-
-				<h3>📘 Accounting Equation</h3>
-					<p style="font-size: 0.85em;">Assets = Liabilities + Owner's Equity</p>
-
-				<h3>📘 Contra Accounts</h3>
-					<p style="font-size: 0.85em;">
-				A contra account offsets the balance of a related account:
-				<br/>e.g. Accumulated Depreciation offsets Equipment.
-					</p>
-
-				</div> <!-- end instructions-container -->
-			</div> <!-- end form-container -->
-
-			<div class="export-buttons">
-				<button onclick="generateBalanceSheet()">Balance Sheet (PDF)</button>
-				<button onclick="generateIncomeStatement()">Income Statement (PDF)</button>
-				<button onclick="generateCashFlowStatement()">Cash Flow (PDF)</button>
-				<button onclick="generateOwnersEquity()">Owner’s Equity (PDF)</button>
-			</div>
-
-	<h3>Journal Entries</h3>
-		<div id="journalEntries"></div>
-
-			<div class="export-buttons">
-				<button onclick="exportToPDF()">Export to PDF</button>
-				<button onclick="exportToJson()">Export to JSON</button>
-				<button onclick="clearJournal()">Clear</button>
-			</div>
-
-		</div> <!-- end .container -->
-
-		<div class="chart-section">
-			<div id="balanceIndicator" class="balance-indicator unbalanced">
-				⚠️ Unbalanced
-		</div>
-
-		<div class="chart-container">
-			<canvas id="accountBalanceChart"></canvas>
-		</div>
-	</div>
-</body>
-
-<script>
-const { jsPDF } = window.jspdf;
-
-let journalEntries = JSON.parse(localStorage.getItem("journalEntries")) || [];
-
-const ctx = document.getElementById("accountBalanceChart").getContext("2d");
-const accountBalanceChart = new Chart(ctx, {
-	type: "bar",
-	data: {
-		labels: ["Asset", "Liability", "Equity", "Revenue", "Expense"],
-		datasets: [
-			{
-				label: "Debit",
-				data: [0, 0, 0, 0, 0],
-				backgroundColor: "#28a745"
-			},
-			{
-				label: "Credit",
-				data: [0, 0, 0, 0, 0],
-				backgroundColor: "#dc3545"
-			}
-		]
-	},
-	options: {
-		scales: {
-			y: { beginAtZero: true }
-		}
-	}
-});
-
-function generateJournalNumber(account1, account2) {
-	const timestamp = Date.now();
-	return `CPU-${account1}-${account2}-${timestamp}`.replace(/\s+/g, '');
-}
-
-function updateBalanceStatus() {
-	let debits = 0, credits = 0;
-	let byType = {
-		asset: { debit: 0, credit: 0 },
-		liability: { debit: 0, credit: 0 },
-		equity: { debit: 0, credit: 0 },
-		revenue: { debit: 0, credit: 0 },
-		expense: { debit: 0, credit: 0 }
-	};
-	
-	journalEntries.forEach(entry => {
-		entry.entries.forEach(tx => {
-			if (!byType[tx.accountType]) return;
-			byType[tx.accountType].debit += tx.debit;
-			byType[tx.accountType].credit += tx.credit;
-			debits += tx.debit;
-			credits += tx.credit;
-		});
-	});
-	
-	const ind = document.getElementById("balanceIndicator");
-	ind.innerText = (debits === credits) ? "✅ Balanced" : "⚠️ Unbalanced";
-	ind.classList.toggle("balanced", debits === credits);
-	ind.classList.toggle("unbalanced", debits !== credits);
-	
-	accountBalanceChart.data.datasets[0].data = [
-		byType.asset.debit, byType.liability.debit, byType.equity.debit,
-		byType.revenue.debit, byType.expense.debit
-	];
-	accountBalanceChart.data.datasets[1].data = [
-		byType.asset.credit, byType.liability.credit, byType.equity.credit,
-		byType.revenue.credit, byType.expense.credit
-	];
-	accountBalanceChart.update();
-}
-
-function displayJournalEntries() {
-	const container = document.getElementById("journalEntries");
-	container.innerHTML = "";
-	
-	journalEntries.forEach(entry => {
-		const div = document.createElement("div");
-		div.className = "journal-entry";
-		let html = `
-		<strong>Entry Number: ${entry.journalNumber}</strong><br>
-		<strong>Date:</strong> ${entry.postDate}<br>
-		<strong>Description:</strong> ${entry.description}<br><br>
-		<table>
-		<tr><td><strong>Account</strong></td><td><strong>Debit</strong></td><td><strong>Credit</strong></td></tr>
-		`;
-		entry.entries.forEach(tx => {
-			html += `
-			<tr>
-			<td>${tx.accountName}</td>
-			<td>${tx.debit > 0 ? "$" + tx.debit.toFixed(2) : ""}</td>
-			<td>${tx.credit > 0 ? "$" + tx.credit.toFixed(2) : ""}</td>
-			</tr>
-			`;
-		});
-		html += `</table><hr>`;
-		div.innerHTML = html;
-		container.appendChild(div);
-	});
-}
-
-function clearJournal() {
-	if (confirm("Are you sure you want to clear all journal entries?")) {
-		journalEntries = [];
-		localStorage.removeItem("journalEntries");
-		displayJournalEntries();
-		updateBalanceStatus();
-	}
-}
-
-window.onload = () => {
-	displayJournalEntries();
-	updateBalanceStatus();
-};
-</script>
-<script>
-function loadLedgerJson() {
-	const input = document.createElement("input");
-	input.type = "file";
-	input.accept = "application/json";
-	input.onchange = e => {
-		const file = e.target.files[0];
-		const reader = new FileReader();
-		reader.onload = () => {
-			try {
-				journalEntries = JSON.parse(reader.result);
-				localStorage.setItem("journalEntries", JSON.stringify(journalEntries));
-				displayJournalEntries();
-				updateBalanceStatus();
-			} catch {
-				alert("Invalid JSON file.");
-			}
-		};
-		reader.readAsText(file);
-	};
-	input.click();
-}
-
-function exportToPDF() {
-	const doc = new jsPDF();
-	doc.setFontSize(12);
-	doc.text("Journal Entries", 10, 10);
-	let y = 20;
-	
-	journalEntries.forEach(entry => {
-		doc.text(`Entry #: ${entry.journalNumber}`, 10, y); y += 5;
-		doc.text(`Date: ${entry.postDate}`, 10, y); y += 5;
-		doc.text(`Desc: ${entry.description}`, 10, y); y += 10;
-		
-		entry.entries.forEach(tx => {
-			doc.text(`${tx.accountName}`, 10, y);
-			doc.text(`D: $${tx.debit.toFixed(2)} C: $${tx.credit.toFixed(2)}`, 80, y);
-			y += 8;
-		});
-		y += 10;
-	});
-	
-	doc.save("journal_entries.pdf");
-}
-
-function exportToJson() {
-	const blob = new Blob([JSON.stringify(journalEntries, null, 2)], { type: "application/json" });
-	const a = document.createElement("a");
-	a.href = URL.createObjectURL(blob);
-	a.download = "journal-entries.json";
-	a.click();
-}
-
-function generateBalanceSheet() {
-	const doc = new jsPDF();
-	doc.setFontSize(12);
-  	doc.text("Balance Sheet", 10, 10);
-
-    const assets = [];
-	const expenses = [];
-	let totalAssets = 0;
-    let totalExpenses = 0;
-
-    journalEntries.forEach(entry => {
-  		entry.entries.forEach(tx => {
-        	if (tx.accountType === "asset" && tx.debit > 0) {
-	        assets.push({ name: tx.accountName, amount: tx.debit });
-    	    totalAssets += tx.debit;
-	        }
-        	if (tx.accountType === "expense" && tx.debit > 0) {
-	        expenses.push({ name: tx.accountName, amount: tx.debit });
-    	    totalExpenses += tx.debit;
-        }
-  	    });
-    });
-
-    let y = 20;
-    doc.text("ASSETS", 10, y);
-    doc.text("AMOUNT", 60, y);
-    doc.text("EXPENSES", 110, y);
-    doc.text("AMOUNT", 160, y);
-    y += 8;
-
-    const maxRows = Math.max(assets.length, expenses.length);
-    	for (let i = 0; i < maxRows; i++) {
-  	    const asset = assets[i] || {};
-	    const exp = expenses[i] || {};
-	    if (asset.name) doc.text(asset.name, 10, y);
-	    if (asset.amount) doc.text(`$${asset.amount.toFixed(2)}`, 60, y, { align: "right" });
-	    if (exp.name) doc.text(exp.name, 110, y);
-	    if (exp.amount) doc.text(`$${exp.amount.toFixed(2)}`, 160, y, { align: "right" });
-	    y += 6;
-    }
-
-    doc.setFont(undefined, "bold");
-    doc.text("TOTAL ASSETS", 10, y);
-    doc.text(`$${totalAssets.toFixed(2)}`, 60, y, { align: "right" });
-    doc.text("TOTAL EXPENSES", 110, y);
-    doc.text(`$${totalExpenses.toFixed(2)}`, 160, y, { align: "right" });
-
-    doc.save("balance_sheet.pdf");
-}
-
-function generateIncomeStatement() {
-    const doc = new jsPDF();
-    doc.setFontSize(12);
-    doc.text("Income Statement", 10, 10);
-    let y = 20;
-
-    let revenue = 0, cogs = 0, operating = 0, nonoperating = 0;
-
-    doc.text("INCOME", 10, y); y += 8;
-    journalEntries.forEach(entry => {
-    	entry.entries.forEach(tx => {
-        	if (tx.accountType === "revenue") {
-        	doc.text(tx.accountName, 10, y);
-        	doc.text(`$${tx.credit.toFixed(2)}`, 80, y, { align: "right" });
-       		revenue += tx.credit;
-      		y += 6;
-        }
-    	});
-    });
-
-    doc.setFont(undefined, "bold");
-    doc.text("TOTAL REVENUE:", 10, y);
-    doc.text(`$${revenue.toFixed(2)}`, 80, y, { align: "right" });
-    y += 10;
-
-	doc.setFont(undefined, "normal");
-    doc.text("COST OF GOODS SOLD", 10, y); y += 8;
-    // Optional: filter specific expense names
-    doc.text("COGS Placeholder", 10, y);
-    doc.text("$0.00", 80, y, { align: "right" });
-    y += 8;
-    doc.setFont(undefined, "bold");
-    doc.text("GROSS PROFIT:", 10, y);
-    doc.text(`$${revenue.toFixed(2)}`, 80, y, { align: "right" });
-    y += 10;
-
-    doc.setFont(undefined, "normal");
-    doc.text("OPERATING EXPENSES", 10, y); y += 8;
-    journalEntries.forEach(entry => {
-  		entry.entries.forEach(tx => {
-    		if (tx.accountType === "expense") {
-		    doc.text(tx.accountName, 10, y);
-		    doc.text(`$${tx.debit.toFixed(2)}`, 80, y, { align: "right" });
-		    operating += tx.debit;
-		    y += 6;
-		}
-    	});
-	});
-
-    doc.setFont(undefined, "bold");
-    doc.text("TOTAL EXPENSES:", 10, y);
-    doc.text(`$${operating.toFixed(2)}`, 80, y, { align: "right" });
-    y += 10;
-
-    const net = revenue - operating;
-  		doc.text("NET INCOME:", 10, y);
-	    doc.text(`$${net.toFixed(2)}`, 80, y, { align: "right" });
-
-    doc.save("income_statement.pdf");
-}
-
-function generateCashFlowStatement() {
-  const doc = new jsPDF();
-  doc.setFontSize(12);
-  doc.text("Cash Flow Statement", 10, 10);
-  let y = 20;
-
-  let op = 0, inv = 0, fin = 0;
-
-  doc.text("Operating Activities", 10, y); y += 8;
-  journalEntries.forEach(entry => {
-    entry.entries.forEach(tx => {
-      if (tx.accountType === "expense") {
-        op -= tx.debit;
-        doc.text(tx.accountName, 10, y);
-        doc.text(`($${tx.debit.toFixed(2)})`, 80, y);
-        y += 6;
-      }
-    });
-  });
-
-  y += 4;
-  doc.text("Investing Activities", 10, y); y += 8;
-  journalEntries.forEach(entry => {
-    entry.entries.forEach(tx => {
-      if (tx.accountType === "asset") {
-        inv -= tx.debit;
-        doc.text(tx.accountName, 10, y);
-        doc.text(`($${tx.debit.toFixed(2)})`, 80, y);
-        y += 6;
-      }
-    });
-  });
-
-  y += 4;
-  doc.text("Financing Activities", 10, y); y += 8;
-  journalEntries.forEach(entry => {
-    entry.entries.forEach(tx => {
-      if (tx.accountType === "liability") {
-        fin += tx.credit;
-        doc.text(tx.accountName, 10, y);
-        doc.text(`$${tx.credit.toFixed(2)}`, 80, y);
-        y += 6;
-      }
-    });
-  });
-
-  y += 10;
-  doc.setFont(undefined, "bold");
-  doc.text("Net Change in Cash:", 10, y);
-  doc.text(`$${(op + inv + fin).toFixed(2)}`, 80, y);
-
-  doc.save("cash_flow_statement.pdf");
-}
-
-function generateOwnersEquity() {
-  const doc = new jsPDF();
-  doc.setFontSize(12);
-  doc.text("Owner's Equity Statement", 10, 10);
-
-  let capital = 0, retained = 0, drawings = 0;
-
-  journalEntries.forEach(entry => {
-    entry.entries.forEach(tx => {
-      if (tx.accountType === "equity") {
-        if (tx.credit > 0) capital += tx.credit;
-        if (tx.debit > 0) drawings += tx.debit;
-      }
-      if (tx.accountType === "revenue") retained += tx.credit;
-      if (tx.accountType === "expense") retained -= tx.debit;
-    });
-  });
-
-  const total = capital + retained - drawings;
-  let y = 20;
-  doc.text("Capital", 10, y); doc.text(`$${capital.toFixed(2)}`, 60, y); y += 8;
-  doc.text("Retained Earnings", 10, y); doc.text(`$${retained.toFixed(2)}`, 60, y); y += 8;
-  doc.text("Drawings", 10, y); doc.text(`($${drawings.toFixed(2)})`, 60, y); y += 8;
-
-  doc.setFont(undefined, "bold");
-  doc.text("Total Equity", 10, y); doc.text(`$${total.toFixed(2)}`, 60, y);
-
-  doc.save("owners_equity.pdf");
-}
-
-document.getElementById("journalForm").addEventListener("submit", function (event) {
-	event.preventDefault();
-	
-	const account1Type = document.getElementById("account1Type").value;
-	const account1Name = document.getElementById("account1Name").value;
-	const debitAmount1 = parseFloat(document.getElementById("debitAmount1").value) || 0;
-	const creditAmount1 = parseFloat(document.getElementById("creditAmount1").value) || 0;
-	
-	const account2Type = document.getElementById("account2Type").value;
-	const account2Name = document.getElementById("account2Name").value;
-	const debitAmount2 = parseFloat(document.getElementById("debitAmount2").value) || 0;
-	const creditAmount2 = parseFloat(document.getElementById("creditAmount2").value) || 0;
-	
-	const description = document.getElementById("description").value;
-	const postDate = document.getElementById("postDate").value;
-	
-	if (!account1Type || !account1Name || (!debitAmount1 && !creditAmount1) ||
-		!account2Type || !account2Name || (!debitAmount2 && !creditAmount2) ||
-		!description || !postDate) {
-		alert("Please fill all required fields.");
-	return;
-		}
-		
-		const journalNumber = generateJournalNumber(account1Name, account2Name);
-		
-		const entry = {
-			id: Date.now(),description,
-				entries: [
-					{ accountType: account1Type, accountName: account1Name, debit: debitAmount1, credit: creditAmount1 },
-					{ accountType: account2Type, accountName: account2Name, debit: debitAmount2, credit: creditAmount2 }
-				],
-					journalNumber,
-					postDate,														
-		};
-		
-		journalEntries.push(entry);
-		localStorage.setItem("journalEntries", JSON.stringify(journalEntries));
-		displayJournalEntries();
-		updateBalanceStatus();
-		document.getElementById("journalForm").reset();
-		
-		// Reset all dynamic fields
-		document.getElementById("asset-details").style.display = "none";
-		document.getElementById("prepaid-details").style.display = "none";
-		document.getElementById("accrual-details").style.display = "none";
-});
-
-document.getElementById("apply-depreciation").addEventListener("change", function () {
-	document.getElementById("asset-details").style.display = this.checked ? "block" : "none";
-});
-
-document.getElementById("isPrepaid").addEventListener("change", function () {
-	document.getElementById("prepaid-details").style.display = this.checked ? "block" : "none";
-});
-
-document.getElementById("isAccrued").addEventListener("change", function () {
-	document.getElementById("accrual-details").style.display = this.checked ? "block" : "none";
-});
-</script>
-
-<!-- Optional: AutoGAAP hook -->
-<script src="AutoGAAP.js"></script>
-<script>
-if (typeof runAutoGAAP === "function") {
-	console.log("✅ AutoGAAP loaded. You can run runAutoGAAP() to trigger compliance scan.");
-}
-</script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auto GAAP | Christopher Hirschauer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <meta
+      name="description"
+      content="Explore Auto GAAP—Christopher Hirschauer’s storytelling-first compliance engine that harmonizes ledger automation, analytics, and close orchestration."
+    />
+    <link rel="stylesheet" href="../../styles/global.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header id="top" class="site-header">
+        <nav class="top-nav">
+          <a class="brand" href="../../index.html#top">
+            <span class="brand-mark">⌁</span>
+            Christopher Hirschauer
+          </a>
+          <div class="nav-links">
+            <a href="../../index.html#top">Home</a>
+            <div class="nav-item">
+              <button class="nav-button" type="button" aria-expanded="false" aria-haspopup="true">
+                Projects <span class="caret" aria-hidden="true">▾</span>
+              </button>
+              <div class="nav-dropdown" role="menu">
+                <a href="../aes/" role="menuitem">AES</a>
+                <a href="./" role="menuitem">Auto GAAP</a>
+                <a href="../easybay/" role="menuitem">EasyBay</a>
+                <a href="../gnoman/" role="menuitem">GNOMAN</a>
+                <a href="../smart-contract-wizard/" role="menuitem">Smart Contract Wizard</a>
+              </div>
+            </div>
+            <a href="../../books/">Books</a>
+            <a href="../../index.html#contact">Contact</a>
+          </div>
+          <a class="button primary nav-cta" href="../../index.html#contact">Let’s collaborate</a>
+          <div class="scroll-progress" aria-hidden="true">
+            <span></span>
+          </div>
+        </nav>
+
+        <div class="hero">
+          <div class="hero-ribbon">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            Close room templates refreshed for fiscal 2024
+            <span class="ribbon-pill">Auto GAAP</span>
+          </div>
+          <div class="hero-main">
+            <div class="hero-copy">
+              <span class="eyebrow">Narrative-led compliance</span>
+              <h1>
+                <span class="hero-highlight">Auto GAAP translates policy into living workflows</span>—automating reconciliations,
+                surfacing insights, and storytelling the close for every stakeholder.
+              </h1>
+              <p class="hero-summary">
+                Built for controllers, revenue leaders, and engineering partners, Auto GAAP stitches ledger discipline with
+                collaborative rituals. Run playbooks, capture audit evidence, and surface analytics from a single control room.
+              </p>
+              <ul class="hero-list">
+                <li>Ledger automation that adapts to GAAP and IFRS policy changes in real time</li>
+                <li>Close orchestration with visibility into owners, blockers, and mitigation plans</li>
+                <li>Story-driven dashboards translating variances into actionable next steps</li>
+              </ul>
+              <div class="hero-actions">
+                <a class="button primary" href="#platform">Launch the sandbox</a>
+                <a class="button outline" href="../../index.html#contact">Book an advisory session</a>
+              </div>
+            </div>
+            <div class="hero-visual">
+              <span class="glow-orb orb-one" aria-hidden="true"></span>
+              <span class="glow-orb orb-two" aria-hidden="true"></span>
+              <div class="hero-device" aria-hidden="true">
+                <div class="hero-device-header">
+                  <span class="device-dots">
+                    <span class="device-dot"></span>
+                    <span class="device-dot primary"></span>
+                    <span class="device-dot"></span>
+                  </span>
+                  <span>Auto GAAP Console</span>
+                </div>
+                <div class="hero-device-body">
+                  <strong>Focus stream</strong>
+                  <p>GAAP variance checks, policy graph updates, and recurring entry automation ready for this quarter’s close.</p>
+                  <div class="chip-row">
+                    <span class="hero-chip">Policy graph</span>
+                    <span class="hero-chip">Close rooms</span>
+                    <span class="hero-chip">Variance AI</span>
+                  </div>
+                </div>
+                <div class="hero-device-footer">
+                  <span>Next milestone</span>
+                  <span>Entity rollup insights · 08.22</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-metrics">
+            <article class="card stat-card">
+              <small>Entities orchestrated</small>
+              <strong>64</strong>
+              <p>Multi-entity ledgers aligned on standardized policy packs with real-time close status.</p>
+            </article>
+            <article class="card stat-card">
+              <small>Reconciliation time saved</small>
+              <strong>48%</strong>
+              <p>Automated entry suggestions and workflow nudges keep teams focused on material risk.</p>
+            </article>
+            <article class="card stat-card">
+              <small>Audit readiness</small>
+              <strong>Always-on</strong>
+              <p>Evidence trails, approval routing, and context stories packaged for auditors and leadership.</p>
+            </article>
+          </div>
+        </div>
+      </header>
+
+      <main class="site-main">
+        <section id="overview" class="section">
+          <div class="section-heading">
+            <span class="eyebrow">Platform pillars</span>
+            <h2>Policy intelligence that keeps finance and engineering moving in lockstep</h2>
+            <p>
+              Auto GAAP is more than an app—it is a storytelling framework for financial operations. Each module captures
+              narrative context, drives automation, and synchronizes the teams stewarding the close.
+            </p>
+          </div>
+          <div class="cards-grid">
+            <article class="card project-card">
+              <div class="project-meta">
+                <span class="badge success">Live</span>
+                <span>Policy graph</span>
+              </div>
+              <h3>Codified standards</h3>
+              <p>
+                Dynamic policy graph keeps GAAP, IFRS, and bespoke governance rules in sync. Every variance links to the
+                precise controls, owners, and documentation that explain it.
+              </p>
+              <div class="tag-list">
+                <span class="tag">GAAP + IFRS</span>
+                <span class="tag">Narrative audit</span>
+                <span class="tag">Evidence vault</span>
+              </div>
+            </article>
+            <article class="card project-card">
+              <div class="project-meta">
+                <span class="badge">Automation</span>
+                <span>Close rooms</span>
+              </div>
+              <h3>Guided rituals</h3>
+              <p>
+                Sequenced close checklists empower every stakeholder. Owners, blockers, and mitigation plans surface instantly,
+                shrinking fire drills while preserving accountability.
+              </p>
+              <div class="tag-list">
+                <span class="tag">Workflow</span>
+                <span class="tag">Playbooks</span>
+                <span class="tag">Telemetry</span>
+              </div>
+            </article>
+            <article class="card project-card">
+              <div class="project-meta">
+                <span class="badge">Insights</span>
+                <span>Story dashboards</span>
+              </div>
+              <h3>Human-friendly analytics</h3>
+              <p>
+                Variance explanations, KPIs, and journal trails stay in sync. Leaders receive context-rich reports that guide the
+                next question and the next improvement.
+              </p>
+              <div class="tag-list">
+                <span class="tag">Narratives</span>
+                <span class="tag">Anomaly alerts</span>
+                <span class="tag">Board-ready</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="platform" class="section auto-gaap-section">
+          <div class="section-heading">
+            <span class="eyebrow">Interactive sandbox</span>
+            <h2>Capture journal entries, visualize balances, and let Auto GAAP narrate the health of the close</h2>
+            <p>
+              Experiment with ledger inputs, preview policy recommendations, and export documentation that keeps auditors and
+              executives aligned. This sandbox mirrors the storytelling-first interface used in production deployments.
+            </p>
+          </div>
+
+          <div class="auto-gaap-grid">
+            <article class="card auto-gaap-panel">
+              <header class="auto-gaap-header">
+                <div>
+                  <h3>Journal entry builder</h3>
+                  <p class="auto-gaap-description">Log debits and credits, capture policy context, and sync recurring cadence.</p>
+                </div>
+                <div class="button-group">
+                  <button id="loadLedger" type="button" class="button outline">Load Sample Ledger</button>
+                  <button id="runAutoGaap" type="button" class="button primary">Run Auto GAAP</button>
+                </div>
+              </header>
+
+              <form id="journalForm" class="auto-gaap-form">
+                <div class="form-row">
+                  <label class="form-field">
+                    <span>Post date</span>
+                    <input type="date" id="postDate" required />
+                  </label>
+                  <label class="form-field">
+                    <span>Journal number</span>
+                    <input type="text" id="journalNumber" readonly placeholder="Auto-generated" />
+                  </label>
+                </div>
+
+                <label class="form-field">
+                  <span>Description</span>
+                  <textarea id="description" rows="2" placeholder="Narrate the business impact" required></textarea>
+                </label>
+
+                <div class="form-columns">
+                  <fieldset class="form-group">
+                    <legend>Account 1</legend>
+                    <div class="form-row">
+                      <label class="form-field">
+                        <span>Type</span>
+                        <select id="account1Type" required>
+                          <option value="">Select account type</option>
+                          <option value="asset">Asset</option>
+                          <option value="liability">Liability</option>
+                          <option value="equity">Equity</option>
+                          <option value="revenue">Revenue</option>
+                          <option value="expense">Expense</option>
+                        </select>
+                      </label>
+                      <label class="form-field">
+                        <span>Account name</span>
+                        <input type="text" id="account1Name" placeholder="Cash" required />
+                      </label>
+                    </div>
+                    <div class="form-row">
+                      <label class="form-field">
+                        <span>Debit</span>
+                        <input type="number" id="debitAmount1" min="0" step="0.01" />
+                      </label>
+                      <label class="form-field">
+                        <span>Credit</span>
+                        <input type="number" id="creditAmount1" min="0" step="0.01" />
+                      </label>
+                    </div>
+                  </fieldset>
+
+                  <fieldset class="form-group">
+                    <legend>Account 2</legend>
+                    <div class="form-row">
+                      <label class="form-field">
+                        <span>Type</span>
+                        <select id="account2Type" required>
+                          <option value="">Select account type</option>
+                          <option value="asset">Asset</option>
+                          <option value="liability">Liability</option>
+                          <option value="equity">Equity</option>
+                          <option value="revenue">Revenue</option>
+                          <option value="expense">Expense</option>
+                        </select>
+                      </label>
+                      <label class="form-field">
+                        <span>Account name</span>
+                        <input type="text" id="account2Name" placeholder="Revenue" required />
+                      </label>
+                    </div>
+                    <div class="form-row">
+                      <label class="form-field">
+                        <span>Debit</span>
+                        <input type="number" id="debitAmount2" min="0" step="0.01" />
+                      </label>
+                      <label class="form-field">
+                        <span>Credit</span>
+                        <input type="number" id="creditAmount2" min="0" step="0.01" />
+                      </label>
+                    </div>
+                  </fieldset>
+                </div>
+
+                <div class="form-row checkbox-row">
+                  <label class="checkbox-field">
+                    <input type="checkbox" id="isAccrued" />
+                    <span>Accrued expense or revenue</span>
+                  </label>
+                  <label class="checkbox-field">
+                    <input type="checkbox" id="isPrepaid" />
+                    <span>Prepaid schedule</span>
+                  </label>
+                  <label class="checkbox-field">
+                    <input type="checkbox" id="apply-depreciation" />
+                    <span>Apply depreciation</span>
+                  </label>
+                </div>
+
+                <div id="accrual-details" class="conditional-group hidden">
+                  <h4>Accrual details</h4>
+                  <div class="form-row">
+                    <label class="form-field">
+                      <span>Due date</span>
+                      <input type="date" id="accrued-due-date" />
+                    </label>
+                    <label class="form-field">
+                      <span>Recognition account</span>
+                      <input type="text" id="accrued-account" placeholder="Accrued expenses" />
+                    </label>
+                    <label class="form-field">
+                      <span>Recognition period</span>
+                      <input type="text" id="accrued-period" placeholder="Q3 FY24" />
+                    </label>
+                  </div>
+                </div>
+
+                <div id="prepaid-details" class="conditional-group hidden">
+                  <h4>Prepaid details</h4>
+                  <div class="form-row">
+                    <label class="form-field">
+                      <span>Start date</span>
+                      <input type="date" id="prepaid-start-date" />
+                    </label>
+                    <label class="form-field">
+                      <span>End date</span>
+                      <input type="date" id="prepaid-end-date" />
+                    </label>
+                    <label class="form-field">
+                      <span>Amortization account</span>
+                      <input type="text" id="prepaid-account" placeholder="Prepaid expenses" />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="conditional-group hidden" id="asset-details">
+                  <h4>Asset depreciation</h4>
+                  <div class="form-row">
+                    <label class="form-field">
+                      <span>Asset name</span>
+                      <input type="text" id="asset-name" placeholder="Equipment" />
+                    </label>
+                    <label class="form-field">
+                      <span>Asset value</span>
+                      <input type="number" id="asset-value" min="0" step="0.01" />
+                    </label>
+                    <label class="form-field">
+                      <span>Useful life (years)</span>
+                      <input type="number" id="useful-life" min="1" />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button class="button primary" type="submit">Add entry</button>
+                  <button class="button outline" type="button" id="saveRecurring">Save as recurring</button>
+                  <button class="button outline" type="button" id="exportPDF">Export PDF</button>
+                  <button class="button outline" type="button" id="exportJSON">Export JSON</button>
+                </div>
+              </form>
+
+              <div class="auto-gaap-kpis">
+                <div class="auto-gaap-kpi">
+                  <span class="auto-gaap-kpi-label">Balance status</span>
+                  <span id="balanceIndicator" class="auto-gaap-status">—</span>
+                </div>
+                <div class="auto-gaap-kpi">
+                  <span class="auto-gaap-kpi-label">Recurring cadence</span>
+                  <span class="auto-gaap-kpi-value">Daily checks</span>
+                </div>
+                <div class="auto-gaap-kpi">
+                  <span class="auto-gaap-kpi-label">Policy coverage</span>
+                  <span class="auto-gaap-kpi-value">GAAP + IFRS</span>
+                </div>
+              </div>
+
+              <div class="auto-gaap-chart">
+                <canvas id="accountBalanceChart" aria-label="Account balance chart"></canvas>
+              </div>
+            </article>
+
+            <article class="card auto-gaap-panel insights-panel">
+              <header class="auto-gaap-header">
+                <div>
+                  <h3>Auto GAAP insights</h3>
+                  <p class="auto-gaap-description">Review narratives, recommended actions, and ledger diagnostics.</p>
+                </div>
+              </header>
+
+              <div id="autoGaapSummary" class="auto-gaap-summary">
+                <p class="auto-gaap-placeholder">Add entries to generate Auto GAAP intelligence.</p>
+              </div>
+
+              <div class="auto-gaap-chart secondary">
+                <canvas id="autoGaapChart" aria-label="Auto GAAP analysis chart"></canvas>
+              </div>
+
+              <section class="auto-gaap-recommendations" aria-labelledby="recommendations-title">
+                <h4 id="recommendations-title">Recommendations</h4>
+                <div id="autoGaapRecommendations"></div>
+              </section>
+
+              <section class="auto-gaap-ledger">
+                <h4>Recent journal entries</h4>
+                <div id="journalEntries" class="ledger-feed"></div>
+              </section>
+
+              <section class="auto-gaap-ledger">
+                <h4>Depreciation preview</h4>
+                <div id="depreciation-info" class="depreciation-feed"></div>
+              </section>
+
+              <section class="auto-gaap-ledger">
+                <h4>Location awareness</h4>
+                <p id="location-info" data-ipinfo-token="" class="location-feed">Set data-ipinfo-token to resolve location.</p>
+              </section>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>© 2024 Christopher Hirschauer. Building resilient products with character and care.</p>
+        <div class="footer-links">
+          <a href="../../index.html#top">Home</a>
+          <a href="../../index.html#about">About</a>
+          <a href="../../index.html#projects">Projects</a>
+          <a href="../../books/">Books</a>
+          <a href="../../index.html#contact">Contact</a>
+        </div>
+      </footer>
+    </div>
+
+    <script src="../../scripts/base_app.js" defer></script>
+    <script src="../../scripts/global.js" defer></script>
+    <script src="../../scripts/journal.js" defer></script>
+    <script src="../../scripts/balance.js" defer></script>
+    <script src="../../scripts/depreciation.js" defer></script>
+    <script src="../../scripts/recurring.js" defer></script>
+    <script src="../../scripts/export.js" defer></script>
+    <script src="../../scripts/chart.js" defer></script>
+    <script src="../../scripts/gaap_expansion.js" defer></script>
+    <script src="../../scripts/geo_location.js" defer></script>
+    <script src="../../scripts/main.js" defer></script>
+    <script src="../../scripts/autogaap.js" defer></script>
+  </body>
 </html>
