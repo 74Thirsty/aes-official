@@ -2,7 +2,7 @@
 
 (function () {
   const STORAGE_KEY = 'journalEntries';
-  const FALLBACK_LEDGER_URL = 'data/ledger.json';
+  const FALLBACK_LEDGER_URL = '../../data/ledger.json';
   const SUMMARY_CONTAINER_ID = 'autoGaapSummary';
   const RECOMMENDATIONS_ID = 'autoGaapRecommendations';
   const RUN_BUTTON_ID = 'runAutoGaap';
@@ -50,6 +50,13 @@
   });
 
   window.addEventListener('autoGaap:refresh', () => runAutoGaapAnalysis());
+  window.addEventListener('autoGaap:entriesChanged', (event) => {
+    if (Array.isArray(event.detail)) {
+      runAutoGaapAnalysis(event.detail);
+    } else {
+      runAutoGaapAnalysis();
+    }
+  });
 
   window.autoGAAP = {
     analyze: () => runAutoGaapAnalysis(),
@@ -57,7 +64,7 @@
     summarize: (entries) => summarizeJournalEntries(entries)
   };
 
-  async function runAutoGaapAnalysis() {
+  async function runAutoGaapAnalysis(entriesOverride) {
     const summaryContainer = getElement(SUMMARY_CONTAINER_ID);
     const recommendationContainer = getElement(RECOMMENDATIONS_ID);
 
@@ -68,11 +75,13 @@
       recommendationContainer.innerHTML = '';
     }
 
-    let ledgerEntries = [];
-    try {
-      ledgerEntries = await loadLedgerEntries();
-    } catch (error) {
-      console.error('AutoGAAP: Unable to load ledger entries.', error);
+    let ledgerEntries = Array.isArray(entriesOverride) ? entriesOverride : [];
+    if (!ledgerEntries.length) {
+      try {
+        ledgerEntries = await loadLedgerEntries();
+      } catch (error) {
+        console.error('AutoGAAP: Unable to load ledger entries.', error);
+      }
     }
 
     if (!Array.isArray(ledgerEntries) || ledgerEntries.length === 0) {

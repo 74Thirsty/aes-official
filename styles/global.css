@@ -1184,6 +1184,279 @@
       }
     }
 
+    .hidden {
+      display: none !important;
+    }
+
+    .card.compact {
+      padding: 18px 20px;
+      gap: 12px;
+    }
+
+    .auto-gaap-section {
+      gap: clamp(32px, 5vw, 48px);
+    }
+
+    .auto-gaap-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(28px, 4vw, 40px);
+      align-items: flex-start;
+    }
+
+    .auto-gaap-panel {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(18px, 3vw, 26px);
+    }
+
+    .auto-gaap-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .auto-gaap-header .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .auto-gaap-description {
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .auto-gaap-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .auto-gaap-form fieldset {
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.55);
+    }
+
+    .auto-gaap-form legend {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      padding: 0 6px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .form-field span {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .form-field textarea {
+      min-height: 120px;
+    }
+
+    .form-columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .checkbox-field {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    .conditional-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .conditional-group h4 {
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .auto-gaap-kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .auto-gaap-kpi {
+      display: grid;
+      gap: 6px;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.18);
+      text-align: left;
+    }
+
+    .auto-gaap-kpi-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .auto-gaap-kpi-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .auto-gaap-status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      background: rgba(148, 163, 184, 0.16);
+      color: var(--text);
+    }
+
+    .auto-gaap-status.balanced {
+      background: rgba(52, 211, 153, 0.16);
+      color: #34d399;
+    }
+
+    .auto-gaap-status.unbalanced {
+      background: rgba(248, 113, 113, 0.16);
+      color: #f87171;
+    }
+
+    .auto-gaap-chart {
+      height: 260px;
+    }
+
+    .auto-gaap-chart.secondary {
+      height: 220px;
+    }
+
+    .auto-gaap-summary,
+    .ledger-feed,
+    .depreciation-feed,
+    .location-feed {
+      display: grid;
+      gap: 14px;
+    }
+
+    .auto-gaap-summary p,
+    .depreciation-feed p,
+    .location-feed {
+      color: var(--text-dim);
+    }
+
+    .auto-gaap-recommendations {
+      display: grid;
+      gap: 12px;
+    }
+
+    .auto-gaap-recommendations h4,
+    .auto-gaap-ledger h4 {
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .auto-gaap-recommendations ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text-dim);
+      display: grid;
+      gap: 6px;
+    }
+
+    .ledger-feed article {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ledger-feed header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .auto-gaap-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .auto-gaap-table th,
+    .auto-gaap-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .auto-gaap-table th {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.75);
+    }
+
+    .auto-gaap-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .auto-gaap-placeholder {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .auto-gaap-ledger {
+      display: grid;
+      gap: 12px;
+    }
+
+    .auto-gaap-ledger + .auto-gaap-ledger {
+      border-top: 1px solid rgba(148, 163, 184, 0.12);
+      padding-top: 18px;
+      margin-top: 12px;
+    }
+
     @keyframes gridPulse {
       0% {
         background-position: 0 0, 0 0;
@@ -1195,6 +1468,10 @@
 
     @media (max-width: 1020px) {
       .assistant-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .auto-gaap-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -1214,6 +1491,15 @@
 
       .hero-metrics {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        align-items: stretch;
       }
     }
 
