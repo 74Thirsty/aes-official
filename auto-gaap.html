@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto GAAP Ledger Workbench</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles/style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <div>
+        <a class="back-link" href="index.html">← Back to portfolio</a>
+        <h1>Auto GAAP Ledger Workbench</h1>
+        <p>
+          Capture double-entry journal activity, monitor balances in real time, and export the core financial statements your
+          controller workflow depends on. Auto GAAP keeps every ledger event auditable with live policy intelligence.
+        </p>
+      </div>
+      <div class="indicator" id="balanceIndicator">⚠️ Unbalanced</div>
+    </header>
+
+    <section class="form-container">
+      <form id="journalForm" class="form-column">
+        <h2>Record a Journal Entry</h2>
+        <div class="form-group">
+          <label for="postDate">Posting date</label>
+          <input type="date" id="postDate" required />
+        </div>
+
+        <fieldset class="form-split">
+          <legend>Debit / Credit accounts</legend>
+          <div class="split-column">
+            <h3>Account 1</h3>
+            <label for="account1Type">Account type</label>
+            <select id="account1Type" required>
+              <option value="">Select type</option>
+              <option value="asset">Asset</option>
+              <option value="liability">Liability</option>
+              <option value="equity">Equity</option>
+              <option value="revenue">Revenue</option>
+              <option value="expense">Expense</option>
+            </select>
+            <label for="account1Name">Account name</label>
+            <input type="text" id="account1Name" placeholder="e.g. Cash" required />
+            <div class="amount-row">
+              <label for="debitAmount1">Debit</label>
+              <input type="number" id="debitAmount1" min="0" step="0.01" placeholder="0.00" />
+            </div>
+            <div class="amount-row">
+              <label for="creditAmount1">Credit</label>
+              <input type="number" id="creditAmount1" min="0" step="0.01" placeholder="0.00" />
+            </div>
+          </div>
+          <div class="split-column">
+            <h3>Account 2</h3>
+            <label for="account2Type">Account type</label>
+            <select id="account2Type" required>
+              <option value="">Select type</option>
+              <option value="asset">Asset</option>
+              <option value="liability">Liability</option>
+              <option value="equity">Equity</option>
+              <option value="revenue">Revenue</option>
+              <option value="expense">Expense</option>
+            </select>
+            <label for="account2Name">Account name</label>
+            <input type="text" id="account2Name" placeholder="e.g. Revenue" required />
+            <div class="amount-row">
+              <label for="debitAmount2">Debit</label>
+              <input type="number" id="debitAmount2" min="0" step="0.01" placeholder="0.00" />
+            </div>
+            <div class="amount-row">
+              <label for="creditAmount2">Credit</label>
+              <input type="number" id="creditAmount2" min="0" step="0.01" placeholder="0.00" />
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" rows="3" placeholder="What business event are you recording?" required></textarea>
+        </div>
+
+        <div class="checkbox-group">
+          <label>
+            <input type="checkbox" id="accruedFlag" disabled />
+            Accrued (handled automatically by policy engine)
+          </label>
+          <label>
+            <input type="checkbox" id="prepaidFlag" disabled />
+            Prepaid (handled automatically by policy engine)
+          </label>
+        </div>
+
+        <button type="submit">Post entry</button>
+      </form>
+
+      <aside class="instructions-container">
+        <h2>Workflow notes</h2>
+        <ul>
+          <li>Use two lines per journal to keep debits and credits balanced.</li>
+          <li>Amounts support cents — enter positive values only, the engine tracks the balance.</li>
+          <li>Exports create PDF packs for balance sheet, income, cash flow, and owner’s equity.</li>
+          <li>The Auto GAAP engine summarizes ledger health and flags policy exceptions.</li>
+        </ul>
+        <div class="export-buttons">
+          <button type="button" id="exportPDF">Export journal PDF</button>
+          <button type="button" id="exportJSON">Export JSON</button>
+          <button type="button" onclick="generateBalanceSheet()" class="doc-button">Balance sheet</button>
+          <button type="button" onclick="generateIncomeStatement()" class="doc-button">Income statement</button>
+          <button type="button" onclick="generateCashFlowStatement()" class="doc-button">Cash flow</button>
+          <button type="button" onclick="generateOwnersEquity()" class="doc-button">Owner’s equity</button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="balance-container">
+      <h2>Ledger status</h2>
+      <canvas id="accountBalanceChart" width="400" height="220"></canvas>
+    </section>
+
+    <section class="journal-section">
+      <h2>Journal entries</h2>
+      <div id="journalEntries"></div>
+    </section>
+
+    <section class="auto-gaap-section">
+      <div class="auto-gaap-header">
+        <div>
+          <h3>Auto GAAP Insights</h3>
+          <p class="auto-gaap-description">Run real-time policy checks across your ledger to highlight risk, balance, and account concentration.</p>
+        </div>
+        <button type="button" id="runAutoGaap" class="doc-button">Run Auto GAAP</button>
+      </div>
+      <div id="autoGaapSummary" class="auto-gaap-summary"></div>
+      <div id="autoGaapRecommendations" class="auto-gaap-recommendations"></div>
+      <canvas id="autoGaapChart" width="400" height="220" aria-label="Auto GAAP summary chart"></canvas>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-SlBjvINw6ih/7gFdja2TYZfpiU45h345H+F6bLO6GCtk0gAmzhkZ7fHq1mpmB3pN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-6u0J5mGxFrYGwHk0ItJd0daTzpSw0DxVh1T/kZLKZVugOpyYoX55aC/Vvm5x8nHi1sMTCrP0VqRrN2qG+7E0ig==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+  <script src="scripts/main.js" defer></script>
+  <script src="scripts/autoGAAP.js" defer></script>
+</body>
+</html>
