@@ -1,0 +1,99 @@
+{
+  "journalEntries": [
+    {
+      "journalNumber": "CPU-CASH-SREV-20240105",
+      "postDate": "2024-01-05",
+      "description": "Service revenue received in cash",
+      "entries": [
+        {
+          "accountType": "asset",
+          "accountName": "Cash",
+          "debit": 8500,
+          "credit": 0
+        },
+        {
+          "accountType": "revenue",
+          "accountName": "Service Revenue",
+          "debit": 0,
+          "credit": 8500
+        }
+      ]
+    },
+    {
+      "journalNumber": "CPU-RENT-CASH-20240201",
+      "postDate": "2024-02-01",
+      "description": "Office rent paid for February",
+      "entries": [
+        {
+          "accountType": "expense",
+          "accountName": "Rent Expense",
+          "debit": 1200,
+          "credit": 0
+        },
+        {
+          "accountType": "asset",
+          "accountName": "Cash",
+          "debit": 0,
+          "credit": 1200
+        }
+      ]
+    },
+    {
+      "journalNumber": "CPU-EQ-AP-20240312",
+      "postDate": "2024-03-12",
+      "description": "Purchased equipment on account",
+      "entries": [
+        {
+          "accountType": "asset",
+          "accountName": "Equipment",
+          "debit": 5000,
+          "credit": 0
+        },
+        {
+          "accountType": "liability",
+          "accountName": "Accounts Payable",
+          "debit": 0,
+          "credit": 5000
+        }
+      ]
+    },
+    {
+      "journalNumber": "CPU-INVEST-20240402",
+      "postDate": "2024-04-02",
+      "description": "Owner investment to capitalize the business",
+      "entries": [
+        {
+          "accountType": "asset",
+          "accountName": "Cash",
+          "debit": 10000,
+          "credit": 0
+        },
+        {
+          "accountType": "equity",
+          "accountName": "Owner's Capital",
+          "debit": 0,
+          "credit": 10000
+        }
+      ]
+    },
+    {
+      "journalNumber": "CPU-LOANPAY-20240520",
+      "postDate": "2024-05-20",
+      "description": "Principal payment on bank loan",
+      "entries": [
+        {
+          "accountType": "liability",
+          "accountName": "Notes Payable",
+          "debit": 2000,
+          "credit": 0
+        },
+        {
+          "accountType": "asset",
+          "accountName": "Cash",
+          "debit": 0,
+          "credit": 2000
+        }
+      ]
+    }
+  ]
+}
