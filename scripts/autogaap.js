@@ -388,8 +388,8 @@
       labels.push(toTitleCase(type));
       data.push(net);
       const positive = net >= 0;
-      backgroundColors.push(positive ? 'rgba(40, 167, 69, 0.6)' : 'rgba(220, 53, 69, 0.6)');
-      borderColors.push(positive ? '#28a745' : '#dc3545');
+      backgroundColors.push(positive ? 'rgba(37, 99, 235, 0.7)' : 'rgba(234, 88, 12, 0.7)');
+      borderColors.push(positive ? '#1d4ed8' : '#c2410c');
     });
 
     const context = canvas.getContext('2d');
@@ -417,9 +417,18 @@
         responsive: true,
         maintainAspectRatio: false,
         scales: {
+          x: {
+            grid: { color: 'rgba(148, 163, 184, 0.18)' },
+            ticks: { color: '#1f2937', font: { weight: '600' } }
+          },
           y: {
-            beginAtZero: true
+            beginAtZero: true,
+            grid: { color: 'rgba(148, 163, 184, 0.16)' },
+            ticks: { color: '#1f2937' }
           }
+        },
+        plugins: {
+          legend: { display: false }
         }
       }
     });

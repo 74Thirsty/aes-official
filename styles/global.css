@@ -152,6 +152,24 @@
       gap: clamp(40px, 7vw, 72px);
     }
 
+    .auto-gaap-shell .hero {
+      background: linear-gradient(140deg, rgba(250, 253, 255, 0.98), rgba(226, 232, 255, 0.94));
+    }
+
+    .auto-gaap-shell .hero-visual {
+      justify-items: center;
+    }
+
+    .auto-gaap-shell .hero-visual .hero-device {
+      margin-top: -120px;
+      z-index: 2;
+      box-shadow: 0 32px 64px rgba(37, 99, 235, 0.22);
+    }
+
+    .auto-gaap-shell .hero-visual .hero-illustration {
+      max-width: clamp(320px, 48vw, 520px);
+    }
+
     .site-header {
       display: flex;
       flex-direction: column;
@@ -696,6 +714,21 @@
       min-height: 280px;
       display: grid;
       place-items: center;
+    }
+
+    .hero-illustration {
+      width: min(420px, 100%);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.18);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(226, 232, 240, 0.86));
+      object-fit: cover;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-illustration--wide {
+      width: min(480px, 100%);
     }
 
     .glow-orb {
@@ -1369,6 +1402,13 @@
       display: flex;
       flex-direction: column;
       gap: clamp(18px, 3vw, 26px);
+      background: linear-gradient(150deg, rgba(255, 255, 255, 0.98), rgba(226, 232, 255, 0.92));
+      border-color: rgba(37, 99, 235, 0.12);
+    }
+
+    .auto-gaap-panel.insights-panel {
+      background: linear-gradient(160deg, rgba(241, 245, 255, 0.98), rgba(226, 232, 240, 0.88));
+      border-color: rgba(30, 64, 175, 0.18);
     }
 
     .auto-gaap-header {
@@ -1530,6 +1570,18 @@
       height: 220px;
     }
 
+    .media-card {
+      gap: 18px;
+    }
+
+    .card-image {
+      width: 100%;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
+      object-fit: cover;
+    }
+
     .auto-gaap-summary,
     .ledger-feed,
     .depreciation-feed,
@@ -1650,6 +1702,10 @@
 
       .hero-visual {
         min-height: 220px;
+      }
+
+      .auto-gaap-shell .hero-visual .hero-device {
+        margin-top: 0;
       }
 
       .hero-metrics {

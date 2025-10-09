@@ -85,7 +85,10 @@
     saveEntries();
     event.currentTarget.reset();
     resetConditionalSections();
-    document.getElementById('journalNumber')?.setAttribute('value', journalNumber);
+    const journalField = document.getElementById('journalNumber');
+    if (journalField) {
+      journalField.value = '';
+    }
   };
 
   const collectMeta = () => {
@@ -102,6 +105,9 @@
       assetName: document.getElementById('asset-name')?.value || '',
       assetValue: document.getElementById('asset-value')?.value || '',
       usefulLife: document.getElementById('useful-life')?.value || '',
+      recurringStart: document.getElementById('recurringStart')?.value || '',
+      recurringEnd: document.getElementById('recurringEnd')?.value || '',
+      recurringFrequency: document.getElementById('recurringFrequency')?.value || '',
     };
   };
 
@@ -169,6 +175,7 @@
     bindLoadSample();
     toggleVisibility('isAccrued', 'accrual-details');
     toggleVisibility('isPrepaid', 'prepaid-details');
+    toggleVisibility('apply-depreciation', 'asset-details');
     notifySubscribers();
   };
 

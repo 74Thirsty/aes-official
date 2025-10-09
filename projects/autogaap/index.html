@@ -79,6 +79,11 @@
             <div class="hero-visual">
               <span class="glow-orb orb-one" aria-hidden="true"></span>
               <span class="glow-orb orb-two" aria-hidden="true"></span>
+              <img
+                class="hero-illustration hero-illustration--wide"
+                src="../../assets/smartcontractmockup.png"
+                alt="Auto GAAP insights dashboard visual"
+              />
               <div class="hero-device" aria-hidden="true">
                 <div class="hero-device-header">
                   <span class="device-dots">
@@ -368,6 +373,29 @@
                     <input type="checkbox" id="apply-depreciation" />
                     <span>Apply depreciation</span>
                   </label>
+                </div>
+
+                <div id="recurring-details" class="conditional-group">
+                  <h4>Recurring schedule (optional)</h4>
+                  <div class="form-row">
+                    <label class="form-field">
+                      <span>Start date</span>
+                      <input type="date" id="recurringStart" />
+                    </label>
+                    <label class="form-field">
+                      <span>End date</span>
+                      <input type="date" id="recurringEnd" />
+                    </label>
+                    <label class="form-field">
+                      <span>Frequency</span>
+                      <select id="recurringFrequency">
+                        <option value="">Select cadence</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                      </select>
+                    </label>
+                  </div>
                 </div>
 
                 <div id="accrual-details" class="conditional-group hidden">
