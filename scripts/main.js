@@ -140,7 +140,7 @@
       try {
         button.disabled = true;
         button.textContent = 'Loading…';
-        const response = await fetch('../../data/ledger.json');
+        const response = await fetch('../data/ledger.json');
         if (!response.ok) {
           throw new Error('Unable to load ledger.json');
         }
