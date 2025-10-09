@@ -18,13 +18,15 @@
           {
             label: 'Debits',
             data: [0, 0, 0, 0, 0],
-            backgroundColor: 'rgba(56, 189, 248, 0.55)',
+            backgroundColor: 'rgba(37, 99, 235, 0.55)',
+            borderColor: 'rgba(37, 99, 235, 0.8)',
             borderRadius: 12,
           },
           {
             label: 'Credits',
             data: [0, 0, 0, 0, 0],
             backgroundColor: 'rgba(249, 115, 22, 0.55)',
+            borderColor: 'rgba(234, 88, 12, 0.8)',
             borderRadius: 12,
           },
         ],
@@ -34,18 +36,18 @@
         maintainAspectRatio: false,
         scales: {
           x: {
-            grid: { color: 'rgba(148, 163, 184, 0.12)' },
-            ticks: { color: '#e2e8f0' },
+            grid: { color: 'rgba(148, 163, 184, 0.18)' },
+            ticks: { color: '#1f2937', font: { weight: '600' } },
           },
           y: {
             beginAtZero: true,
-            grid: { color: 'rgba(148, 163, 184, 0.12)' },
-            ticks: { color: '#e2e8f0' },
+            grid: { color: 'rgba(148, 163, 184, 0.16)' },
+            ticks: { color: '#1f2937' },
           },
         },
         plugins: {
           legend: {
-            labels: { color: '#e2e8f0' },
+            labels: { color: '#1f2937', font: { weight: '600' } },
           },
         },
       },
