@@ -2,7 +2,7 @@
 
 (function () {
   const STORAGE_KEY = 'journalEntries';
-  const FALLBACK_LEDGER_URL = '../../data/ledger.json';
+  const FALLBACK_LEDGER_URL = '/data/ledger.json';
   const SUMMARY_CONTAINER_ID = 'autoGaapSummary';
   const RECOMMENDATIONS_ID = 'autoGaapRecommendations';
   const RUN_BUTTON_ID = 'runAutoGaap';
