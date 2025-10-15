@@ -1,6 +1,12 @@
 (() => {
   const STORAGE_KEY = 'journalEntries';
   const OUTPUT_ID = 'financialStatementsOutput';
+  const STATEMENT_METADATA = {
+    balanceSheet: { title: 'Balance sheet', fileName: 'balance_sheet' },
+    incomeStatement: { title: 'Income statement', fileName: 'income_statement' },
+    equityStatement: { title: "Statement of owner's equity", fileName: 'owners_equity_statement' },
+    cashFlow: { title: 'Cash flow statement', fileName: 'cash_flow_statement' },
+  };
   const NORMAL_BALANCES = {
     asset: 'debit',
     expense: 'debit',
@@ -10,6 +16,7 @@
   };
 
   let lastStatement = null;
+  let lastStatementInfo = null;
 
   const currencyFormatter = (() => {
     try {
@@ -140,7 +147,7 @@
       ? 'Assets equal liabilities plus equity.'
       : 'Review balances—assets do not equal liabilities plus equity.';
 
-    return `
+    const html = `
       <article class="card compact">
         <h5>Balance sheet</h5>
         <div class="statement-columns">
@@ -163,6 +170,35 @@
         <p class="statement-footnote">${balanceNote}</p>
       </article>
     `;
+
+    return {
+      html,
+      data: {
+        sections: {
+          assets: assets.map((item) => ({
+            accountType: 'asset',
+            accountName: item.accountName,
+            balance: Number(item.balance),
+          })),
+          liabilities: liabilities.map((item) => ({
+            accountType: 'liability',
+            accountName: item.accountName,
+            balance: Number(item.balance),
+          })),
+          equity: equity.map((item) => ({
+            accountType: 'equity',
+            accountName: item.accountName,
+            balance: Number(item.balance),
+          })),
+        },
+        totals: {
+          assets: totalAssets,
+          liabilities: totalLiabilities,
+          equity: totalEquity,
+        },
+        reconciliation: balanceNote,
+      },
+    };
   };
 
   const renderIncomeStatement = (accounts) => {
@@ -187,7 +223,7 @@
     const totalExpenses = expenses.reduce((sum, item) => sum + item.balance, 0);
     const netIncome = totalRevenue - totalExpenses;
 
-    return `
+    const html = `
       <article class="card compact">
         <h5>Income statement</h5>
         <div class="statement-columns">
@@ -205,6 +241,29 @@
         <p class="statement-total">Net income: ${formatCurrency(netIncome)}</p>
       </article>
     `;
+
+    return {
+      html,
+      data: {
+        sections: {
+          revenues: revenues.map((item) => ({
+            accountType: 'revenue',
+            accountName: item.accountName,
+            balance: Number(item.balance),
+          })),
+          expenses: expenses.map((item) => ({
+            accountType: 'expense',
+            accountName: item.accountName,
+            balance: Number(item.balance),
+          })),
+        },
+        totals: {
+          revenue: totalRevenue,
+          expenses: totalExpenses,
+          netIncome,
+        },
+      },
+    };
   };
 
   const renderEquityStatement = (accounts) => {
@@ -231,7 +290,7 @@
     const netIncomeValue = formatCurrency(netIncomeRaw);
     const endingEquity = totalEquity + netIncomeRaw;
 
-    return `
+    const html = `
       <article class="card compact">
         <h5>Statement of owner's equity</h5>
         ${renderList(equityAccounts)}
@@ -240,6 +299,22 @@
         <p class="statement-total">Ending owner's equity: ${formatCurrency(endingEquity)}</p>
       </article>
     `;
+
+    return {
+      html,
+      data: {
+        accounts: equityAccounts.map((item) => ({
+          accountType: 'equity',
+          accountName: item.accountName,
+          balance: Number(item.balance),
+        })),
+        totals: {
+          ownerEquity: totalEquity,
+          netIncome: netIncomeRaw,
+          endingEquity,
+        },
+      },
+    };
   };
 
   const isCashAccount = (line) => {
@@ -284,7 +359,7 @@
   const renderCashFlowStatement = (entries) => {
     const totals = categorizeCashFlows(entries);
 
-    return `
+    const html = `
       <article class="card compact">
         <h5>Cash flow statement</h5>
         <ul class="statement-list">
@@ -295,6 +370,11 @@
         <p class="statement-total">Net change in cash: ${formatCurrency(totals.netChange)}</p>
       </article>
     `;
+
+    return {
+      html,
+      data: { ...totals },
+    };
   };
 
   const updateOutput = (html) => {
@@ -308,30 +388,199 @@
     if (!entries.length) {
       updateOutput('<p class="auto-gaap-placeholder">Add journal entries before generating financial statements.</p>');
       lastStatement = null;
+      lastStatementInfo = null;
       return;
     }
 
     const accounts = aggregateAccountBalances(entries);
-    let html = '';
+    let result = null;
 
     if (type === 'balanceSheet') {
-      html = renderBalanceSheet(accounts);
+      result = renderBalanceSheet(accounts);
     } else if (type === 'incomeStatement') {
-      html = renderIncomeStatement(accounts);
+      result = renderIncomeStatement(accounts);
     } else if (type === 'equityStatement') {
-      html = renderEquityStatement(accounts);
+      result = renderEquityStatement(accounts);
     } else if (type === 'cashFlow') {
-      html = renderCashFlowStatement(entries);
+      result = renderCashFlowStatement(entries);
     }
 
-    if (!html) {
+    if (!result || !result.html) {
       updateOutput('<p class="auto-gaap-placeholder">Unable to generate the requested statement.</p>');
       lastStatement = null;
+      lastStatementInfo = null;
       return;
     }
 
-    updateOutput(html);
+    updateOutput(result.html);
     lastStatement = type;
+    const metadata = STATEMENT_METADATA[type] || { title: 'Financial statement', fileName: 'financial_statement' };
+    lastStatementInfo = {
+      type,
+      title: metadata.title,
+      fileName: metadata.fileName,
+      html: result.html,
+      data: result.data,
+      generatedAt: new Date().toISOString(),
+    };
+  };
+
+  const wrapHtmlDocument = (title, body) => `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>${title}</title>
+    <style>
+      body { font-family: Arial, Helvetica, sans-serif; color: #111827; background: #f9fafb; padding: 2rem; }
+      h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+      article { background: #ffffff; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08); }
+      ul { list-style: none; padding: 0; margin: 0; }
+      li { display: flex; justify-content: space-between; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 0; }
+      li span:first-child { font-weight: 600; }
+      .statement-total { font-weight: 600; margin-top: 0.75rem; }
+      .statement-columns { display: grid; gap: 1.5rem; }
+    </style>
+  </head>
+  <body>
+    <h1>${title}</h1>
+    ${body}
+  </body>
+</html>`;
+
+  const triggerDownload = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportCurrentStatementAsHtml = () => {
+    if (!lastStatementInfo) {
+      alert('Generate a financial statement before downloading it.');
+      return;
+    }
+
+    const documentHtml = wrapHtmlDocument(lastStatementInfo.title, lastStatementInfo.html);
+    const blob = new Blob([documentHtml], { type: 'text/html' });
+    triggerDownload(blob, `${lastStatementInfo.fileName}.html`);
+  };
+
+  const exportCurrentStatementAsJson = () => {
+    if (!lastStatementInfo) {
+      alert('Generate a financial statement before exporting it.');
+      return;
+    }
+
+    const payload = {
+      statement: lastStatementInfo.title,
+      generatedAt: lastStatementInfo.generatedAt,
+      data: lastStatementInfo.data,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    triggerDownload(blob, `${lastStatementInfo.fileName}.json`);
+  };
+
+  const appendSectionToPdf = (doc, heading, rows, startY) => {
+    if (!rows || !rows.length) {
+      return startY;
+    }
+
+    let y = startY;
+    const ensureSpace = () => {
+      if (y > 260) {
+        doc.addPage();
+        y = 20;
+      }
+    };
+
+    ensureSpace();
+    doc.setFont('helvetica', 'bold');
+    doc.text(heading, 12, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+
+    rows.forEach((row) => {
+      ensureSpace();
+      const line = `${row.accountName}: ${formatCurrency(row.balance)}`;
+      doc.text(line, 16, y);
+      y += 6;
+    });
+
+    return y + 2;
+  };
+
+  const exportCurrentStatementAsPdf = () => {
+    if (!lastStatementInfo) {
+      alert('Generate a financial statement before exporting it.');
+      return;
+    }
+
+    if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+      alert('PDF export is unavailable in this environment.');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(lastStatementInfo.title, 12, 20);
+    doc.setFontSize(12);
+
+    let y = 30;
+    const { type, data } = lastStatementInfo;
+
+    if (type === 'balanceSheet') {
+      y = appendSectionToPdf(doc, 'Assets', data.sections.assets, y);
+      y = appendSectionToPdf(doc, 'Liabilities', data.sections.liabilities, y + 4);
+      y = appendSectionToPdf(doc, "Owner's equity", data.sections.equity, y + 4);
+      doc.setFont('helvetica', 'bold');
+      y += 4;
+      doc.text(`Total assets: ${formatCurrency(data.totals.assets)}`, 12, y);
+      y += 6;
+      doc.text(`Total liabilities: ${formatCurrency(data.totals.liabilities)}`, 12, y);
+      y += 6;
+      doc.text(`Total equity: ${formatCurrency(data.totals.equity)}`, 12, y);
+      y += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.text(data.reconciliation, 12, y);
+    } else if (type === 'incomeStatement') {
+      y = appendSectionToPdf(doc, 'Revenues', data.sections.revenues, y);
+      y = appendSectionToPdf(doc, 'Expenses', data.sections.expenses, y + 4);
+      doc.setFont('helvetica', 'bold');
+      y += 4;
+      doc.text(`Total revenues: ${formatCurrency(data.totals.revenue)}`, 12, y);
+      y += 6;
+      doc.text(`Total expenses: ${formatCurrency(data.totals.expenses)}`, 12, y);
+      y += 6;
+      doc.text(`Net income: ${formatCurrency(data.totals.netIncome)}`, 12, y);
+    } else if (type === 'equityStatement') {
+      y = appendSectionToPdf(doc, "Owner's equity accounts", data.accounts, y);
+      doc.setFont('helvetica', 'bold');
+      y += 4;
+      doc.text(`Owner investments & balances: ${formatCurrency(data.totals.ownerEquity)}`, 12, y);
+      y += 6;
+      doc.text(`Net income: ${formatCurrency(data.totals.netIncome)}`, 12, y);
+      y += 6;
+      doc.text(`Ending owner's equity: ${formatCurrency(data.totals.endingEquity)}`, 12, y);
+    } else if (type === 'cashFlow') {
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Net cash from operating activities: ${formatCurrency(data.operating)}`, 12, y);
+      y += 6;
+      doc.text(`Net cash from investing activities: ${formatCurrency(data.investing)}`, 12, y);
+      y += 6;
+      doc.text(`Net cash from financing activities: ${formatCurrency(data.financing)}`, 12, y);
+      y += 8;
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Net change in cash: ${formatCurrency(data.netChange)}`, 12, y);
+    } else {
+      doc.setFont('helvetica', 'normal');
+      doc.text('No exportable data found for this statement.', 12, y);
+    }
+
+    doc.save(`${lastStatementInfo.fileName}.pdf`);
   };
 
   const bindStatements = () => {
@@ -349,8 +598,23 @@
     });
   };
 
+  const bindExports = () => {
+    const bindings = [
+      { id: 'downloadStatementHtml', handler: exportCurrentStatementAsHtml },
+      { id: 'downloadStatementJson', handler: exportCurrentStatementAsJson },
+      { id: 'downloadStatementPdf', handler: exportCurrentStatementAsPdf },
+    ];
+
+    bindings.forEach((binding) => {
+      const button = document.getElementById(binding.id);
+      if (!button) return;
+      button.addEventListener('click', binding.handler);
+    });
+  };
+
   document.addEventListener('DOMContentLoaded', () => {
     bindStatements();
+    bindExports();
   });
 
   window.addEventListener('autoGaap:entriesChanged', () => {
