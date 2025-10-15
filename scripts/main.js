@@ -15,7 +15,11 @@
   };
 
   const saveEntries = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(journalEntries));
+    if (journalEntries.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(journalEntries));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
     notifySubscribers();
   };
 
@@ -32,6 +36,54 @@
   const generateJournalNumber = (account1, account2) => {
     const sanitized = [account1, account2].map((value) => (value || 'GEN').replace(/\s+/g, '-').toUpperCase());
     return `CPU-${sanitized.join('-')}-${Date.now()}`;
+  };
+
+  const extractEntriesFromPayload = (payload) => {
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+    if (payload && Array.isArray(payload.journalEntries)) {
+      return payload.journalEntries;
+    }
+    return [];
+  };
+
+  const sanitizeImportedEntries = (candidates) => {
+    if (!Array.isArray(candidates)) {
+      return [];
+    }
+
+    const baseTimestamp = Date.now();
+
+    return candidates
+      .map((entry, index) => {
+        if (!entry || !Array.isArray(entry.entries)) {
+          return null;
+        }
+
+        const sanitizedLines = entry.entries
+          .map((line) => ({
+            accountType: typeof line.accountType === 'string' ? line.accountType : '',
+            accountName: typeof line.accountName === 'string' ? line.accountName : '',
+            debit: formatNumber(line.debit),
+            credit: formatNumber(line.credit),
+          }))
+          .filter((line) => line.accountType || line.accountName || line.debit !== 0 || line.credit !== 0);
+
+        if (!sanitizedLines.length) {
+          return null;
+        }
+
+        return {
+          id: Number.isFinite(Number(entry.id)) ? Number(entry.id) : baseTimestamp + index,
+          journalNumber: typeof entry.journalNumber === 'string' && entry.journalNumber ? entry.journalNumber : `IM-${baseTimestamp}-${index + 1}`,
+          postDate: typeof entry.postDate === 'string' ? entry.postDate : '',
+          description: typeof entry.description === 'string' ? entry.description : '',
+          entries: sanitizedLines,
+          meta: entry.meta && typeof entry.meta === 'object' ? entry.meta : {},
+        };
+      })
+      .filter(Boolean);
   };
 
   const gatherLineItem = (typeId, nameId, debitId, creditId) => {
@@ -145,11 +197,8 @@
           throw new Error('Unable to load ledger.json');
         }
         const data = await response.json();
-        if (Array.isArray(data)) {
-          journalEntries = data;
-        } else if (Array.isArray(data?.journalEntries)) {
-          journalEntries = data.journalEntries;
-        }
+        const loadedEntries = extractEntriesFromPayload(data);
+        journalEntries = sanitizeImportedEntries(loadedEntries);
         saveEntries();
       } catch (error) {
         console.warn('main.js: failed to load ledger', error);
@@ -158,6 +207,69 @@
         button.disabled = false;
         button.textContent = 'Load Sample Ledger';
       }
+    });
+  };
+
+  const bindClearLedger = () => {
+    const button = document.getElementById('clearLedger');
+    if (!button) return;
+
+    button.addEventListener('click', () => {
+      if (!journalEntries.length) {
+        alert('Ledger is already empty.');
+        return;
+      }
+
+      const confirmed = window.confirm('Clear all journal entries from this ledger? This action cannot be undone.');
+      if (!confirmed) {
+        return;
+      }
+
+      journalEntries = [];
+      saveEntries();
+    });
+  };
+
+  const bindImportLedger = () => {
+    const button = document.getElementById('importLedger');
+    const fileInput = document.getElementById('importLedgerInput');
+    if (!button || !fileInput) return;
+
+    button.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+      const [file] = fileInput.files || [];
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const text = typeof reader.result === 'string' ? reader.result : '';
+          const payload = JSON.parse(text);
+          const imported = sanitizeImportedEntries(extractEntriesFromPayload(payload));
+          if (!imported.length) {
+            throw new Error('No journal entries found in import.');
+          }
+          journalEntries = imported;
+          saveEntries();
+          alert('Ledger imported successfully.');
+        } catch (error) {
+          console.warn('main.js: failed to import ledger', error);
+          alert('Unable to import ledger. Verify the JSON file matches the expected format.');
+        } finally {
+          fileInput.value = '';
+        }
+      };
+      reader.onerror = () => {
+        console.warn('main.js: file reader error while importing ledger');
+        alert('Unable to read the selected file.');
+        fileInput.value = '';
+      };
+      reader.readAsText(file);
     });
   };
 
@@ -173,6 +285,8 @@
     bindForm();
     bindRunAutoGaap();
     bindLoadSample();
+    bindClearLedger();
+    bindImportLedger();
     toggleVisibility('isAccrued', 'accrual-details');
     toggleVisibility('isPrepaid', 'prepaid-details');
     toggleVisibility('apply-depreciation', 'asset-details');
