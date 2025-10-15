@@ -510,6 +510,35 @@
               <section class="auto-gaap-ledger">
                 <h4>Recent journal entries</h4>
                 <div id="journalEntries" class="ledger-feed"></div>
+                <div class="ledger-controls" role="group" aria-label="Ledger data actions">
+                  <button class="button outline" type="button" id="clearLedger">Clear ledger</button>
+                  <button class="button outline" type="button" id="importLedger">Import JSON</button>
+                </div>
+                <input
+                  type="file"
+                  id="importLedgerInput"
+                  accept="application/json"
+                  class="visually-hidden"
+                  aria-label="Select a ledger JSON file"
+                />
+              </section>
+
+              <section class="auto-gaap-ledger">
+                <h4>Financial statement generator</h4>
+                <div class="ledger-controls" role="group" aria-label="Financial statement actions">
+                  <button class="button outline" type="button" id="generateBalanceSheet">Balance sheet</button>
+                  <button class="button outline" type="button" id="generateIncomeStatement">Income statement</button>
+                  <button class="button outline" type="button" id="generateEquityStatement">Statement of owner's equity</button>
+                  <button class="button outline" type="button" id="generateCashFlow">Cash flow statement</button>
+                </div>
+                <div
+                  id="financialStatementsOutput"
+                  class="financial-statements-output"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  <p class="auto-gaap-placeholder">Select a statement button to generate a summary.</p>
+                </div>
               </section>
 
               <section class="auto-gaap-ledger">
@@ -572,6 +601,7 @@
     <script src="../scripts/gaap_expansion.js" defer></script>
     <script src="../scripts/geo_location.js" defer></script>
     <script src="../scripts/main.js" defer></script>
+    <script src="../scripts/financial_statements.js" defer></script>
     <script src="../scripts/autogaap.js" defer></script>
   </body>
 </html>

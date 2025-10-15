@@ -1745,6 +1745,69 @@
       margin-top: 12px;
     }
 
+    .ledger-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .financial-statements-output {
+      display: grid;
+      gap: 14px;
+    }
+
+    .financial-statements-output article {
+      display: grid;
+      gap: 10px;
+    }
+
+    .financial-statements-output h5 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .statement-columns {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .statement-columns h6 {
+      margin: 0 0 6px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .statement-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .statement-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    .statement-total {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .statement-footnote {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
     @keyframes gridPulse {
       0% {
         background-position: 0 0, 0 0;
