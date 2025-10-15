@@ -1885,7 +1885,6 @@
     .statement-table th.numeric {
       text-align: right;
       font-variant-numeric: tabular-nums;
-      white-space: nowrap;
     }
 
     .statement-metrics {

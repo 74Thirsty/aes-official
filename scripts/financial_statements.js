@@ -217,48 +217,29 @@
       .map((section) => {
         const total = section.total ?? 0;
         const hasLines = Array.isArray(section.items) && section.items.length;
-        const shareBaseline = hasLines
-          ? Math.abs(total) > 0.0001
-            ? Math.abs(total)
-            : section.items.reduce((sum, current) => sum + Math.abs(resolveNetBalance(current)), 0)
-          : 0;
         const rows = hasLines
           ? section.items
               .map((item) => {
-                const debit = toNumber(item.debit);
-                const credit = toNumber(item.credit);
-                const net = resolveNetBalance(item);
-                const share = shareBaseline > 0.0001 ? formatPercentage(Math.abs(net) / shareBaseline) : '—';
+                const share = Math.abs(total) > 0.0001 ? formatPercentage(Math.abs(item.balance) / Math.abs(total)) : '—';
                 return `
                   <tr>
                     <td>${escapeHtml(item.accountName)}</td>
-                    <td class="numeric">${Math.abs(debit) > 0.0001 ? formatCurrency(debit) : '—'}</td>
-                    <td class="numeric">${Math.abs(credit) > 0.0001 ? formatCurrency(credit) : '—'}</td>
-                    <td class="numeric">${formatCurrency(net)}</td>
+                    <td class="numeric">${formatCurrency(item.balance)}</td>
                     <td class="numeric">${share}</td>
                   </tr>
                 `;
               })
               .join('')
-          : '<tr class="statement-empty"><td colspan="5">No activity recorded.</td></tr>';
+          : '<tr class="statement-empty"><td colspan="3">No activity recorded.</td></tr>';
 
-        const totalDebit = hasLines ? section.items.reduce((sum, item) => sum + toNumber(item.debit), 0) : 0;
-        const totalCredit = hasLines ? section.items.reduce((sum, item) => sum + toNumber(item.credit), 0) : 0;
-        const resolvedTotal = Number.isFinite(Number(total)) ? Number(total) : resolveNetBalance({
-          debit: totalDebit,
-          credit: totalCredit,
-          normalSide: section.normalSide,
-        });
-        const totalShare = Math.abs(resolvedTotal) > 0.0001 ? '100%' : '—';
+        const totalShare = Math.abs(total) > 0.0001 ? '100%' : '—';
 
         return `
-          <tr class="statement-section"><th colspan="5">${escapeHtml(section.title)}</th></tr>
+          <tr class="statement-section"><th colspan="3">${escapeHtml(section.title)}</th></tr>
           ${rows}
           <tr class="statement-subtotal">
             <td>${escapeHtml(section.totalLabel || `Total ${section.title.toLowerCase()}`)}</td>
-            <td class="numeric">${Math.abs(totalDebit) > 0.0001 ? formatCurrency(totalDebit) : '—'}</td>
-            <td class="numeric">${Math.abs(totalCredit) > 0.0001 ? formatCurrency(totalCredit) : '—'}</td>
-            <td class="numeric">${formatCurrency(resolvedTotal)}</td>
+            <td class="numeric">${formatCurrency(total)}</td>
             <td class="numeric">${totalShare}</td>
           </tr>
         `;
@@ -270,9 +251,7 @@
         <thead>
           <tr>
             <th scope="col">Account</th>
-            <th scope="col" class="numeric">Debits</th>
-            <th scope="col" class="numeric">Credits</th>
-            <th scope="col" class="numeric">Net impact</th>
+            <th scope="col" class="numeric">Amount</th>
             <th scope="col" class="numeric">% of section</th>
           </tr>
         </thead>
@@ -410,7 +389,6 @@
     const notes = [
       balanceNote,
       "Percentages reflect each account's share of its section total.",
-      'Debit and credit columns list the gross postings captured for each account.',
       `Prepared ${context?.reportingPeriod?.asOfLabel || 'for the current session'}.`,
     ];
 
@@ -500,21 +478,7 @@
     const sections = [
       { title: 'Revenues', items: revenues, total: totalRevenue, totalLabel: 'Total revenues' },
       { title: 'Expenses', items: expenses, total: totalExpenses, totalLabel: 'Total expenses' },
-      {
-        title: 'Results',
-        items: [
-          {
-            accountType: 'equity',
-            accountName: resultLabel,
-            balance: netIncome,
-            debit: netIncome < 0 ? Math.abs(netIncome) : 0,
-            credit: netIncome > 0 ? Math.abs(netIncome) : 0,
-            normalSide: netIncome >= 0 ? 'credit' : 'debit',
-          },
-        ],
-        total: netIncome,
-        totalLabel: resultLabel,
-      },
+      { title: 'Results', items: [{ accountName: resultLabel, balance: netIncome }], total: netIncome, totalLabel: resultLabel },
     ];
 
     const metrics = [
@@ -534,7 +498,6 @@
     const notes = [
       `${resultLabel} equals total revenue minus total expenses.`,
       "Percentages reflect each line's contribution to its section total.",
-      'Debit and credit columns show the gross postings behind each line.',
       `Prepared ${context?.reportingPeriod?.periodLabel || 'for the current session'}.`,
     ];
 
@@ -630,31 +593,13 @@
       },
       {
         title: 'Current period earnings',
-        items: [
-          {
-            accountType: 'equity',
-            accountName: resultLabel,
-            balance: netIncomeRaw,
-            debit: netIncomeRaw < 0 ? Math.abs(netIncomeRaw) : 0,
-            credit: netIncomeRaw > 0 ? Math.abs(netIncomeRaw) : 0,
-            normalSide: netIncomeRaw >= 0 ? 'credit' : 'debit',
-          },
-        ],
+        items: [{ accountName: resultLabel, balance: netIncomeRaw }],
         total: netIncomeRaw,
         totalLabel: resultLabel,
       },
       {
         title: "Ending owner's equity",
-        items: [
-          {
-            accountType: 'equity',
-            accountName: "Ending owner's equity",
-            balance: endingEquity,
-            debit: endingEquity < 0 ? Math.abs(endingEquity) : 0,
-            credit: endingEquity > 0 ? Math.abs(endingEquity) : 0,
-            normalSide: endingEquity >= 0 ? 'credit' : 'debit',
-          },
-        ],
+        items: [{ accountName: "Ending owner's equity", balance: endingEquity }],
         total: endingEquity,
         totalLabel: "Ending owner's equity",
       },
@@ -677,7 +622,6 @@
     const notes = [
       `${resultLabel} is rolled into ending equity for the reporting period.`,
       "Percentages illustrate each line's share of the ending balance.",
-      'Debit and credit columns highlight the gross postings feeding each movement.',
       `Prepared ${context?.reportingPeriod?.periodLabel || 'for the current session'}.`,
     ];
 
@@ -783,37 +727,16 @@
       .reduce((sum, account) => sum + calculateNetBalance(account), 0);
     const openingCash = endingCash - netChange;
 
-    const cashSummaryItems = [
-      {
-        accountName: 'Net cash from operating activities',
-        balance: totals.operating,
-        debit: totals.operating >= 0 ? Math.abs(totals.operating) : 0,
-        credit: totals.operating < 0 ? Math.abs(totals.operating) : 0,
-        normalSide: totals.operating >= 0 ? 'debit' : 'credit',
-      },
-      {
-        accountName: 'Net cash from investing activities',
-        balance: totals.investing,
-        debit: totals.investing >= 0 ? Math.abs(totals.investing) : 0,
-        credit: totals.investing < 0 ? Math.abs(totals.investing) : 0,
-        normalSide: totals.investing >= 0 ? 'debit' : 'credit',
-      },
-      {
-        accountName: 'Net cash from financing activities',
-        balance: totals.financing,
-        debit: totals.financing >= 0 ? Math.abs(totals.financing) : 0,
-        credit: totals.financing < 0 ? Math.abs(totals.financing) : 0,
-        normalSide: totals.financing >= 0 ? 'debit' : 'credit',
-      },
-    ];
-
     const sections = [
       {
         title: 'Cash flow summary',
-        items: cashSummaryItems,
+        items: [
+          { accountName: 'Net cash from operating activities', balance: totals.operating },
+          { accountName: 'Net cash from investing activities', balance: totals.investing },
+          { accountName: 'Net cash from financing activities', balance: totals.financing },
+        ],
         total: netChange,
         totalLabel: 'Net change in cash',
-        normalSide: netChange >= 0 ? 'debit' : 'credit',
       },
     ];
 
@@ -831,7 +754,6 @@
     const notes = [
       'Cash flow categories are inferred from the counterpart accounts paired with cash in each journal entry.',
       "Percentages reflect each activity's share of total net cash movement (absolute value).",
-      'Debit and credit columns show cash inflows versus outflows for each activity.',
       `Prepared ${context?.reportingPeriod?.periodLabel || 'for the current session'}.`,
     ];
 
@@ -847,15 +769,7 @@
     return {
       html,
       data: {
-        sections: {
-          summary: cashSummaryItems.map((item) => ({
-            accountName: item.accountName,
-            debit: toNumber(item.debit),
-            credit: toNumber(item.credit),
-            balance: item.balance,
-            shareOfSection: Math.abs(netChange) > 0.0001 ? Math.abs(item.balance) / Math.abs(netChange) : 0,
-          })),
-        },
+        sections: sections[0].items.map((item) => ({ accountName: item.accountName, balance: item.balance })),
         totals: { ...totals },
         endingCash,
         openingCash,
@@ -938,7 +852,7 @@
       .statement-table tbody tr.statement-section th { padding-top: 1rem; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6b7280; border-bottom: none; }
       .statement-table tbody tr.statement-subtotal td { font-weight: 600; border-top: 1px solid #d1d5db; }
       .statement-table tbody tr.statement-empty td { color: #9ca3af; font-style: italic; }
-      .statement-table td.numeric, .statement-table th.numeric { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .statement-table td.numeric, .statement-table th.numeric { text-align: right; font-variant-numeric: tabular-nums; }
       .statement-metrics { margin-bottom: 1.25rem; }
       .statement-metrics h6 { margin: 0 0 0.75rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; }
       .metrics-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
@@ -1106,9 +1020,13 @@
       doc.text(`Ending owner's equity: ${formatCurrency(data.totals.endingEquity)}`, 12, y);
     } else if (type === 'cashFlow') {
       const totals = data?.totals || {};
-      const summaryRows = Array.isArray(data?.sections?.summary) ? data.sections.summary : [];
-      y = appendSectionToPdf(doc, 'Cash flow summary', summaryRows, y);
-      y += 2;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Net cash from operating activities: ${formatCurrency(totals.operating)}`, 12, y);
+      y += 6;
+      doc.text(`Net cash from investing activities: ${formatCurrency(totals.investing)}`, 12, y);
+      y += 6;
+      doc.text(`Net cash from financing activities: ${formatCurrency(totals.financing)}`, 12, y);
+      y += 8;
       doc.setFont('helvetica', 'bold');
       doc.text(`Net change in cash: ${formatCurrency(totals.netChange)}`, 12, y);
       if (typeof data.endingCash === 'number') {
