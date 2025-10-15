@@ -1,5 +1,6 @@
 (() => {
   const STORAGE_KEY = 'journalEntries';
+  const CLEAR_SENTINEL_KEY = 'journalEntriesCleared';
   const LEDGER_DATA_URL = (() => {
     try {
       return new URL('../data/ledger.json', window.location.href).toString();
@@ -22,9 +23,35 @@
     }
   };
 
+  const clearLedgerSentinel = () => {
+    try {
+      localStorage.removeItem(CLEAR_SENTINEL_KEY);
+    } catch (error) {
+      console.warn('main.js: unable to clear ledger sentinel', error);
+    }
+  };
+
+  const markLedgerCleared = () => {
+    try {
+      localStorage.setItem(CLEAR_SENTINEL_KEY, String(Date.now()));
+    } catch (error) {
+      console.warn('main.js: unable to persist ledger cleared sentinel', error);
+    }
+  };
+
+  const wasLedgerCleared = () => {
+    try {
+      return Boolean(localStorage.getItem(CLEAR_SENTINEL_KEY));
+    } catch (error) {
+      console.warn('main.js: unable to read ledger cleared sentinel', error);
+      return false;
+    }
+  };
+
   const saveEntries = () => {
     if (journalEntries.length) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(journalEntries));
+      clearLedgerSentinel();
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
@@ -234,6 +261,7 @@
       }
 
       journalEntries = [];
+      markLedgerCleared();
       saveEntries();
     });
   };
@@ -307,11 +335,14 @@
     if (event.key === STORAGE_KEY) {
       journalEntries = loadEntries();
       notifySubscribers();
+    } else if (event.key === CLEAR_SENTINEL_KEY && event.newValue) {
+      journalEntries = [];
+      notifySubscribers();
     }
   });
 
   window.addEventListener('autoGaap:ledgerHydrated', (event) => {
-    if (journalEntries.length) {
+    if (journalEntries.length || wasLedgerCleared()) {
       return;
     }
 

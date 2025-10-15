@@ -10,6 +10,7 @@
       return '../data/ledger.json';
     }
   })();
+  const CLEAR_SENTINEL_KEY = 'journalEntriesCleared';
   const SUMMARY_CONTAINER_ID = 'autoGaapSummary';
   const RECOMMENDATIONS_ID = 'autoGaapRecommendations';
   const RUN_BUTTON_ID = 'runAutoGaap';
@@ -122,6 +123,11 @@
       return storedEntries;
     }
 
+    if (wasLedgerExplicitlyCleared()) {
+      lastLoadUsedFallback = false;
+      return [];
+    }
+
     try {
       const response = await fetch(FALLBACK_LEDGER_URL, { cache: 'no-store' });
       if (!response.ok) {
@@ -187,6 +193,15 @@
     } catch (error) {
       console.warn('AutoGAAP: Failed to parse journal entries from storage.', error);
       return null;
+    }
+  }
+
+  function wasLedgerExplicitlyCleared() {
+    try {
+      return Boolean(window.localStorage ? window.localStorage.getItem(CLEAR_SENTINEL_KEY) : null);
+    } catch (error) {
+      console.warn('AutoGAAP: Unable to read ledger cleared sentinel.', error);
+      return false;
     }
   }
 
