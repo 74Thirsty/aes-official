@@ -19,6 +19,17 @@
   let lastStatementInfo = null;
   let fallbackEntries = [];
 
+  const HTML_ESCAPE_MAP = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+
+  const escapeHtml = (value) =>
+    typeof value === 'string' ? value.replace(/[&<>"']/g, (char) => HTML_ESCAPE_MAP[char] || char) : '';
+
   const currencyFormatter = (() => {
     try {
       return new Intl.NumberFormat(undefined, {
@@ -45,6 +56,185 @@
   const toNumber = (value) => {
     const number = Number(value);
     return Number.isFinite(number) ? number : 0;
+  };
+
+  const safeDivide = (numerator, denominator) => {
+    const divisor = Number(denominator);
+    if (!Number.isFinite(divisor) || Math.abs(divisor) < 0.00001) {
+      return null;
+    }
+    const dividend = Number(numerator);
+    if (!Number.isFinite(dividend)) {
+      return null;
+    }
+    return dividend / divisor;
+  };
+
+  const formatPercentage = (value) =>
+    Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : '—';
+
+  const formatRatio = (value) => (Number.isFinite(value) ? value.toFixed(2) : '—');
+
+  const parseDateValue = (value) => {
+    if (!value || typeof value !== 'string') return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
+  const formatDateDisplay = (date) => {
+    if (!date) return null;
+    try {
+      return date.toLocaleDateString(undefined, {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    } catch (error) {
+      return date.toISOString().split('T')[0];
+    }
+  };
+
+  const deriveReportingPeriod = (entries) => {
+    let start = null;
+    let end = null;
+
+    entries.forEach((entry) => {
+      const date = parseDateValue(entry?.postDate);
+      if (!date) return;
+      if (!start || date < start) start = date;
+      if (!end || date > end) end = date;
+    });
+
+    const asOfLabel = end ? `As of ${formatDateDisplay(end)}` : 'As of current session';
+    let periodLabel = 'For the current session';
+    if (start && end) {
+      if (start.getTime() === end.getTime()) {
+        periodLabel = `For the period ended ${formatDateDisplay(end)}`;
+      } else {
+        periodLabel = `For the period ${formatDateDisplay(start)} – ${formatDateDisplay(end)}`;
+      }
+    } else if (end) {
+      periodLabel = `For the period through ${formatDateDisplay(end)}`;
+    }
+
+    return {
+      startDateIso: start ? start.toISOString() : null,
+      endDateIso: end ? end.toISOString() : null,
+      asOfLabel,
+      periodLabel,
+      entryCount: entries.length,
+    };
+  };
+
+  const sortByMagnitudeDesc = (a, b) => Math.abs(b.balance) - Math.abs(a.balance);
+
+  const renderStatementHeader = (title, context, mode = 'period', tagline = '') => {
+    const reporting = context?.reportingPeriod || {
+      asOfLabel: 'As of current session',
+      periodLabel: 'For the current session',
+      entryCount: context?.entryCount || 0,
+    };
+
+    const descriptor = mode === 'asOf' ? reporting.asOfLabel : reporting.periodLabel;
+    const resolvedTagline = tagline ? `<p class="statement-tagline">${escapeHtml(tagline)}</p>` : '';
+
+    return `
+      <header class="statement-header">
+        <div>
+          <h5>${escapeHtml(title)}</h5>
+          <p class="statement-subtitle">${escapeHtml(descriptor)}</p>
+          ${resolvedTagline}
+        </div>
+        <ul class="statement-meta">
+          <li><span class="label">Entries analyzed</span><span>${reporting.entryCount}</span></li>
+          <li><span class="label">Reporting currency</span><span>USD</span></li>
+        </ul>
+      </header>
+    `;
+  };
+
+  const renderMetrics = (metrics) => {
+    if (!Array.isArray(metrics) || !metrics.length) {
+      return '';
+    }
+
+    const items = metrics
+      .map((metric) => {
+        const value = escapeHtml(metric.value ?? '');
+        const note = metric.note ? `<small>${escapeHtml(metric.note)}</small>` : '';
+        return `<li><span>${escapeHtml(metric.label ?? '')}</span><strong>${value}</strong>${note}</li>`;
+      })
+      .join('');
+
+    return `
+      <section class="statement-metrics">
+        <h6>Key indicators</h6>
+        <ul class="metrics-grid">${items}</ul>
+      </section>
+    `;
+  };
+
+  const renderFootnotes = (notes) => {
+    if (!Array.isArray(notes) || !notes.length) {
+      return '';
+    }
+
+    const items = notes.map((note) => `<li>${escapeHtml(note)}</li>`).join('');
+
+    return `
+      <section class="statement-footnotes">
+        <h6>Notes</h6>
+        <ol>${items}</ol>
+      </section>
+    `;
+  };
+
+  const renderSectionTable = (sections) => {
+    const body = sections
+      .map((section) => {
+        const total = section.total ?? 0;
+        const hasLines = Array.isArray(section.items) && section.items.length;
+        const rows = hasLines
+          ? section.items
+              .map((item) => {
+                const share = Math.abs(total) > 0.0001 ? formatPercentage(Math.abs(item.balance) / Math.abs(total)) : '—';
+                return `
+                  <tr>
+                    <td>${escapeHtml(item.accountName)}</td>
+                    <td class="numeric">${formatCurrency(item.balance)}</td>
+                    <td class="numeric">${share}</td>
+                  </tr>
+                `;
+              })
+              .join('')
+          : '<tr class="statement-empty"><td colspan="3">No activity recorded.</td></tr>';
+
+        const totalShare = Math.abs(total) > 0.0001 ? '100%' : '—';
+
+        return `
+          <tr class="statement-section"><th colspan="3">${escapeHtml(section.title)}</th></tr>
+          ${rows}
+          <tr class="statement-subtotal">
+            <td>${escapeHtml(section.totalLabel || `Total ${section.title.toLowerCase()}`)}</td>
+            <td class="numeric">${formatCurrency(total)}</td>
+            <td class="numeric">${totalShare}</td>
+          </tr>
+        `;
+      })
+      .join('');
+
+    return `
+      <table class="statement-table">
+        <thead>
+          <tr>
+            <th scope="col">Account</th>
+            <th scope="col" class="numeric">Amount</th>
+            <th scope="col" class="numeric">% of section</th>
+          </tr>
+        </thead>
+        <tbody>${body}</tbody>
+      </table>
+    `;
   };
 
   const loadEntries = () => {
@@ -108,18 +298,7 @@
     return normalSide === 'debit' ? debit - credit : credit - debit;
   };
 
-  const renderList = (items) => {
-    if (!items.length) {
-      return '<p class="auto-gaap-placeholder">No activity recorded.</p>';
-    }
-
-    const rows = items
-      .map((item) => `<li><span>${item.accountName}</span><span>${formatCurrency(item.balance)}</span></li>`)
-      .join('');
-    return `<ul class="statement-list">${rows}</ul>`;
-  };
-
-  const renderBalanceSheet = (accounts) => {
+  const renderBalanceSheet = (accounts, context) => {
     const assets = [];
     const liabilities = [];
     const equity = [];
@@ -154,34 +333,45 @@
       });
     }
 
+    assets.sort(sortByMagnitudeDesc);
+    liabilities.sort(sortByMagnitudeDesc);
+    equity.sort(sortByMagnitudeDesc);
+
     const totalAssets = assets.reduce((sum, item) => sum + item.balance, 0);
     const totalLiabilities = liabilities.reduce((sum, item) => sum + item.balance, 0);
     const totalEquity = equity.reduce((sum, item) => sum + item.balance, 0);
-    const balanceNote = Math.abs(totalAssets - (totalLiabilities + totalEquity)) < 0.01
-      ? 'Assets equal liabilities plus equity.'
-      : 'Review balances—assets do not equal liabilities plus equity.';
+    const equationVariance = totalAssets - (totalLiabilities + totalEquity);
+    const balanceNote = Math.abs(equationVariance) < 0.01
+      ? 'Assets reconcile to liabilities plus equity.'
+      : `Review balances — the accounting equation is off by ${formatCurrency(equationVariance)}.`;
+    const workingCapital = totalAssets - totalLiabilities;
+    const debtToEquity = safeDivide(totalLiabilities, totalEquity);
+    const coverageRatio = safeDivide(totalAssets, totalLiabilities + totalEquity);
+
+    const sections = [
+      { title: 'Assets', items: assets, total: totalAssets, totalLabel: 'Total assets' },
+      { title: 'Liabilities', items: liabilities, total: totalLiabilities, totalLabel: 'Total liabilities' },
+      { title: "Owner's equity", items: equity, total: totalEquity, totalLabel: "Total owner's equity" },
+    ];
+
+    const metrics = [
+      { label: 'Working capital', value: formatCurrency(workingCapital) },
+      { label: 'Debt-to-equity', value: formatRatio(debtToEquity ?? null), note: 'Liabilities ÷ equity' },
+      { label: 'Assets coverage', value: formatRatio(coverageRatio ?? null), note: 'Assets ÷ (liabilities + equity)' },
+    ];
+
+    const notes = [
+      balanceNote,
+      "Percentages reflect each account's share of its section total.",
+      `Prepared ${context?.reportingPeriod?.asOfLabel || 'for the current session'}.`,
+    ];
 
     const html = `
-      <article class="card compact">
-        <h5>Balance sheet</h5>
-        <div class="statement-columns">
-          <div>
-            <h6>Assets</h6>
-            ${renderList(assets)}
-            <p class="statement-total">Total assets: ${formatCurrency(totalAssets)}</p>
-          </div>
-          <div>
-            <h6>Liabilities</h6>
-            ${renderList(liabilities)}
-            <p class="statement-total">Total liabilities: ${formatCurrency(totalLiabilities)}</p>
-          </div>
-          <div>
-            <h6>Owner's equity</h6>
-            ${renderList(equity)}
-            <p class="statement-total">Total equity: ${formatCurrency(totalEquity)}</p>
-          </div>
-        </div>
-        <p class="statement-footnote">${balanceNote}</p>
+      <article class="card statement-card">
+        ${renderStatementHeader('Balance sheet', context, 'asOf', 'Detailed classification of assets, liabilities, and equity.')}
+        ${renderSectionTable(sections)}
+        ${renderMetrics(metrics)}
+        ${renderFootnotes(notes)}
       </article>
     `;
 
@@ -193,16 +383,19 @@
             accountType: 'asset',
             accountName: item.accountName,
             balance: Number(item.balance),
+            shareOfSection: Math.abs(totalAssets) > 0.0001 ? Math.abs(item.balance) / Math.abs(totalAssets) : 0,
           })),
           liabilities: liabilities.map((item) => ({
             accountType: 'liability',
             accountName: item.accountName,
             balance: Number(item.balance),
+            shareOfSection: Math.abs(totalLiabilities) > 0.0001 ? Math.abs(item.balance) / Math.abs(totalLiabilities) : 0,
           })),
           equity: equity.map((item) => ({
             accountType: 'equity',
             accountName: item.accountName,
             balance: Number(item.balance),
+            shareOfSection: Math.abs(totalEquity) > 0.0001 ? Math.abs(item.balance) / Math.abs(totalEquity) : 0,
           })),
         },
         totals: {
@@ -211,11 +404,17 @@
           equity: totalEquity,
         },
         reconciliation: balanceNote,
+        metrics: {
+          workingCapital,
+          debtToEquity,
+          assetsCoverage: coverageRatio,
+        },
+        reportingPeriod: context?.reportingPeriod || null,
       },
     };
   };
 
-  const renderIncomeStatement = (accounts) => {
+  const renderIncomeStatement = (accounts, context) => {
     const revenues = [];
     const expenses = [];
 
@@ -233,26 +432,49 @@
       }
     });
 
+    revenues.sort(sortByMagnitudeDesc);
+    expenses.sort(sortByMagnitudeDesc);
+
     const totalRevenue = revenues.reduce((sum, item) => sum + item.balance, 0);
     const totalExpenses = expenses.reduce((sum, item) => sum + item.balance, 0);
     const netIncome = totalRevenue - totalExpenses;
+    const expenseRatio = safeDivide(totalExpenses, totalRevenue);
+    const netMargin = safeDivide(netIncome, totalRevenue);
+
+    const resultLabel = netIncome >= 0 ? 'Net income' : 'Net loss';
+
+    const sections = [
+      { title: 'Revenues', items: revenues, total: totalRevenue, totalLabel: 'Total revenues' },
+      { title: 'Expenses', items: expenses, total: totalExpenses, totalLabel: 'Total expenses' },
+      { title: 'Results', items: [{ accountName: resultLabel, balance: netIncome }], total: netIncome, totalLabel: resultLabel },
+    ];
+
+    const metrics = [
+      { label: 'Total revenue', value: formatCurrency(totalRevenue) },
+      {
+        label: 'Total expenses',
+        value: formatCurrency(totalExpenses),
+        note: expenseRatio !== null ? `${formatPercentage(Math.abs(expenseRatio))} of revenue` : undefined,
+      },
+      {
+        label: resultLabel,
+        value: formatCurrency(netIncome),
+        note: netMargin !== null ? `${formatPercentage(netMargin)} margin` : undefined,
+      },
+    ];
+
+    const notes = [
+      `${resultLabel} equals total revenue minus total expenses.`,
+      "Percentages reflect each line's contribution to its section total.",
+      `Prepared ${context?.reportingPeriod?.periodLabel || 'for the current session'}.`,
+    ];
 
     const html = `
-      <article class="card compact">
-        <h5>Income statement</h5>
-        <div class="statement-columns">
-          <div>
-            <h6>Revenues</h6>
-            ${renderList(revenues)}
-            <p class="statement-total">Total revenues: ${formatCurrency(totalRevenue)}</p>
-          </div>
-          <div>
-            <h6>Expenses</h6>
-            ${renderList(expenses)}
-            <p class="statement-total">Total expenses: ${formatCurrency(totalExpenses)}</p>
-          </div>
-        </div>
-        <p class="statement-total">Net income: ${formatCurrency(netIncome)}</p>
+      <article class="card statement-card">
+        ${renderStatementHeader('Income statement', context, 'period', 'Performance for the reporting window.')}
+        ${renderSectionTable(sections)}
+        ${renderMetrics(metrics)}
+        ${renderFootnotes(notes)}
       </article>
     `;
 
@@ -264,11 +486,13 @@
             accountType: 'revenue',
             accountName: item.accountName,
             balance: Number(item.balance),
+            shareOfSection: Math.abs(totalRevenue) > 0.0001 ? Math.abs(item.balance) / Math.abs(totalRevenue) : 0,
           })),
           expenses: expenses.map((item) => ({
             accountType: 'expense',
             accountName: item.accountName,
             balance: Number(item.balance),
+            shareOfSection: Math.abs(totalExpenses) > 0.0001 ? Math.abs(item.balance) / Math.abs(totalExpenses) : 0,
           })),
         },
         totals: {
@@ -276,11 +500,16 @@
           expenses: totalExpenses,
           netIncome,
         },
+        metrics: {
+          expenseRatio,
+          netMargin,
+        },
+        reportingPeriod: context?.reportingPeriod || null,
       },
     };
   };
 
-  const renderEquityStatement = (accounts) => {
+  const renderEquityStatement = (accounts, context) => {
     const equityAccounts = [];
 
     accounts.forEach((account) => {
@@ -293,6 +522,8 @@
       }
     });
 
+    equityAccounts.sort(sortByMagnitudeDesc);
+
     const totalEquity = equityAccounts.reduce((sum, item) => sum + item.balance, 0);
     const totalRevenue = accounts
       .filter((account) => account.accountType === 'revenue')
@@ -301,16 +532,59 @@
       .filter((account) => account.accountType === 'expense')
       .reduce((sum, account) => sum + calculateNetBalance(account), 0);
     const netIncomeRaw = totalRevenue - totalExpenses;
-    const netIncomeValue = formatCurrency(netIncomeRaw);
     const endingEquity = totalEquity + netIncomeRaw;
+    const resultLabel = netIncomeRaw >= 0 ? 'Net income' : 'Net loss';
+    const returnOnEquity = safeDivide(netIncomeRaw, endingEquity);
+    const earningsShare = safeDivide(netIncomeRaw, endingEquity);
+    const revenueShare = safeDivide(netIncomeRaw, totalRevenue);
+
+    const sections = [
+      {
+        title: "Owner's equity accounts",
+        items: equityAccounts,
+        total: totalEquity,
+        totalLabel: "Owner investments & balances",
+      },
+      {
+        title: 'Current period earnings',
+        items: [{ accountName: resultLabel, balance: netIncomeRaw }],
+        total: netIncomeRaw,
+        totalLabel: resultLabel,
+      },
+      {
+        title: "Ending owner's equity",
+        items: [{ accountName: "Ending owner's equity", balance: endingEquity }],
+        total: endingEquity,
+        totalLabel: "Ending owner's equity",
+      },
+    ];
+
+    const metrics = [
+      { label: "Ending owner's equity", value: formatCurrency(endingEquity) },
+      {
+        label: resultLabel,
+        value: formatCurrency(netIncomeRaw),
+        note: revenueShare !== null ? `${formatPercentage(revenueShare)} of revenue` : undefined,
+      },
+      {
+        label: 'Return on equity',
+        value: returnOnEquity !== null ? formatPercentage(returnOnEquity) : '—',
+        note: 'Net income ÷ ending equity',
+      },
+    ];
+
+    const notes = [
+      `${resultLabel} is rolled into ending equity for the reporting period.`,
+      "Percentages illustrate each line's share of the ending balance.",
+      `Prepared ${context?.reportingPeriod?.periodLabel || 'for the current session'}.`,
+    ];
 
     const html = `
-      <article class="card compact">
-        <h5>Statement of owner's equity</h5>
-        ${renderList(equityAccounts)}
-        <p class="statement-total">Owner investments & balances: ${formatCurrency(totalEquity)}</p>
-        <p class="statement-total">Net income: ${netIncomeValue}</p>
-        <p class="statement-total">Ending owner's equity: ${formatCurrency(endingEquity)}</p>
+      <article class="card statement-card">
+        ${renderStatementHeader("Statement of owner's equity", context, 'period', 'Movement in owner capital accounts.')}
+        ${renderSectionTable(sections)}
+        ${renderMetrics(metrics)}
+        ${renderFootnotes(notes)}
       </article>
     `;
 
@@ -327,6 +601,11 @@
           netIncome: netIncomeRaw,
           endingEquity,
         },
+        metrics: {
+          returnOnEquity,
+          earningsShare,
+        },
+        reportingPeriod: context?.reportingPeriod || null,
       },
     };
   };
@@ -370,24 +649,64 @@
     };
   };
 
-  const renderCashFlowStatement = (entries) => {
+  const renderCashFlowStatement = (entries, accounts, context) => {
     const totals = categorizeCashFlows(entries);
+    const netChange = totals.netChange;
+
+    const endingCash = accounts
+      .filter((account) => account.accountType === 'asset' && typeof account.accountName === 'string')
+      .filter((account) => account.accountName.toLowerCase().includes('cash'))
+      .reduce((sum, account) => sum + calculateNetBalance(account), 0);
+    const openingCash = endingCash - netChange;
+
+    const sections = [
+      {
+        title: 'Cash flow summary',
+        items: [
+          { accountName: 'Net cash from operating activities', balance: totals.operating },
+          { accountName: 'Net cash from investing activities', balance: totals.investing },
+          { accountName: 'Net cash from financing activities', balance: totals.financing },
+        ],
+        total: netChange,
+        totalLabel: 'Net change in cash',
+      },
+    ];
+
+    const operatingShare = netChange ? Math.abs(totals.operating) / Math.abs(netChange) : null;
+    const metrics = [
+      { label: 'Net change in cash', value: formatCurrency(netChange) },
+      { label: 'Ending cash balance', value: formatCurrency(endingCash) },
+      {
+        label: 'Operating contribution',
+        value: operatingShare !== null ? formatPercentage(operatingShare) : '—',
+        note: 'Operating cash ÷ total net change (absolute)',
+      },
+    ];
+
+    const notes = [
+      'Cash flow categories are inferred from the counterpart accounts paired with cash in each journal entry.',
+      "Percentages reflect each activity's share of total net cash movement (absolute value).",
+      `Prepared ${context?.reportingPeriod?.periodLabel || 'for the current session'}.`,
+    ];
 
     const html = `
-      <article class="card compact">
-        <h5>Cash flow statement</h5>
-        <ul class="statement-list">
-          <li><span>Net cash from operating activities</span><span>${formatCurrency(totals.operating)}</span></li>
-          <li><span>Net cash from investing activities</span><span>${formatCurrency(totals.investing)}</span></li>
-          <li><span>Net cash from financing activities</span><span>${formatCurrency(totals.financing)}</span></li>
-        </ul>
-        <p class="statement-total">Net change in cash: ${formatCurrency(totals.netChange)}</p>
+      <article class="card statement-card">
+        ${renderStatementHeader('Cash flow statement', context, 'period', 'Sources and uses of cash for the reporting window.')}
+        ${renderSectionTable(sections)}
+        ${renderMetrics(metrics)}
+        ${renderFootnotes(notes)}
       </article>
     `;
 
     return {
       html,
-      data: { ...totals },
+      data: {
+        sections: sections[0].items.map((item) => ({ accountName: item.accountName, balance: item.balance })),
+        totals: { ...totals },
+        endingCash,
+        openingCash,
+        reportingPeriod: context?.reportingPeriod || null,
+      },
     };
   };
 
@@ -407,16 +726,20 @@
     }
 
     const accounts = aggregateAccountBalances(entries);
+    const context = {
+      reportingPeriod: deriveReportingPeriod(entries),
+      entryCount: entries.length,
+    };
     let result = null;
 
     if (type === 'balanceSheet') {
-      result = renderBalanceSheet(accounts);
+      result = renderBalanceSheet(accounts, context);
     } else if (type === 'incomeStatement') {
-      result = renderIncomeStatement(accounts);
+      result = renderIncomeStatement(accounts, context);
     } else if (type === 'equityStatement') {
-      result = renderEquityStatement(accounts);
+      result = renderEquityStatement(accounts, context);
     } else if (type === 'cashFlow') {
-      result = renderCashFlowStatement(entries);
+      result = renderCashFlowStatement(entries, accounts, context);
     }
 
     if (!result || !result.html) {
@@ -446,13 +769,31 @@
     <title>${title}</title>
     <style>
       body { font-family: Arial, Helvetica, sans-serif; color: #111827; background: #f9fafb; padding: 2rem; }
-      h1 { font-size: 1.5rem; margin-bottom: 1rem; }
-      article { background: #ffffff; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08); }
-      ul { list-style: none; padding: 0; margin: 0; }
-      li { display: flex; justify-content: space-between; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 0; }
-      li span:first-child { font-weight: 600; }
-      .statement-total { font-weight: 600; margin-top: 0.75rem; }
-      .statement-columns { display: grid; gap: 1.5rem; }
+      h1 { font-size: 1.6rem; margin-bottom: 1.5rem; }
+      article { background: #ffffff; border-radius: 0.75rem; padding: 1.75rem; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08); margin-bottom: 1.5rem; }
+      .statement-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.25rem; }
+      .statement-header h5 { font-size: 1.25rem; margin: 0 0 0.35rem; }
+      .statement-subtitle { margin: 0; color: #4b5563; font-size: 0.95rem; }
+      .statement-tagline { margin: 0.25rem 0 0; color: #6b7280; font-size: 0.85rem; }
+      .statement-meta { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; font-size: 0.85rem; color: #4b5563; }
+      .statement-meta li { display: flex; gap: 0.5rem; justify-content: space-between; min-width: 180px; }
+      .statement-meta .label { font-weight: 600; color: #111827; }
+      .statement-table { width: 100%; border-collapse: collapse; margin-bottom: 1.25rem; }
+      .statement-table th, .statement-table td { border-bottom: 1px solid #e5e7eb; padding: 0.6rem 0.4rem; text-align: left; font-size: 0.9rem; }
+      .statement-table thead th { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.08em; color: #6b7280; border-bottom: 2px solid #d1d5db; }
+      .statement-table tbody tr.statement-section th { padding-top: 1rem; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6b7280; border-bottom: none; }
+      .statement-table tbody tr.statement-subtotal td { font-weight: 600; border-top: 1px solid #d1d5db; }
+      .statement-table tbody tr.statement-empty td { color: #9ca3af; font-style: italic; }
+      .statement-table td.numeric, .statement-table th.numeric { text-align: right; font-variant-numeric: tabular-nums; }
+      .statement-metrics { margin-bottom: 1.25rem; }
+      .statement-metrics h6 { margin: 0 0 0.75rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; }
+      .metrics-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+      .metrics-grid li { background: #f3f4f6; border-radius: 0.5rem; padding: 0.9rem; display: grid; gap: 0.25rem; }
+      .metrics-grid span { color: #4b5563; font-size: 0.85rem; }
+      .metrics-grid strong { font-size: 1rem; color: #111827; }
+      .metrics-grid small { color: #6b7280; font-size: 0.75rem; }
+      .statement-footnotes h6 { margin: 0 0 0.5rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; }
+      .statement-footnotes ol { margin: 0; padding-left: 1.25rem; color: #4b5563; font-size: 0.85rem; display: grid; gap: 0.5rem; }
     </style>
   </head>
   <body>
@@ -545,6 +886,20 @@
 
     let y = 30;
     const { type, data } = lastStatementInfo;
+    const reporting = data?.reportingPeriod || null;
+    if (reporting) {
+      const descriptor = type === 'balanceSheet' ? reporting.asOfLabel : reporting.periodLabel;
+      doc.setFont('helvetica', 'italic');
+      if (descriptor) {
+        doc.text(descriptor, 12, y);
+        y += 6;
+      }
+      if (typeof reporting.entryCount === 'number') {
+        doc.text(`Entries analyzed: ${reporting.entryCount}`, 12, y);
+        y += 6;
+      }
+      doc.setFont('helvetica', 'normal');
+    }
 
     if (type === 'balanceSheet') {
       y = appendSectionToPdf(doc, 'Assets', data.sections.assets, y);
@@ -580,15 +935,24 @@
       y += 6;
       doc.text(`Ending owner's equity: ${formatCurrency(data.totals.endingEquity)}`, 12, y);
     } else if (type === 'cashFlow') {
+      const totals = data?.totals || {};
       doc.setFont('helvetica', 'normal');
-      doc.text(`Net cash from operating activities: ${formatCurrency(data.operating)}`, 12, y);
+      doc.text(`Net cash from operating activities: ${formatCurrency(totals.operating)}`, 12, y);
       y += 6;
-      doc.text(`Net cash from investing activities: ${formatCurrency(data.investing)}`, 12, y);
+      doc.text(`Net cash from investing activities: ${formatCurrency(totals.investing)}`, 12, y);
       y += 6;
-      doc.text(`Net cash from financing activities: ${formatCurrency(data.financing)}`, 12, y);
+      doc.text(`Net cash from financing activities: ${formatCurrency(totals.financing)}`, 12, y);
       y += 8;
       doc.setFont('helvetica', 'bold');
-      doc.text(`Net change in cash: ${formatCurrency(data.netChange)}`, 12, y);
+      doc.text(`Net change in cash: ${formatCurrency(totals.netChange)}`, 12, y);
+      if (typeof data.endingCash === 'number') {
+        y += 6;
+        doc.text(`Ending cash balance: ${formatCurrency(data.endingCash)}`, 12, y);
+      }
+      if (typeof data.openingCash === 'number') {
+        y += 6;
+        doc.text(`Implied opening cash: ${formatCurrency(data.openingCash)}`, 12, y);
+      }
     } else {
       doc.setFont('helvetica', 'normal');
       doc.text('No exportable data found for this statement.', 12, y);
