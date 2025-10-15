@@ -1744,6 +1744,13 @@
       gap: 12px;
     }
 
+    .ledger-description {
+      margin: 4px 0 0;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      max-width: 680px;
+    }
+
     .auto-gaap-ledger + .auto-gaap-ledger {
       border-top: 1px solid rgba(148, 163, 184, 0.12);
       padding-top: 18px;

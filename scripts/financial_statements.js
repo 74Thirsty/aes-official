@@ -189,6 +189,29 @@
     `;
   };
 
+  const resolveNormalSide = (item) => {
+    if (typeof item?.normalSide === 'string') {
+      return item.normalSide;
+    }
+
+    if (typeof item?.accountType === 'string' && NORMAL_BALANCES[item.accountType]) {
+      return NORMAL_BALANCES[item.accountType];
+    }
+
+    return 'debit';
+  };
+
+  const resolveNetBalance = (item) => {
+    if (item && Number.isFinite(Number(item.balance))) {
+      return Number(item.balance);
+    }
+
+    const debit = toNumber(item?.debit);
+    const credit = toNumber(item?.credit);
+    const normalSide = resolveNormalSide(item);
+    return normalSide === 'credit' ? credit - debit : debit - credit;
+  };
+
   const renderSectionTable = (sections) => {
     const body = sections
       .map((section) => {
@@ -330,6 +353,9 @@
         accountType: 'equity',
         accountName: netIncome >= 0 ? 'Current period earnings' : 'Current period loss',
         balance: netIncome,
+        debit: netIncome < 0 ? Math.abs(netIncome) : 0,
+        credit: netIncome > 0 ? Math.abs(netIncome) : 0,
+        normalSide: 'credit',
       });
     }
 
@@ -382,18 +408,24 @@
           assets: assets.map((item) => ({
             accountType: 'asset',
             accountName: item.accountName,
+            debit: toNumber(item.debit),
+            credit: toNumber(item.credit),
             balance: Number(item.balance),
             shareOfSection: Math.abs(totalAssets) > 0.0001 ? Math.abs(item.balance) / Math.abs(totalAssets) : 0,
           })),
           liabilities: liabilities.map((item) => ({
             accountType: 'liability',
             accountName: item.accountName,
+            debit: toNumber(item.debit),
+            credit: toNumber(item.credit),
             balance: Number(item.balance),
             shareOfSection: Math.abs(totalLiabilities) > 0.0001 ? Math.abs(item.balance) / Math.abs(totalLiabilities) : 0,
           })),
           equity: equity.map((item) => ({
             accountType: 'equity',
             accountName: item.accountName,
+            debit: toNumber(item.debit),
+            credit: toNumber(item.credit),
             balance: Number(item.balance),
             shareOfSection: Math.abs(totalEquity) > 0.0001 ? Math.abs(item.balance) / Math.abs(totalEquity) : 0,
           })),
@@ -485,15 +517,29 @@
           revenues: revenues.map((item) => ({
             accountType: 'revenue',
             accountName: item.accountName,
+            debit: toNumber(item.debit),
+            credit: toNumber(item.credit),
             balance: Number(item.balance),
             shareOfSection: Math.abs(totalRevenue) > 0.0001 ? Math.abs(item.balance) / Math.abs(totalRevenue) : 0,
           })),
           expenses: expenses.map((item) => ({
             accountType: 'expense',
             accountName: item.accountName,
+            debit: toNumber(item.debit),
+            credit: toNumber(item.credit),
             balance: Number(item.balance),
             shareOfSection: Math.abs(totalExpenses) > 0.0001 ? Math.abs(item.balance) / Math.abs(totalExpenses) : 0,
           })),
+          results: [
+            {
+              accountType: 'equity',
+              accountName: resultLabel,
+              debit: netIncome < 0 ? Math.abs(netIncome) : 0,
+              credit: netIncome > 0 ? Math.abs(netIncome) : 0,
+              balance: netIncome,
+              shareOfSection: Math.abs(netIncome) > 0.0001 ? 1 : 0,
+            },
+          ],
         },
         totals: {
           revenue: totalRevenue,
@@ -594,8 +640,30 @@
         accounts: equityAccounts.map((item) => ({
           accountType: 'equity',
           accountName: item.accountName,
+          debit: toNumber(item.debit),
+          credit: toNumber(item.credit),
           balance: Number(item.balance),
         })),
+        rollforward: [
+          {
+            label: "Owner investments & balances",
+            debit: equityAccounts.reduce((sum, item) => sum + toNumber(item.debit), 0),
+            credit: equityAccounts.reduce((sum, item) => sum + toNumber(item.credit), 0),
+            balance: totalEquity,
+          },
+          {
+            label: resultLabel,
+            debit: netIncomeRaw < 0 ? Math.abs(netIncomeRaw) : 0,
+            credit: netIncomeRaw > 0 ? Math.abs(netIncomeRaw) : 0,
+            balance: netIncomeRaw,
+          },
+          {
+            label: "Ending owner's equity",
+            debit: endingEquity < 0 ? Math.abs(endingEquity) : 0,
+            credit: endingEquity > 0 ? Math.abs(endingEquity) : 0,
+            balance: endingEquity,
+          },
+        ],
         totals: {
           ownerEquity: totalEquity,
           netIncome: netIncomeRaw,
@@ -837,6 +905,21 @@
     triggerDownload(blob, `${lastStatementInfo.fileName}.json`);
   };
 
+  const summarizeDebitCredit = (row) => {
+    const debit = toNumber(row?.debit);
+    const credit = toNumber(row?.credit);
+    const net = resolveNetBalance(row);
+    const segments = [];
+    if (Math.abs(debit) > 0.0001) {
+      segments.push(`Debit ${formatCurrency(debit)}`);
+    }
+    if (Math.abs(credit) > 0.0001) {
+      segments.push(`Credit ${formatCurrency(credit)}`);
+    }
+    segments.push(`Net ${formatCurrency(net)}`);
+    return segments.join(' | ');
+  };
+
   const appendSectionToPdf = (doc, heading, rows, startY) => {
     if (!rows || !rows.length) {
       return startY;
@@ -858,7 +941,8 @@
 
     rows.forEach((row) => {
       ensureSpace();
-      const line = `${row.accountName}: ${formatCurrency(row.balance)}`;
+      const detail = summarizeDebitCredit(row);
+      const line = `${row.accountName}: ${detail}`;
       doc.text(line, 16, y);
       y += 6;
     });

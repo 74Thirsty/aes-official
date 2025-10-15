@@ -61,6 +61,7 @@
             <div class="workspace-actions">
               <a class="button primary" href="#platform">Open the journal builder</a>
               <a class="button outline" href="#journal-guide">Review the workflow</a>
+              <a class="button outline" href="#financialStatements">Jump to financial docs</a>
             </div>
           </div>
           <aside class="workspace-checklist" aria-labelledby="sessionChecklist">
@@ -530,8 +531,12 @@
                 />
               </section>
 
-              <section class="auto-gaap-ledger">
+              <section id="financialStatements" class="auto-gaap-ledger">
                 <h4>Financial statement generator</h4>
+                <p class="ledger-description">
+                  Load or import journal entries above, then pick one of the statement buttons below to render debits, credits,
+                  and net balances for each account.
+                </p>
                 <div class="ledger-controls" role="group" aria-label="Financial statement actions">
                   <button class="button outline" type="button" id="generateBalanceSheet">Balance sheet</button>
                   <button class="button outline" type="button" id="generateIncomeStatement">Income statement</button>
@@ -549,7 +554,10 @@
                   aria-live="polite"
                   aria-atomic="true"
                 >
-                  <p class="auto-gaap-placeholder">Select a statement button to generate a summary.</p>
+                  <p class="auto-gaap-placeholder">
+                    Select a statement button to generate a summary. You can always use the “Jump to financial docs” link at the
+                    top of the workspace to return to this section.
+                  </p>
                 </div>
               </section>
 
