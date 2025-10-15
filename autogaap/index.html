@@ -49,92 +49,77 @@
           </div>
         </nav>
 
-        <div class="hero">
-          <div class="hero-ribbon">
-            <span class="pulse-dot" aria-hidden="true"></span>
-            Close room templates refreshed for fiscal 2024
-            <span class="ribbon-pill">Auto GAAP</span>
-          </div>
-          <div class="hero-main">
-            <div class="hero-copy">
-              <span class="eyebrow">Narrative-led compliance</span>
-              <h1>
-                <span class="hero-highlight">Auto GAAP translates policy into living workflows</span>—automating reconciliations,
-                surfacing insights, and storytelling the close for every stakeholder.
-              </h1>
-              <p class="hero-summary">
-                Built for controllers, revenue leaders, and engineering partners, Auto GAAP stitches ledger discipline with
-                collaborative rituals. Run playbooks, capture audit evidence, and surface analytics from a single control room.
-              </p>
-              <ul class="hero-list">
-                <li>Ledger automation that adapts to GAAP and IFRS policy changes in real time</li>
-                <li>Close orchestration with visibility into owners, blockers, and mitigation plans</li>
-                <li>Story-driven dashboards translating variances into actionable next steps</li>
-              </ul>
-              <div class="hero-actions">
-                <a class="button primary" href="#platform">Launch the sandbox</a>
-                <a class="button outline" href="../#contact">Book an advisory session</a>
-              </div>
-            </div>
-            <div class="hero-visual">
-              <span class="glow-orb orb-one" aria-hidden="true"></span>
-              <span class="glow-orb orb-two" aria-hidden="true"></span>
-              <img
-                class="hero-illustration hero-illustration--wide"
-                src="../assets/smartcontractmockup.png"
-                alt="Auto GAAP insights dashboard visual"
-              />
-              <div class="hero-device" aria-hidden="true">
-                <div class="hero-device-header">
-                  <span class="device-dots">
-                    <span class="device-dot"></span>
-                    <span class="device-dot primary"></span>
-                    <span class="device-dot"></span>
-                  </span>
-                  <span>Auto GAAP Console</span>
-                </div>
-                <div class="hero-device-body">
-                  <strong>Focus stream</strong>
-                  <p>GAAP variance checks, policy graph updates, and recurring entry automation ready for this quarter’s close.</p>
-                  <div class="chip-row">
-                    <span class="hero-chip">Policy graph</span>
-                    <span class="hero-chip">Close rooms</span>
-                    <span class="hero-chip">Variance AI</span>
-                  </div>
-                </div>
-                <div class="hero-device-footer">
-                  <span>Next milestone</span>
-                  <span>Entity rollup insights · 08.22</span>
-                </div>
-              </div>
+        <div class="workspace-header">
+          <div class="workspace-summary">
+            <span class="eyebrow">Auto GAAP workspace</span>
+            <h1>Keep journal entries organized and policy compliant</h1>
+            <p>
+              Use this page as your working console for month-end close. The sandbox mirrors the production workflow so you
+              can document transactions, confirm balances, and capture the narrative that auditors expect.
+            </p>
+            <div class="workspace-actions">
+              <a class="button primary" href="#platform">Open the journal builder</a>
+              <a class="button outline" href="#journal-guide">Review the workflow</a>
             </div>
           </div>
-          <div class="hero-metrics">
-            <article class="card stat-card">
-              <small>Entities orchestrated</small>
-              <strong>64</strong>
-              <p>Multi-entity ledgers aligned on standardized policy packs with real-time close status.</p>
-            </article>
-            <article class="card stat-card">
-              <small>Reconciliation time saved</small>
-              <strong>48%</strong>
-              <p>Automated entry suggestions and workflow nudges keep teams focused on material risk.</p>
-            </article>
-            <article class="card stat-card">
-              <small>Audit readiness</small>
-              <strong>Always-on</strong>
-              <p>Evidence trails, approval routing, and context stories packaged for auditors and leadership.</p>
-            </article>
-          </div>
+          <aside class="workspace-checklist" aria-labelledby="sessionChecklist">
+            <h2 id="sessionChecklist">Session checklist</h2>
+            <ol>
+              <li>Load the sample ledger or connect your export to review prior balances.</li>
+              <li>Gather source docs (invoices, bank statements, payroll reports) before posting.</li>
+              <li>Confirm policy requirements for revenue recognition, accruals, and capitalization.</li>
+              <li>Document why the entry is needed and who approved it in the description field.</li>
+            </ol>
+          </aside>
         </div>
 
-        <section class="card auto-gaap-howto" aria-labelledby="howToTitle">
-          <div class="howto-intro">
-            <span class="eyebrow">Getting started</span>
-            <h2 id="howToTitle">How to put Auto GAAP to work in minutes</h2>
+        <section class="card workspace-tips" aria-labelledby="workspaceTips">
+          <div class="tips-intro">
+            <h2 id="workspaceTips">Tips before you start recording</h2>
             <p>
-              Launch the sandbox with your own ledger or the provided sample file, then let AutoLedger narrate every
-              reconciliation step. Each stage is adaptive, so finance, revenue, and engineering partners stay in sync.
+              Treat the sandbox as a rehearsal for your actual ledger. Keep it grounded in your company’s policy manual and
+              use the controls below to validate recognition timing, supporting schedules, and review evidence.
+            </p>
+          </div>
+          <div class="tips-grid">
+            <article class="tip">
+              <h3>Scope the entry</h3>
+              <p>
+                Write a short narrative that explains the business event, approval trail, and any contractual terms affecting
+                timing. This text exports with the entry and supports audit requests.
+              </p>
+            </article>
+            <article class="tip">
+              <h3>Balance before automation</h3>
+              <p>
+                Enter debits and credits manually first. When the sandbox confirms balance, enable auto-categorization so the
+                policy engine can recommend accounts for similar transactions.
+              </p>
+            </article>
+            <article class="tip">
+              <h3>Track dependencies</h3>
+              <p>
+                Use the recurring, accrual, and depreciation sections to map downstream work. The reminders help you close
+                sub-ledgers and reconcile supporting schedules on time.
+              </p>
+            </article>
+            <article class="tip">
+              <h3>Validate supporting data</h3>
+              <p>
+                Attach or reference ticket IDs, contract numbers, and calculation workbooks. Consistency here reduces review
+                time and prevents rework when auditors sample the entry.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="journal-guide" class="card journal-guide" aria-labelledby="journalGuideTitle">
+          <div class="howto-intro">
+            <span class="eyebrow">Journalizing workflow</span>
+            <h2 id="journalGuideTitle">Follow these steps inside the sandbox</h2>
+            <p>
+              Each step mirrors the controls used by controllers and revenue teams. Use the collapsible panels to remind
+              yourself what to verify before submitting the entry for approval.
             </p>
           </div>
           <div class="howto-steps" role="list">
@@ -142,52 +127,52 @@
               <summary>
                 <span class="step-index" aria-hidden="true">1</span>
                 <div>
-                  <h3>Upload or connect your ledger</h3>
-                  <p>Drop in a CSV, connect an ERP source, or load the sample ledger to explore the control room.</p>
+                  <h3>Set the context</h3>
+                  <p>Populate the post date, auto-generated journal number, and a clear description.</p>
                 </div>
               </summary>
               <p>
-                Auto GAAP ingests structured and semi-structured journal data. Use the sample ledger to see baseline
-                flows, or authenticate a live data source when you are ready for full automation.
+                Align the post date with the reporting calendar and include who requested the entry. If it is part of a close
+                checklist, reference the task ID so reviewers can trace it quickly.
               </p>
             </details>
             <details class="howto-step" open>
               <summary>
                 <span class="step-index" aria-hidden="true">2</span>
                 <div>
-                  <h3>Choose your accounting mode</h3>
-                  <p>Select cash or accrual handling so AutoLedger applies the right recognition cadence.</p>
+                  <h3>Select and balance accounts</h3>
+                  <p>Choose the correct account types and confirm debits equal credits before continuing.</p>
                 </div>
               </summary>
               <p>
-                Toggle policy packs for cash or accrual workflows. The sandbox updates balances, scheduling, and
-                disclosure prompts instantly so you can validate controls before production rollout.
+                If you are unsure which account to use, cross-check your policy library or trial balance. The sandbox flags
+                imbalance immediately so you can correct mis-postings.
               </p>
             </details>
             <details class="howto-step" open>
               <summary>
                 <span class="step-index" aria-hidden="true">3</span>
                 <div>
-                  <h3>Run the Auto GAAP analyzer</h3>
-                  <p>Click <strong>Analyze</strong> to surface narratives, recommendations, and trial balance views.</p>
+                  <h3>Layer in schedules</h3>
+                  <p>Use the recurring, accrual, or prepaid sections when the entry spans periods or needs follow-up.</p>
                 </div>
               </summary>
               <p>
-                The analyzer inspects every entry, grouping line items by GAAP category and highlighting imbalances,
-                stale policies, or missing evidence so you can act before close deadlines.
+                Capture start and end dates, allocation frequency, and recognition accounts. These fields create the
+                reminders that keep amortization and true-ups on track.
               </p>
             </details>
             <details class="howto-step" open>
               <summary>
                 <span class="step-index" aria-hidden="true">4</span>
                 <div>
-                  <h3>Let AutoLedger categorize transactions</h3>
-                  <p>Activate auto-categorization to balance the books and push updates into your ledger view.</p>
+                  <h3>Run Auto GAAP checks</h3>
+                  <p>Click <strong>Run Auto GAAP</strong> to surface policy alignment, variance alerts, and documentation gaps.</p>
                 </div>
               </summary>
               <p>
-                AutoLedger monitors every journal event, applying policy graph rules, syncing recurring entries, and
-                exporting ledger or trial balance snapshots that remain audit-ready by design.
+                Review the recommendations panel for missing evidence or conflicting policies. Resolve the flags before you
+                export the entry for approval or import back into your ERP.
               </p>
             </details>
           </div>
@@ -197,23 +182,23 @@
       <main class="site-main">
         <section id="overview" class="section">
           <div class="section-heading">
-            <span class="eyebrow">Platform pillars</span>
-            <h2>Policy intelligence that keeps finance and engineering moving in lockstep</h2>
+            <span class="eyebrow">Workspace reference</span>
+            <h2>Core tools you’ll use while preparing journal entries</h2>
             <p>
-              Auto GAAP is more than an app—it is a storytelling framework for financial operations. Each module captures
-              narrative context, drives automation, and synchronizes the teams stewarding the close.
+              These modules mirror what ships in production Auto GAAP environments. Use them as reminders for the controls to
+              check before sign-off and to explain to teammates how the workflow stays compliant.
             </p>
           </div>
           <div class="cards-grid">
             <article class="card project-card">
               <div class="project-meta">
-                <span class="badge success">Live</span>
+                <span class="badge success">Policy</span>
                 <span>Policy graph</span>
               </div>
               <h3>Codified standards</h3>
               <p>
-                Dynamic policy graph keeps GAAP, IFRS, and bespoke governance rules in sync. Every variance links to the
-                precise controls, owners, and documentation that explain it.
+                Look up recognition rules, thresholds, and reviewer expectations. Link your entry narrative to the policy node
+                you followed so downstream reviewers can validate decisions instantly.
               </p>
               <div class="tag-list">
                 <span class="tag">GAAP + IFRS</span>
@@ -223,13 +208,13 @@
             </article>
             <article class="card project-card">
               <div class="project-meta">
-                <span class="badge">Automation</span>
+                <span class="badge">Workflow</span>
                 <span>Close rooms</span>
               </div>
               <h3>Guided rituals</h3>
               <p>
-                Sequenced close checklists empower every stakeholder. Owners, blockers, and mitigation plans surface instantly,
-                shrinking fire drills while preserving accountability.
+                Track which checklist item this entry supports, note blockers, and assign follow-up actions. Close rooms keep
+                approvers aligned and make sure nothing slips between departments.
               </p>
               <div class="tag-list">
                 <span class="tag">Workflow</span>
@@ -244,8 +229,8 @@
               </div>
               <h3>Human-friendly analytics</h3>
               <p>
-                Variance explanations, KPIs, and journal trails stay in sync. Leaders receive context-rich reports that guide the
-                next question and the next improvement.
+                Review the variance story and attach commentary. The dashboards summarize account movement so leadership sees
+                the impact of each entry without combing through spreadsheets.
               </p>
               <div class="tag-list">
                 <span class="tag">Narratives</span>
@@ -259,10 +244,10 @@
         <section id="platform" class="section auto-gaap-section">
           <div class="section-heading">
             <span class="eyebrow">Interactive sandbox</span>
-            <h2>Capture journal entries, visualize balances, and let Auto GAAP narrate the health of the close</h2>
+            <h2>Work through entries, verify balances, and export support</h2>
             <p>
-              Experiment with ledger inputs, preview policy recommendations, and export documentation that keeps auditors and
-              executives aligned. This sandbox mirrors the storytelling-first interface used in production deployments.
+              Start with the journal builder on the left, then review the insights panel on the right for policy alignment and
+              outstanding tasks. Stay in this flow until the recommendations panel shows a clean status.
             </p>
           </div>
 
@@ -278,6 +263,16 @@
                   <button id="runAutoGaap" type="button" class="button primary">Run Auto GAAP</button>
                 </div>
               </header>
+
+              <div class="form-guidance" role="note">
+                <h4>Before you submit</h4>
+                <ul>
+                  <li>Use the description to document the business rationale, source documents, and approver.</li>
+                  <li>Double-check that only one side of the entry contains debit amounts and the other contains credits.</li>
+                  <li>Tag entries that need ongoing tracking with the recurring, accrual, or depreciation sections.</li>
+                  <li>After posting, export PDF or JSON to attach in your close checklist or ERP upload.</li>
+                </ul>
+              </div>
 
               <form id="journalForm" class="auto-gaap-form">
                 <div class="form-row">
