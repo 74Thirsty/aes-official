@@ -2,7 +2,14 @@
 
 (function () {
   const STORAGE_KEY = 'journalEntries';
-  const FALLBACK_LEDGER_URL = '/data/ledger.json';
+  const FALLBACK_LEDGER_URL = (() => {
+    try {
+      return new URL('../data/ledger.json', window.location.href).toString();
+    } catch (error) {
+      console.warn('AutoGAAP: Unable to resolve fallback ledger path.', error);
+      return '../data/ledger.json';
+    }
+  })();
   const SUMMARY_CONTAINER_ID = 'autoGaapSummary';
   const RECOMMENDATIONS_ID = 'autoGaapRecommendations';
   const RUN_BUTTON_ID = 'runAutoGaap';
@@ -18,6 +25,7 @@
   const BALANCE_TOLERANCE = 0.01;
 
   let chartInstance = null;
+  let lastLoadUsedFallback = false;
   const currencyFormatter = typeof Intl !== 'undefined' && Intl.NumberFormat
     ? new Intl.NumberFormat(undefined, {
         style: 'currency',
@@ -76,9 +84,11 @@
     }
 
     let ledgerEntries = Array.isArray(entriesOverride) ? entriesOverride : [];
+    let usedFallbackForThisRun = false;
     if (!ledgerEntries.length) {
       try {
         ledgerEntries = await loadLedgerEntries();
+        usedFallbackForThisRun = lastLoadUsedFallback && Array.isArray(ledgerEntries) && ledgerEntries.length > 0;
       } catch (error) {
         console.error('AutoGAAP: Unable to load ledger entries.', error);
       }
@@ -99,6 +109,11 @@
     renderSummary(summary);
     renderRecommendations(summary);
     renderGaapChart(summary);
+
+    if (usedFallbackForThisRun) {
+      broadcastFallbackLedger(ledgerEntries);
+      lastLoadUsedFallback = false;
+    }
   }
 
   async function loadLedgerEntries() {
@@ -116,16 +131,49 @@
 
       const payload = await response.json();
       if (Array.isArray(payload)) {
+        lastLoadUsedFallback = payload.length > 0;
         return payload;
       }
       if (payload && Array.isArray(payload.journalEntries)) {
+        lastLoadUsedFallback = payload.journalEntries.length > 0;
         return payload.journalEntries;
       }
+      lastLoadUsedFallback = false;
       return [];
     } catch (error) {
       console.warn('AutoGAAP: Error fetching fallback ledger.', error);
+      lastLoadUsedFallback = false;
       return [];
     }
+  }
+
+  function broadcastFallbackLedger(entries) {
+    if (!Array.isArray(entries) || !entries.length) {
+      return;
+    }
+
+    const clonedEntries = entries
+      .map((entry) => {
+        if (!entry || typeof entry !== 'object') {
+          return null;
+        }
+
+        const lines = Array.isArray(entry.entries)
+          ? entry.entries.map((line) => (line && typeof line === 'object' ? { ...line } : null)).filter(Boolean)
+          : [];
+
+        return {
+          ...entry,
+          entries: lines,
+        };
+      })
+      .filter(Boolean);
+
+    if (!clonedEntries.length) {
+      return;
+    }
+
+    window.dispatchEvent(new CustomEvent('autoGaap:ledgerHydrated', { detail: clonedEntries }));
   }
 
   function getStoredJournalEntries() {

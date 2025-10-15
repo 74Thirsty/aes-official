@@ -80,4 +80,12 @@
     const entries = Array.isArray(event.detail) ? event.detail : loadEntries();
     handleEntriesChanged(entries);
   });
+
+  window.addEventListener('autoGaap:ledgerHydrated', (event) => {
+    const entries = Array.isArray(event.detail) ? event.detail : [];
+    if (!entries.length) {
+      return;
+    }
+    handleEntriesChanged(entries);
+  });
 })();
