@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Location Log (Private)</title>
+  <link rel="stylesheet" href="styles/global.css" />
+  <style>
+    body {
+      font-family: Inter, sans-serif;
+      background: #0b0b0b;
+      color: #eee;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Visitor Location Log</h1>
+  <pre id="log"></pre>
+
+  <script>
+    // Fetch all logged locations from backend
+    fetch('/log-location')
+      .then(res => res.json())
+      .then(data => {
+        const el = document.getElementById('log');
+        el.textContent = JSON.stringify(data, null, 2);
+      })
+      .catch(err => {
+        document.getElementById('log').textContent =
+          'Error loading location log: ' + err;
+      });
+  </script>
+</body>
+</html>
