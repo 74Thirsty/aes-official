@@ -24,6 +24,53 @@
     revenue: 'credit'
   };
   const BALANCE_TOLERANCE = 0.01;
+  const EMBEDDED_FALLBACK_LEDGER = Object.freeze([
+    {
+      journalNumber: 'CPU-CASH-SREV-20240105',
+      postDate: '2024-01-05',
+      description: 'Service revenue received in cash',
+      entries: [
+        { accountType: 'asset', accountName: 'Cash', debit: 8500, credit: 0 },
+        { accountType: 'revenue', accountName: 'Service Revenue', debit: 0, credit: 8500 }
+      ]
+    },
+    {
+      journalNumber: 'CPU-RENT-CASH-20240201',
+      postDate: '2024-02-01',
+      description: 'Office rent paid for February',
+      entries: [
+        { accountType: 'expense', accountName: 'Rent Expense', debit: 1200, credit: 0 },
+        { accountType: 'asset', accountName: 'Cash', debit: 0, credit: 1200 }
+      ]
+    },
+    {
+      journalNumber: 'CPU-EQ-AP-20240312',
+      postDate: '2024-03-12',
+      description: 'Purchased equipment on account',
+      entries: [
+        { accountType: 'asset', accountName: 'Equipment', debit: 5000, credit: 0 },
+        { accountType: 'liability', accountName: 'Accounts Payable', debit: 0, credit: 5000 }
+      ]
+    },
+    {
+      journalNumber: 'CPU-INVEST-20240402',
+      postDate: '2024-04-02',
+      description: 'Owner investment to capitalize the business',
+      entries: [
+        { accountType: 'asset', accountName: 'Cash', debit: 10000, credit: 0 },
+        { accountType: 'equity', accountName: "Owner's Capital", debit: 0, credit: 10000 }
+      ]
+    },
+    {
+      journalNumber: 'CPU-LOANPAY-20240520',
+      postDate: '2024-05-20',
+      description: 'Principal payment on bank loan',
+      entries: [
+        { accountType: 'liability', accountName: 'Notes Payable', debit: 2000, credit: 0 },
+        { accountType: 'asset', accountName: 'Cash', debit: 0, credit: 2000 }
+      ]
+    }
+  ]);
 
   let chartInstance = null;
   let lastLoadUsedFallback = false;
@@ -107,8 +154,10 @@
     }
 
     const summary = summarizeJournalEntries(ledgerEntries);
-    renderSummary(summary);
-    renderRecommendations(summary);
+    const health = analyzeLedgerHealth(ledgerEntries, summary);
+
+    renderSummary(summary, health);
+    renderRecommendations(summary, health);
     renderGaapChart(summary);
 
     if (usedFallbackForThisRun) {
@@ -132,7 +181,8 @@
       const response = await fetch(FALLBACK_LEDGER_URL, { cache: 'no-store' });
       if (!response.ok) {
         console.warn('AutoGAAP: Fallback ledger could not be loaded.', response.statusText);
-        return [];
+        lastLoadUsedFallback = EMBEDDED_FALLBACK_LEDGER.length > 0;
+        return [...EMBEDDED_FALLBACK_LEDGER];
       }
 
       const payload = await response.json();
@@ -144,12 +194,12 @@
         lastLoadUsedFallback = payload.journalEntries.length > 0;
         return payload.journalEntries;
       }
-      lastLoadUsedFallback = false;
-      return [];
+      lastLoadUsedFallback = EMBEDDED_FALLBACK_LEDGER.length > 0;
+      return [...EMBEDDED_FALLBACK_LEDGER];
     } catch (error) {
       console.warn('AutoGAAP: Error fetching fallback ledger.', error);
-      lastLoadUsedFallback = false;
-      return [];
+      lastLoadUsedFallback = EMBEDDED_FALLBACK_LEDGER.length > 0;
+      return [...EMBEDDED_FALLBACK_LEDGER];
     }
   }
 
@@ -286,7 +336,7 @@
     };
   }
 
-  function renderSummary(summary) {
+  function renderSummary(summary, health) {
     const summaryContainer = getElement(SUMMARY_CONTAINER_ID);
     if (!summaryContainer) {
       return;
@@ -362,6 +412,7 @@
           ? 'Debits and credits are in balance.'
           : `Ledger is out of balance by ${escapeHtml(formatCurrency(difference))} (Debit - Credit).`}
       </div>
+      ${renderIssueBanner(health)}
       <table class="auto-gaap-table">
         <thead>
           <tr>
@@ -379,12 +430,13 @@
     `;
   }
 
-  function renderRecommendations(summary) {
+  function renderRecommendations(summary, health) {
     const recommendationContainer = getElement(RECOMMENDATIONS_ID);
     if (!recommendationContainer) {
       return;
     }
 
+    const ledgerHealth = health || { issues: [], warnings: [] };
     const messages = [];
     const difference = round(summary.totalDebits - summary.totalCredits);
 
@@ -418,11 +470,30 @@
       messages.push(`Largest balances: ${accountMessage}.`);
     }
 
+    const issueList = ledgerHealth.issues.length
+      ? `
+        <div class="auto-gaap-issue-group" role="alert">
+          <h5>Detected issues</h5>
+          <ul>${ledgerHealth.issues.map((message) => `<li>${escapeHtml(message)}</li>`).join('')}</ul>
+        </div>
+      `
+      : '';
+
+    const warningList = ledgerHealth.warnings.length
+      ? `
+        <div class="auto-gaap-warning-group">
+          <h5>Potential follow-ups</h5>
+          <ul>${ledgerHealth.warnings.map((message) => `<li>${escapeHtml(message)}</li>`).join('')}</ul>
+        </div>
+      `
+      : '';
+
     recommendationContainer.innerHTML = `
       <h4>AutoGAAP Highlights</h4>
       <ul>
         ${messages.map((message) => `<li>${escapeHtml(message)}</li>`).join('')}
       </ul>
+      ${issueList || warningList ? `<div class="auto-gaap-health">${issueList}${warningList}</div>` : '<p class="auto-gaap-placeholder">No policy exceptions detected in the latest run.</p>'}
     `;
   }
 
@@ -497,6 +568,112 @@
     });
   }
 
+  function analyzeLedgerHealth(entries, summary) {
+    const issues = [];
+    const warnings = [];
+    const seenNumbers = new Set();
+    const today = new Date();
+
+    entries.forEach((entry, entryIndex) => {
+      if (!entry || typeof entry !== 'object') {
+        issues.push(`Entry ${entryIndex + 1} is not a valid journal object.`);
+        return;
+      }
+
+      const journalLabel = entry.journalNumber || `Entry ${entryIndex + 1}`;
+      const description = entry.description || '';
+      const postDate = entry.postDate ? new Date(entry.postDate) : null;
+
+      if (seenNumbers.has(journalLabel)) {
+        warnings.push(`${journalLabel} appears more than once. Confirm you have not duplicated the journal.`);
+      } else {
+        seenNumbers.add(journalLabel);
+      }
+
+      if (!description.trim()) {
+        issues.push(`${journalLabel} is missing a description. Add the business purpose and approvals.`);
+      }
+
+      if (!postDate || Number.isNaN(postDate.getTime())) {
+        issues.push(`${journalLabel} does not have a valid post date.`);
+      } else if (postDate > today) {
+        warnings.push(`${journalLabel} posts in the future (${postDate.toISOString().slice(0, 10)}). Confirm timing.`);
+      }
+
+      if (!Array.isArray(entry.entries) || entry.entries.length === 0) {
+        issues.push(`${journalLabel} has no line items.`);
+        return;
+      }
+
+      let entryDebits = 0;
+      let entryCredits = 0;
+
+      entry.entries.forEach((lineItem, lineIndex) => {
+        const debit = round(toNumber(lineItem && lineItem.debit));
+        const credit = round(toNumber(lineItem && lineItem.credit));
+        entryDebits += debit;
+        entryCredits += credit;
+
+        const accountName = lineItem && typeof lineItem.accountName === 'string' && lineItem.accountName.trim()
+          ? lineItem.accountName.trim()
+          : '';
+        const accountType = lineItem && typeof lineItem.accountType === 'string' && lineItem.accountType.trim()
+          ? lineItem.accountType.trim()
+          : '';
+
+        if (!accountName) {
+          issues.push(`${journalLabel} line ${lineIndex + 1} is missing an account name.`);
+        }
+
+        if (!accountType) {
+          warnings.push(`${journalLabel} line ${lineIndex + 1} is missing an account classification.`);
+        }
+
+        if (debit === 0 && credit === 0) {
+          warnings.push(`${journalLabel} line ${lineIndex + 1} has zero debit and credit values.`);
+        }
+      });
+
+      const imbalance = round(entryDebits - entryCredits);
+      if (Math.abs(imbalance) > BALANCE_TOLERANCE) {
+        issues.push(`${journalLabel} is out of balance by ${formatCurrency(imbalance)} (Debit - Credit).`);
+      }
+    });
+
+    if (summary) {
+      const totalImbalance = round(summary.totalDebits - summary.totalCredits);
+      if (Math.abs(totalImbalance) > BALANCE_TOLERANCE) {
+        issues.push(`Total ledger imbalance is ${formatCurrency(totalImbalance)}. Investigate latest entries.`);
+      }
+    }
+
+    return {
+      issues: dedupeMessages(issues).slice(0, 10),
+      warnings: dedupeMessages(warnings).slice(0, 10)
+    };
+  }
+
+  function renderIssueBanner(health) {
+    const ledgerHealth = health || { issues: [], warnings: [] };
+    if (!ledgerHealth.issues.length && !ledgerHealth.warnings.length) {
+      return '';
+    }
+
+    if (ledgerHealth.issues.length) {
+      return `
+        <div class="auto-gaap-status-banner issue" role="alert">
+          ${escapeHtml(ledgerHealth.issues[0])}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="auto-gaap-status-banner warning" role="note">
+        ${escapeHtml(ledgerHealth.warnings[0])}
+      </div>
+    `;
+  }
+
   function clearGaapChart() {
     if (chartInstance) {
       chartInstance.destroy();
@@ -547,6 +724,10 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  function dedupeMessages(messages) {
+    return Array.from(new Set(messages.filter(Boolean)));
   }
 
   const accountingAssistantForm = document.getElementById('accountingAssistantForm');
