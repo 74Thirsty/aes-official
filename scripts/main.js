@@ -1,5 +1,13 @@
 (() => {
   const STORAGE_KEY = 'journalEntries';
+  const LEDGER_DATA_URL = (() => {
+    try {
+      return new URL('../data/ledger.json', window.location.href).toString();
+    } catch (error) {
+      console.warn('main.js: unable to resolve ledger data path', error);
+      return '../data/ledger.json';
+    }
+  })();
   let journalEntries = [];
 
   const loadEntries = () => {
@@ -192,7 +200,7 @@
       try {
         button.disabled = true;
         button.textContent = 'Loading…';
-        const response = await fetch('../data/ledger.json');
+        const response = await fetch(LEDGER_DATA_URL, { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('Unable to load ledger.json');
         }
@@ -300,6 +308,21 @@
       journalEntries = loadEntries();
       notifySubscribers();
     }
+  });
+
+  window.addEventListener('autoGaap:ledgerHydrated', (event) => {
+    if (journalEntries.length) {
+      return;
+    }
+
+    const entries = Array.isArray(event.detail) ? event.detail : [];
+    const sanitized = sanitizeImportedEntries(entries);
+    if (!sanitized.length) {
+      return;
+    }
+
+    journalEntries = sanitized;
+    saveEntries();
   });
 
   window.loadLedgerJson = () => {

@@ -17,6 +17,7 @@
 
   let lastStatement = null;
   let lastStatementInfo = null;
+  let fallbackEntries = [];
 
   const currencyFormatter = (() => {
     try {
@@ -49,13 +50,26 @@
   const loadEntries = () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length) {
+          return parsed;
+        }
+      }
     } catch (error) {
       console.warn('financial_statements.js: unable to parse stored entries', error);
-      return [];
     }
+
+    if (fallbackEntries.length) {
+      return fallbackEntries.map((entry) => ({
+        ...entry,
+        entries: Array.isArray(entry.entries)
+          ? entry.entries.map((line) => ({ ...line }))
+          : [],
+      }));
+    }
+
+    return [];
   };
 
   const aggregateAccountBalances = (entries) => {
@@ -617,7 +631,25 @@
     bindExports();
   });
 
-  window.addEventListener('autoGaap:entriesChanged', () => {
+  window.addEventListener('autoGaap:entriesChanged', (event) => {
+    if (Array.isArray(event.detail)) {
+      fallbackEntries = [];
+    }
+
+    if (lastStatement) {
+      renderStatement(lastStatement);
+    }
+  });
+
+  window.addEventListener('autoGaap:ledgerHydrated', (event) => {
+    const entries = Array.isArray(event.detail) ? event.detail : [];
+    fallbackEntries = entries.map((entry) => ({
+      ...entry,
+      entries: Array.isArray(entry.entries)
+        ? entry.entries.map((line) => ({ ...line }))
+        : [],
+    }));
+
     if (lastStatement) {
       renderStatement(lastStatement);
     }
