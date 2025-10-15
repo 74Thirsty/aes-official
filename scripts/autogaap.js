@@ -549,6 +549,128 @@
       .replace(/'/g, '&#39;');
   }
 
+  const accountingAssistantForm = document.getElementById('accountingAssistantForm');
+  const accountingAssistantLog = document.getElementById('accountingAssistantLog');
+
+  if (accountingAssistantForm && accountingAssistantLog) {
+    const accountingAssistantInput = document.getElementById('accountingAssistantInput');
+    const accountingAssistantButton = accountingAssistantForm.querySelector('button[type="submit"]');
+    const defaultAssistantLabel = accountingAssistantButton ? accountingAssistantButton.textContent : '';
+    const accountingPatterns = [
+      {
+        test: /(revenue recognition|asc 606|deferred revenue|performance obligation|contract)/,
+        response:
+          'Document the contract ID, identify each performance obligation, and schedule revenue recognition as milestones are met. Auto GAAP keeps the liability in deferred revenue until you mark the obligation satisfied, then suggests the debit/credit pair for recognition.'
+      },
+      {
+        test: /(accrual|accrued|payable|true[-\s]?up|reverse|reversing entry)/,
+        response:
+          'Record the accrual with a debit to the expense and a credit to the appropriate accrued liability. Include the expected settlement date so the recurring controls queue a reversal or true-up. The accrual panel in the journal builder stores who approved the estimate and when to revisit it.'
+      },
+      {
+        test: /(prepaid|amortization|deferral|schedule)/,
+        response:
+          'For prepaid activity, debit the prepaid asset and credit cash or payables. Capture the service window in the prepaid schedule so Auto GAAP books the monthly amortization entry automatically and shows the runoff in the depreciation preview.'
+      },
+      {
+        test: /(depreciation|fixed asset|useful life|salvage|capitaliz)/,
+        response:
+          'Confirm the capitalization threshold, then debit the asset and credit cash or accounts payable. Enter cost, salvage, and useful life in the asset fields so the depreciation preview calculates straight-line expense and the remaining net book value each period.'
+      },
+      {
+        test: /(trial balance|balance|out of balance|debits|credits)/,
+        response:
+          'Use the balance indicator under the journal builder and the Auto GAAP highlights table to confirm total debits equal credits. If you see a variance, drill into the account breakdown and adjust the entry before posting to keep the ledger reconciled.'
+      },
+      {
+        test: /(financial statement|income statement|balance sheet|cash flow|equity statement)/,
+        response:
+          'Load your entries and trigger the financial statement generator. It maps each account to the correct statement section, shows period-to-date balances, and lets you export HTML, JSON, or PDF for review packages.'
+      },
+      {
+        test: /(internal control|audit|supporting doc|documentation|evidence)/,
+        response:
+          'Attach the source document reference, approval trail, and policy citation in the description. Auto GAAP reminders prompt you to log preparer/reviewer details so auditors can trace each entry from evidence to financial statements.'
+      },
+      {
+        test: /(cash flow|operating|investing|financing)/,
+        response:
+          'Classify cash activity by asking whether it supports operations, investing in long-term assets, or financing capital. The cash flow generator in Auto GAAP groups your journal lines accordingly and reconciles beginning to ending cash automatically.'
+      },
+      {
+        test: /(close|month[-\s]?end|reconcile|checklist|calendar)/,
+        response:
+          'Anchor each task to the close checklist: reconcile subledgers, review accruals, generate statements, then lock the period. Auto GAAP tracks status on each step so controllers know when reviewers and approvers have signed off.'
+      },
+      {
+        test: /(chart of accounts|coa|account type|classification)/,
+        response:
+          'Choose the account from your GAAP-aligned chart and verify the normal balance. Auto GAAP enforces the asset/liability/equity/revenue/expense taxonomy so every posting flows cleanly into statements and analytics.'
+      }
+    ];
+    const accountingFallbackResponses = [
+      'I can outline debits, credits, and supporting controls for your entry—just share the business event and timing.',
+      'Need a walkthrough? Ask about revenue, expenses, cash flow, or reconciliations and I will map the Auto GAAP workflow for you.',
+      'Provide the accounts involved plus any policies you are referencing, and I will recommend documentation steps and reviewers.'
+    ];
+    let fallbackCursor = 0;
+
+    const appendAssistantMessage = (role, text) => {
+      const bubble = document.createElement('div');
+      bubble.className = `message ${role}`;
+      bubble.textContent = text;
+      accountingAssistantLog.appendChild(bubble);
+      accountingAssistantLog.scrollTop = accountingAssistantLog.scrollHeight;
+    };
+
+    const generateAccountingResponse = (value) => {
+      const normalized = value.toLowerCase();
+      for (const pattern of accountingPatterns) {
+        if (pattern.test(normalized)) {
+          return pattern.response;
+        }
+      }
+      const fallback = accountingFallbackResponses[fallbackCursor % accountingFallbackResponses.length];
+      fallbackCursor += 1;
+      return fallback;
+    };
+
+    const primerMessages = [
+      'Hi, I’m the Auto GAAP accounting assistant. Ask me about ledger entries, GAAP policy, or how to keep the close on track.',
+      'You can prompt me with questions like:\n• Draft a deferred revenue entry\n• Explain the controls for payroll accruals\n• Show how this maps to the balance sheet'
+    ];
+
+    primerMessages.forEach((message) => appendAssistantMessage('bot', message));
+
+    accountingAssistantForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!accountingAssistantInput) {
+        return;
+      }
+      const rawValue = accountingAssistantInput.value.trim();
+      if (!rawValue) {
+        return;
+      }
+
+      appendAssistantMessage('user', rawValue);
+      accountingAssistantInput.value = '';
+
+      if (accountingAssistantButton) {
+        accountingAssistantButton.disabled = true;
+        accountingAssistantButton.textContent = 'Thinking…';
+      }
+
+      window.setTimeout(() => {
+        appendAssistantMessage('bot', generateAccountingResponse(rawValue));
+        if (accountingAssistantButton) {
+          accountingAssistantButton.disabled = false;
+          accountingAssistantButton.textContent = defaultAssistantLabel;
+        }
+        accountingAssistantInput.focus();
+      }, 480 + Math.random() * 420);
+    });
+  }
+
   function getElement(id) {
     return document.getElementById(id);
   }
