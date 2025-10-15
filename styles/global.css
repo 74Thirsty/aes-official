@@ -990,11 +990,10 @@
       color: rgba(203, 213, 225, 0.85);
     }
 
-      #location-info,
-      .auto-gaap-ledger {
-        display: none !important;
-        visibility: hidden !important;
-      }
+    #location-info {
+      display: none !important;
+      visibility: hidden !important;
+    }
 
     .cards-grid {
       display: grid;
