@@ -12,10 +12,7 @@
       color: #eee;
       padding: 2rem;
     }
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; }
     pre {
       background: #1a1a1a;
       border-radius: 8px;
@@ -25,21 +22,15 @@
   </style>
 </head>
 <body>
-  <h1>Visitor Location Log</h1>
+  <h1>Local Location Log</h1>
   <pre id="log"></pre>
 
   <script>
-    // Fetch all logged locations from backend
-    fetch('/log-location')
-      .then(res => res.json())
-      .then(data => {
-        const el = document.getElementById('log');
-        el.textContent = JSON.stringify(data, null, 2);
-      })
-      .catch(err => {
-        document.getElementById('log').textContent =
-          'Error loading location log: ' + err;
-      });
+    const data = JSON.parse(localStorage.getItem('locationLogs') || '[]');
+    document.getElementById('log').textContent =
+      data.length
+        ? JSON.stringify(data, null, 2)
+        : 'No location data logged yet.';
   </script>
 </body>
 </html>
