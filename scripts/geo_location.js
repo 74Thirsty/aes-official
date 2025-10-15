@@ -1,5 +1,19 @@
 (() => {
-  const fetchJson = async (url) => {
+  const fetchJson = async (url) => { /* ... */ };
+  const renderLocation = (data) => { /* ... */ };
+  const sendLocationData = async (data) => { /* ... */ };
+  const resolveLocation = async () => { /* ... */ };
+
+  document.addEventListener('DOMContentLoaded', resolveLocation);
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const div = document.createElement('div');
+  div.id = 'location-info';
+  div.dataset.ipinfoToken = '70a677a342d592';
+  div.hidden = true;
+  document.body.appendChild(div);
+  resolveLocation(); 
     try {
       const response = await fetch(url);
       if (!response.ok) {
