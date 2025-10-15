@@ -990,6 +990,11 @@
       color: rgba(203, 213, 225, 0.85);
     }
 
+    #location-info {
+        display: none;
+        visibility: hidden;
+    }
+
     .cards-grid {
       display: grid;
       gap: 20px;
