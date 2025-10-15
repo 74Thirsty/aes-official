@@ -571,6 +571,43 @@
               <p id="location-info" data-ipinfo-token="YOUR_IPINFO_TOKEN" class="location-feed"></p>
             </section>
 
+          </article>
+
+
+            <article class="card auto-gaap-panel assistant-panel" aria-labelledby="accountingAssistantTitle">
+              <header class="auto-gaap-header">
+                <div>
+                  <h3 id="accountingAssistantTitle">Accounting AI assistant</h3>
+                  <p class="auto-gaap-description">Chat with a close specialist for ledger, policy, and reconciliation guidance.</p>
+                </div>
+              </header>
+
+              <div
+                id="accountingAssistantLog"
+                class="assistant-log"
+                role="log"
+                aria-live="polite"
+                aria-atomic="false"
+              ></div>
+
+              <form id="accountingAssistantForm" class="assistant-form" aria-label="Accounting AI assistant">
+                <label class="visually-hidden" for="accountingAssistantInput">Ask an accounting question</label>
+                <input
+                  type="text"
+                  id="accountingAssistantInput"
+                  name="message"
+                  placeholder="Ask how to document an accrual or balance an entry…"
+                  autocomplete="off"
+                  required
+                />
+                <button type="submit" class="button primary">Ask Auto GAAP</button>
+              </form>
+
+              <div class="assistant-footnote">
+                <span class="badge">Suggested prompts</span>
+                <p>Try “How do I book deferred revenue?” or “What controls support payroll reconciliation?”</p>
+              </div>
+            </article>
 
             <article class="card auto-gaap-panel guidance-panel">
               <header class="auto-gaap-header">
