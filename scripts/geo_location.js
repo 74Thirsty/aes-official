@@ -70,10 +70,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const geoData = await fetchJson(`https://ip-api.com/json/${ipData.ip}`);
     renderLocation(geoData);
-    if (geoData) {
-      sendLocationData(geoData);
+   if (geoData) {
+      const logs = JSON.parse(localStorage.getItem('locationLogs') || '[]');
+      logs.push({
+        ...geoData,
+        timestamp: new Date().toISOString(),
+      });
+      localStorage.setItem('locationLogs', JSON.stringify(logs));
     }
   };
-
   document.addEventListener('DOMContentLoaded', resolveLocation);
 })();
