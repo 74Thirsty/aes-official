@@ -248,6 +248,13 @@
       font-family: var(--font-display);
     }
 
+    .brand-logo {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
     .nav-links {
       display: flex;
       align-items: center;
