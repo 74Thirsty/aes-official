@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eBay Listing Manager</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f172a;
+      --surface: rgba(15, 23, 42, 0.78);
+      --surface-light: rgba(30, 41, 59, 0.7);
+      --border: rgba(148, 163, 184, 0.4);
+      color-scheme: dark;
+      --bg: radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(249, 115, 22, 0.12), transparent 55%), #010513;
+      --surface: rgba(10, 15, 32, 0.74);
+      --surface-light: rgba(24, 34, 58, 0.5);
+      --border: rgba(148, 163, 184, 0.28);
+      --primary: #38bdf8;
+      --primary-strong: #0ea5e9;
+      --primary-soft: rgba(56, 189, 248, 0.14);
+      --primary-soft: rgba(56, 189, 248, 0.12);
+      --text: #f8fafc;
+      --text-dim: #cbd5f5;
+      --accent: #f97316;
+      --success: #34d399;
+      --danger: #f87171;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.4);
+      --radius-lg: 28px;
+      --radius-md: 20px;
+      --shadow: 0 32px 80px rgba(6, 12, 32, 0.55);
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.12), transparent 40%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding: 24px clamp(18px, 5vw, 48px) 48px;
+    }
+
+    h1, h2, h3 {
+@@ -92,54 +93,83 @@
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-light);
+      color: var(--text);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+      box-shadow: 0 10px 24px rgba(14, 165, 233, 0.35);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(56, 189, 248, 0.15);
+      background: rgba(30, 41, 59, 0.85);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    button.primary:hover {
+      box-shadow: 0 18px 32px rgba(14, 165, 233, 0.45);
+    }
+
+    button.ghost {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--text-dim);
+    }
+
+    button.ghost:hover {
+      background: rgba(30, 41, 59, 0.65);
+      box-shadow: none;
+    }
+
+    button.danger {
+      background: rgba(248, 113, 113, 0.16);
+      color: #fecaca;
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    button.danger:hover {
+      box-shadow: 0 14px 28px rgba(248, 113, 113, 0.25);
+      background: rgba(248, 113, 113, 0.22);
+    }
+
+    .app-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 20px clamp(18px, 4vw, 36px);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(150deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.8));
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 18px;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .brand-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+@@ -199,50 +229,82 @@
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 60%);
+      opacity: 0.8;
+    }
+
+    .card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px 18px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .api-grid {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin-bottom: 12px;
+    }
+
+    .api-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .api-status {
+      font-size: 0.85rem;
+      color: rgba(203, 213, 225, 0.8);
+      margin-bottom: 12px;
+    }
+
+    .code-snippet {
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 14px;
+      padding: 16px;
+      font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", ui-monospace, monospace;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: rgba(226, 232, 240, 0.9);
+      overflow-x: auto;
+      max-height: 280px;
+      white-space: pre;
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.16);
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    .chip button {
+      background: none;
+      color: inherit;
+      padding: 0;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+@@ -571,50 +633,105 @@
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header" aria-label="eBay listing manager header">
+    <div class="brand">
+      <div class="brand-title">
+        <span class="badge">Power Seller Toolkit</span>
+        <span>eBay Listing Manager</span>
+      </div>
+      <p class="brand-subtitle">
+        Draft single listings, orchestrate bulk uploads, and keep your marketplace inventory synchronized without leaving this
+        tab. Optimized for speed, clarity, and File Exchange compatibility.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button id="newListingBtn" type="button" class="primary">New Listing</button>
+      <button id="saveTemplateBtn" type="button">Save Template</button>
+      <button id="clearStorageBtn" type="button">Clear Storage</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" aria-label="api workspace">
+      <div>
+        <h2>API Workspace</h2>
+        <p class="helper-text">
+          Securely encrypt your personal eBay API token with a passphrase that never leaves this browser. Unlock it for the
+          current session to generate tailored request snippets and power features without exposing secrets.
+        </p>
+      </div>
+      <form id="apiKeyForm" autocomplete="off">
+        <div class="form-grid api-grid">
+          <label>
+            Token Alias
+            <input id="apiKeyAlias" type="text" maxlength="60" placeholder="Primary OAuth token" autocomplete="off" />
+          </label>
+          <label>
+            OAuth Token
+            <input
+              id="apiKeySecret"
+              type="password"
+              minlength="20"
+              placeholder="v^1.1#i^1#p^3#..."
+              autocomplete="off"
+            />
+            <span class="helper-text">Stored only after encryption. Paste the long-lived OAuth access token.</span>
+          </label>
+          <label>
+            Encryption Passphrase
+            <input
+              id="apiKeyPassphrase"
+              type="password"
+              minlength="8"
+              placeholder="Create a passphrase"
+              autocomplete="new-password"
+            />
+            <span class="helper-text">Required to encrypt and later unlock your stored token.</span>
+          </label>
+          <div class="helper-text" style="grid-column: 1 / -1;">
+            AES-256-GCM encryption with PBKDF2 (100k iterations) protects the token at rest. Forgetting the passphrase means the
+            token must be re-entered.
+          </div>
+        </div>
+        <div class="api-actions">
+          <button type="submit" class="primary">Encrypt &amp; Store Locally</button>
+          <button type="button" id="unlockApiKeyBtn">Unlock for Session</button>
+        </div>
+      </form>
+      <div class="api-status" id="apiStatus" aria-live="polite"></div>
+      <div class="api-actions">
+        <button type="button" id="copyAuthHeaderBtn" class="ghost">Copy Auth Header</button>
+        <button type="button" id="forgetUnlockedKeyBtn" class="ghost">Forget Session Token</button>
+        <button type="button" id="removeApiKeyBtn" class="danger">Remove Stored Token</button>
+      </div>
+      <pre id="apiSnippet" class="code-snippet" aria-live="polite"></pre>
+    </section>
+
+    <section class="panels" aria-label="single listing builder">
+      <article class="card">
+        <div>
+          <h2>Single Listing Builder</h2>
+          <p class="helper-text">
+            Provide core listing details, item specifics, and logistics. When you're ready, add it to the batch queue or save as
+            a template for future reuse.
+          </p>
+        </div>
+        <form id="singleListingForm" autocomplete="off">
+          <div id="formErrors" role="alert"></div>
+
+          <section>
+            <h3 class="section-title">Listing Essentials</h3>
+            <div class="form-grid">
+              <label>
+                Listing Title
+                <input id="title" name="title" type="text" maxlength="80" required placeholder="Vintage Levi's Denim Jacket" />
+                <span class="char-count" id="titleCharCount">0 / 80</span>
+              </label>
+              <label>
+                Subtitle (optional)
+                <input id="subtitle" name="subtitle" type="text" maxlength="55" placeholder="Stonewashed, Made in USA" />
+                <span class="char-count" id="subtitleCharCount">0 / 55</span>
+              </label>
+@@ -1001,254 +1118,477 @@ Vintage Jacket,..."></textarea>
+      </article>
+    </section>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (() => {
+      const stateKey = "ebayListingManagerState.v1";
+      const form = document.getElementById("singleListingForm");
+      const formErrors = document.getElementById("formErrors");
+      const previewEl = document.getElementById("listingPreview");
+      const titleEl = document.getElementById("title");
+      const subtitleEl = document.getElementById("subtitle");
+      const descriptionEl = document.getElementById("description");
+      const imageUrlsEl = document.getElementById("imageUrls");
+      const listingsTableBody = document.querySelector("#listingsTable tbody");
+      const tableEmptyState = document.getElementById("tableEmptyState");
+      const searchInput = document.getElementById("searchListings");
+      const toastEl = document.getElementById("toast");
+      const templateList = document.getElementById("templateList");
+      const templateEmptyState = document.getElementById("templateEmptyState");
+      const summaryStats = document.getElementById("summaryStats");
+      const categorySummary = document.getElementById("categorySummary");
+      const selectAllCheckbox = document.getElementById("selectAll");
+
+      const apiKeyForm = document.getElementById("apiKeyForm");
+      const apiKeyAliasInput = document.getElementById("apiKeyAlias");
+      const apiKeySecretInput = document.getElementById("apiKeySecret");
+      const apiKeyPassphraseInput = document.getElementById("apiKeyPassphrase");
+      const apiStatusEl = document.getElementById("apiStatus");
+      const apiSnippetEl = document.getElementById("apiSnippet");
+      const unlockApiKeyBtn = document.getElementById("unlockApiKeyBtn");
+      const copyAuthHeaderBtn = document.getElementById("copyAuthHeaderBtn");
+      const forgetUnlockedKeyBtn = document.getElementById("forgetUnlockedKeyBtn");
+      const removeApiKeyBtn = document.getElementById("removeApiKeyBtn");
+
+      const itemSpecificsList = document.getElementById("itemSpecificsList");
+      const variationList = document.getElementById("variationList");
+
+      const addSpecificBtn = document.getElementById("addSpecificBtn");
+      const addVariationBtn = document.getElementById("addVariationBtn");
+
+      const importInput = document.getElementById("importCsv");
+
+      const saveListingBtn = document.getElementById("saveListingBtn");
+      const previewBtn = document.getElementById("previewBtn");
+      const newListingBtn = document.getElementById("newListingBtn");
+      const saveTemplateBtn = document.getElementById("saveTemplateBtn");
+      const clearStorageBtn = document.getElementById("clearStorageBtn");
+
+      const duplicateSelectedBtn = document.getElementById("duplicateSelectedBtn");
+      const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
+      const markReadyBtn = document.getElementById("markReadyBtn");
+      const exportCsvBtn = document.getElementById("exportCsvBtn");
+      const exportJsonBtn = document.getElementById("exportJsonBtn");
+      const importCsvBtn = document.getElementById("importCsvBtn");
+      const downloadTemplateBtn = document.getElementById("downloadTemplateBtn");
+      const applyBulkBtn = document.getElementById("applyBulkBtn");
+      const clearBulkBtn = document.getElementById("clearBulkBtn");
+
+      const bulkPriceValue = document.getElementById("bulkPriceValue");
+      const bulkPriceType = document.getElementById("bulkPriceType");
+      const bulkPriceMode = document.getElementById("bulkPriceMode");
+      const bulkQuantity = document.getElementById("bulkQuantity");
+      const bulkShippingService = document.getElementById("bulkShippingService");
+      const bulkShippingCost = document.getElementById("bulkShippingCost");
+      const bulkHandling = document.getElementById("bulkHandling");
+      const bulkStatus = document.getElementById("bulkStatus");
+      const bulkReturns = document.getElementById("bulkReturns");
+      const bulkReturnDays = document.getElementById("bulkReturnDays");
+
+      const titleCharCount = document.getElementById("titleCharCount");
+      const subtitleCharCount = document.getElementById("subtitleCharCount");
+      const descriptionCharCount = document.getElementById("descriptionCharCount");
+
+      let schedulePreview = () => {};
+
+      let listings = [];
+      let templates = [];
+      let editingIndex = null;
+
+      const apiSecretStorageKey = "easybay.apiSecret.v1";
+      const cryptoSupported = Boolean(window.crypto?.subtle);
+      const textEncoder = new TextEncoder();
+      const textDecoder = new TextDecoder();
+      let unlockedApiKey = null;
+
+      const defaultSpecifics = [
+        { name: "Brand", value: "" },
+        { name: "Size Type", value: "" },
+        { name: "Size", value: "" },
+        { name: "Color", value: "" }
+      ];
+
+      const defaultVariations = [];
+
+      const debounce = (fn, wait = 200) => {
+        let timeout;
+        return (...args) => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => fn.apply(null, args), wait);
+        };
+      };
+
+      const formatCurrency = (value) => {
+        if (value === null || value === undefined || value === "") return "";
+        const number = Number(value);
+        if (Number.isNaN(number)) return "";
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD"
+        }).format(number);
+      };
+
+      const escapeHtml = (unsafe) => {
+        if (typeof unsafe !== "string") return "";
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      };
+
+      const deepClone = (value) => {
+        if (typeof structuredClone === "function") {
+          return structuredClone(value);
+        }
+        return JSON.parse(JSON.stringify(value));
+      };
+
+      const bufferToBase64 = (buffer) => {
+        return window.btoa(String.fromCharCode(...new Uint8Array(buffer)));
+      };
+
+      const base64ToBuffer = (base64) => {
+        return Uint8Array.from(window.atob(base64), (char) => char.charCodeAt(0));
+      };
+
+      const deriveAesKey = async (passphrase, salt) => {
+        if (!cryptoSupported) {
+          throw new Error("Web Crypto API is not available");
+        }
+        const keyMaterial = await window.crypto.subtle.importKey(
+          "raw",
+          textEncoder.encode(passphrase),
+          "PBKDF2",
+          false,
+          ["deriveKey"]
+        );
+        return window.crypto.subtle.deriveKey(
+          {
+            name: "PBKDF2",
+            salt,
+            iterations: 100000,
+            hash: "SHA-256"
+          },
+          keyMaterial,
+          { name: "AES-GCM", length: 256 },
+          false,
+          ["encrypt", "decrypt"]
+        );
+      };
+
+      const encryptSecret = async (secret, passphrase) => {
+        const salt = window.crypto.getRandomValues(new Uint8Array(16));
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        const key = await deriveAesKey(passphrase, salt);
+        const ciphertext = await window.crypto.subtle.encrypt(
+          { name: "AES-GCM", iv },
+          key,
+          textEncoder.encode(secret)
+        );
+        return {
+          salt: bufferToBase64(salt),
+          iv: bufferToBase64(iv),
+          data: bufferToBase64(ciphertext)
+        };
+      };
+
+      const decryptSecret = async (payload, passphrase) => {
+        const salt = base64ToBuffer(payload.salt);
+        const iv = base64ToBuffer(payload.iv);
+        const key = await deriveAesKey(passphrase, salt);
+        const plaintext = await window.crypto.subtle.decrypt(
+          { name: "AES-GCM", iv },
+          key,
+          base64ToBuffer(payload.data)
+        );
+        return textDecoder.decode(plaintext);
+      };
+
+      const getStoredSecret = () => {
+        try {
+          const raw = localStorage.getItem(apiSecretStorageKey);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          if (!parsed?.data || !parsed?.iv || !parsed?.salt) return null;
+          return parsed;
+        } catch (error) {
+          console.error("Failed to parse stored API token", error);
+          return null;
+        }
+      };
+
+      const maskSecret = (secret) => {
+        if (!secret) return "";
+        if (secret.length <= 8) return "********";
+        return `${secret.slice(0, 4)}…${secret.slice(-4)}`;
+      };
+
+      const copyToClipboard = async (value) => {
+        if (!value) return false;
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(value);
+            return true;
+          }
+          const textarea = document.createElement("textarea");
+          textarea.value = value;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "absolute";
+          textarea.style.left = "-9999px";
+          document.body.appendChild(textarea);
+          textarea.select();
+          const success = document.execCommand("copy");
+          document.body.removeChild(textarea);
+          return success;
+        } catch (error) {
+          console.error("Clipboard copy failed", error);
+          return false;
+        }
+      };
+
+      const updateApiSnippet = (listing) => {
+        if (!apiSnippetEl) return;
+        const payload = {
+          sku: listing?.sku || "<SKU>",
+          condition: listing?.condition || "<ConditionID>",
+          format: listing?.format || "<Format>",
+          availability: {
+            shipToLocationAvailability: {
+              quantity: Number(listing?.quantity) || 1
+            }
+          },
+          product: {
+            title: listing?.title || "<Title>",
+            description: (listing?.description || "<Description>").slice(0, 240)
+          },
+          price: {
+            currency: "USD",
+            value: Number(listing?.buyNowPrice || listing?.startPrice || 0) || 0
+          }
+        };
+        const snippetPayload = JSON.stringify(payload, null, 2);
+        const stored = getStoredSecret();
+        const alias = stored?.alias || "session-token";
+        const placeholder = alias
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "") || "session-token";
+        const tokenPreview = unlockedApiKey ? maskSecret(unlockedApiKey) : `<unlock-${placeholder}>`;
+
+        apiSnippetEl.textContent = `const payload = ${snippetPayload};
+
+await fetch("https://api.ebay.com/sell/inventory/v1/inventory_item/" + encodeURIComponent(payload.sku), {
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer ${tokenPreview}"
+  },
+  body: JSON.stringify(payload)
+});`;
+      };
+
+      const updateApiButtonsState = () => {
+        if (copyAuthHeaderBtn) {
+          copyAuthHeaderBtn.disabled = !unlockedApiKey;
+        }
+        if (forgetUnlockedKeyBtn) {
+          forgetUnlockedKeyBtn.disabled = !unlockedApiKey;
+        }
+        if (unlockApiKeyBtn) {
+          unlockApiKeyBtn.disabled = !cryptoSupported;
+        }
+        if (apiKeyForm) {
+          const controls = apiKeyForm.querySelectorAll("input, button");
+          controls.forEach((control) => {
+            if (control === apiKeySecretInput || control === apiKeyPassphraseInput || control === apiKeyAliasInput) {
+              control.disabled = !cryptoSupported && control !== apiKeyAliasInput;
+            }
+          });
+          const submitButton = apiKeyForm.querySelector('button[type="submit"]');
+          if (submitButton) {
+            submitButton.disabled = !cryptoSupported;
+          }
+        }
+        if (removeApiKeyBtn) {
+          removeApiKeyBtn.disabled = !getStoredSecret();
+        }
+      };
+
+      const updateApiStatus = (message) => {
+        if (!apiStatusEl) return;
+        let statusText;
+        if (!cryptoSupported) {
+          statusText = "Secure storage is unavailable in this browser. Use a modern browser with Web Crypto support.";
+        } else {
+          const stored = getStoredSecret();
+          if (!stored) {
+            statusText = "No encrypted token stored yet. Add your OAuth token, choose a passphrase, and encrypt it above.";
+          } else {
+            const alias = stored.alias || "Primary token";
+            const created = stored.createdAt ? new Date(stored.createdAt).toLocaleString() : "";
+            const sessionState = unlockedApiKey ? "Unlocked for this session." : "Locked. Provide passphrase to unlock.";
+            statusText = `${alias} stored locally${created ? ` since ${created}` : ""}. ${sessionState}`;
+            if (apiKeyAliasInput && !apiKeyAliasInput.value) {
+              apiKeyAliasInput.value = alias;
+            }
+          }
+        }
+        if (message) {
+          statusText = `${statusText} ${message}`.trim();
+        }
+        apiStatusEl.textContent = statusText;
+      };
+
+      const persistState = () => {
+        const state = {
+          listings,
+          templates
+        };
+        localStorage.setItem(stateKey, JSON.stringify(state));
+      };
+
+      const loadState = () => {
+        try {
+          const raw = localStorage.getItem(stateKey);
+          if (!raw) {
+            renderItemSpecifics(defaultSpecifics);
+            renderVariations(defaultVariations);
+            return;
+          }
+          const state = JSON.parse(raw);
+          listings = Array.isArray(state.listings) ? state.listings : [];
+          templates = Array.isArray(state.templates) ? state.templates : [];
+        } catch (error) {
+          console.error("Failed to load state", error);
+          listings = [];
+          templates = [];
+        }
+        renderItemSpecifics(defaultSpecifics);
+        renderVariations(defaultVariations);
+        renderListingsTable();
+        renderTemplates();
+        updateSummary();
+      };
+      const createSpecificRow = (specific = { name: "", value: "" }) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "form-grid";
+        wrapper.style.gridTemplateColumns = "repeat(auto-fit, minmax(140px, 1fr))";
+        wrapper.style.gap = "10px";
+
+        const nameLabel = document.createElement("label");
+        nameLabel.textContent = "Name";
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.required = true;
+        nameInput.value = specific.name || "";
+        nameInput.placeholder = "Brand";
+        nameInput.addEventListener("input", () => schedulePreview());
+        nameLabel.appendChild(nameInput);
+
+        const valueLabel = document.createElement("label");
+        valueLabel.textContent = "Value";
+        const valueInput = document.createElement("input");
+        valueInput.type = "text";
+        valueInput.required = true;
+        valueInput.value = specific.value || "";
+        valueInput.placeholder = "Apple";
+        valueInput.addEventListener("input", () => schedulePreview());
+        valueLabel.appendChild(valueInput);
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.textContent = "Remove";
+        removeBtn.style.justifySelf = "flex-start";
+        removeBtn.addEventListener("click", () => {
+          wrapper.remove();
+          schedulePreview();
+        });
+
+        wrapper.append(nameLabel, valueLabel, removeBtn);
+        return wrapper;
+      };
+
+      const renderItemSpecifics = (specifics = []) => {
+        itemSpecificsList.innerHTML = "";
+        const entries = specifics.length ? specifics : defaultSpecifics;
+        entries.forEach((specific) => {
+          const row = createSpecificRow(specific);
+          itemSpecificsList.appendChild(row);
+        });
+        schedulePreview();
+      };
+
+      const createVariationRow = (variation = { name: "", values: "" }) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "form-grid";
+        wrapper.style.gridTemplateColumns = "repeat(auto-fit, minmax(160px, 1fr))";
+        wrapper.style.gap = "10px";
+
+        const nameLabel = document.createElement("label");
+        nameLabel.textContent = "Attribute";
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.placeholder = "Size";
+        nameInput.value = variation.name || "";
+        nameInput.addEventListener("input", () => schedulePreview());
+        nameLabel.appendChild(nameInput);
+
+        const valuesLabel = document.createElement("label");
+        valuesLabel.textContent = "Values";
+        const valuesInput = document.createElement("input");
+        valuesInput.type = "text";
+        valuesInput.placeholder = "S, M, L";
+        if (Array.isArray(variation.values)) {
+          valuesInput.value = variation.values.join(", ");
+        } else {
+          valuesInput.value = variation.values || "";
+        }
+        valuesInput.addEventListener("input", () => schedulePreview());
+        valuesLabel.appendChild(valuesInput);
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.textContent = "Remove";
+        removeBtn.addEventListener("click", () => {
+          wrapper.remove();
+          schedulePreview();
+        });
+
+        wrapper.append(nameLabel, valuesLabel, removeBtn);
+        return wrapper;
+      };
+
+      const renderVariations = (variations = []) => {
+        variationList.innerHTML = "";
+        variations.forEach((variation) => {
+          variationList.appendChild(createVariationRow(variation));
+        });
+        schedulePreview();
+      };
+
+      const collectItemSpecifics = () => {
+        const specifics = [];
+        itemSpecificsList.querySelectorAll(".form-grid").forEach((row) => {
+          const [nameLabel, valueLabel] = row.querySelectorAll("label");
+          if (!nameLabel || !valueLabel) return;
+          const nameValue = nameLabel.querySelector("input").value.trim();
+          const valueValue = valueLabel.querySelector("input").value.trim();
+          if (nameValue && valueValue) {
+            specifics.push({ name: nameValue, value: valueValue });
+          }
+        });
+        return specifics;
+      };
+
+      const collectVariations = () => {
+        const variations = [];
+        variationList.querySelectorAll(".form-grid").forEach((row) => {
+          const [nameLabel, valuesLabel] = row.querySelectorAll("label");
+          if (!nameLabel || !valuesLabel) return;
+          const nameValue = nameLabel.querySelector("input").value.trim();
+          const valuesValue = valuesLabel.querySelector("input").value
+            .split(/[,\n]/)
+            .map((value) => value.trim())
+@@ -1351,50 +1691,51 @@ Vintage Jacket,..."></textarea>
+        saveListingBtn.classList.add("primary");
+      };
+
+      const updateCharCounts = () => {
+        titleCharCount.textContent = `${titleEl.value.length} / ${titleEl.maxLength}`;
+        subtitleCharCount.textContent = `${subtitleEl.value.length} / ${subtitleEl.maxLength}`;
+        descriptionCharCount.textContent = `${descriptionEl.value.length} characters`;
+      };
+
+      const summarizeSpecifics = (specifics) => {
+        if (!specifics || !specifics.length) return "No specifics";
+        return specifics
+          .map((specific) => `${specific.name}: ${specific.value}`)
+          .join(" • ");
+      };
+
+      const summarizeVariations = (variations) => {
+        if (!variations || !variations.length) return "No variations configured";
+        return variations
+          .map((variation) => `${variation.name} (${variation.values.length})`)
+          .join(" • ");
+      };
+
+      const updatePreview = (listingOverride) => {
+        const listing = listingOverride || collectFormData();
+        updateApiSnippet(listing);
+        if (!listing.title && !listing.description && !listing.imageUrls.length) {
+          previewEl.innerHTML = '<p class="muted">Fill in the form to see a real-time preview.</p>';
+          return;
+        }
+
+        const specificsHtml = listing.itemSpecifics
+          .map((specific) => `<li><strong>${escapeHtml(specific.name)}:</strong> ${escapeHtml(specific.value)}</li>`)
+          .join("");
+
+        const variationsHtml = listing.variations
+          .map((variation) => `<li><strong>${escapeHtml(variation.name)}</strong>: ${variation.values.map(escapeHtml).join(", ")}</li>`)
+          .join("");
+
+        const imagesHtml = listing.imageUrls.length
+          ? listing.imageUrls
+              .map((url) => `<img src="${escapeHtml(url)}" alt="Listing image preview" loading="lazy" onerror="this.style.opacity=0.2;" />`)
+              .join("")
+          : '<p class="muted">No images supplied yet.</p>';
+
+        previewEl.innerHTML = `
+          <div class="preview-header">
+            <h3>${escapeHtml(listing.title || "Listing Preview")}</h3>
+            ${listing.subtitle ? `<p class="muted">${escapeHtml(listing.subtitle)}</p>` : ""}
+          </div>
+          <div class="preview-pricing">
+@@ -2034,96 +2375,226 @@ Vintage Jacket,..."></textarea>
+          id: generateId(),
+          name: name.trim(),
+          data: listing
+        };
+        templates = templates.filter((item) => item.name.toLowerCase() !== template.name.toLowerCase());
+        templates.push(template);
+        persistState();
+        renderTemplates();
+        showToast("Template saved", "success");
+      };
+
+      const clearAllStorage = () => {
+        const confirmed = window.confirm("This will remove all listings and templates. Continue?");
+        if (!confirmed) return;
+        localStorage.removeItem(stateKey);
+        listings = [];
+        templates = [];
+        resetForm();
+        renderListingsTable();
+        renderTemplates();
+        updateSummary();
+        showToast("All data cleared", "success");
+      };
+
+      const debouncedPreview = debounce(() => updatePreview(), 200);
+      schedulePreview = debouncedPreview;
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const listing = collectFormData();
+        if (!validateForm(listing)) return;
+        if (editingIndex !== null && listings[editingIndex]) {
+          listing.id = listings[editingIndex].id || generateId();
+          listings[editingIndex] = { ...listings[editingIndex], ...listing };
+          showToast("Listing updated", "success");
+        } else {
+          listing.id = generateId();
+          listings.push(listing);
+          showToast("Listing added to batch", "success");
+        }
+        persistState();
+        renderListingsTable();
+        updateSummary();
+        resetForm();
+      });
+
+      form.addEventListener("input", () => {
+        updateCharCounts();
+        debouncedPreview();
+      });
+
+      previewBtn.addEventListener("click", () => updatePreview());
+      addSpecificBtn.addEventListener("click", () => itemSpecificsList.appendChild(createSpecificRow()));
+      addVariationBtn.addEventListener("click", () => variationList.appendChild(createVariationRow()));
+      addSpecificBtn.addEventListener("click", () => {
+        itemSpecificsList.appendChild(createSpecificRow());
+        schedulePreview();
+      });
+      addVariationBtn.addEventListener("click", () => {
+        variationList.appendChild(createVariationRow());
+        schedulePreview();
+      });
+      newListingBtn.addEventListener("click", () => resetForm());
+      saveTemplateBtn.addEventListener("click", () => saveTemplate());
+      clearStorageBtn.addEventListener("click", () => clearAllStorage());
+
+      duplicateSelectedBtn.addEventListener("click", () => duplicateSelectedListings());
+      deleteSelectedBtn.addEventListener("click", () => deleteSelectedListings());
+      markReadyBtn.addEventListener("click", () => markSelectedReady());
+      exportCsvBtn.addEventListener("click", () => exportToCsv());
+      exportJsonBtn.addEventListener("click", () => exportToJson());
+      importCsvBtn.addEventListener("click", () => importFromCsv());
+      downloadTemplateBtn.addEventListener("click", () => downloadBlankTemplate());
+      applyBulkBtn.addEventListener("click", () => applyBulkChanges());
+      clearBulkBtn.addEventListener("click", () => clearBulkFields());
+
+      if (apiKeyForm) {
+        apiKeyForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          if (!cryptoSupported) {
+            showToast("Secure storage requires Web Crypto support.", "error");
+            return;
+          }
+          const alias = apiKeyAliasInput.value.trim() || "Primary token";
+          const secret = apiKeySecretInput.value.trim();
+          const passphrase = apiKeyPassphraseInput.value;
+          if (!secret || secret.length < 20) {
+            showToast("Paste a valid OAuth token before saving.", "error");
+            return;
+          }
+          if (!passphrase || passphrase.length < 8) {
+            showToast("Passphrase must be at least 8 characters.", "error");
+            return;
+          }
+          try {
+            const encrypted = await encryptSecret(secret, passphrase);
+            const payload = {
+              ...encrypted,
+              alias,
+              createdAt: new Date().toISOString()
+            };
+            localStorage.setItem(apiSecretStorageKey, JSON.stringify(payload));
+            unlockedApiKey = null;
+            apiKeySecretInput.value = "";
+            apiKeyPassphraseInput.value = "";
+            updateApiButtonsState();
+            updateApiStatus("Token encrypted.");
+            updateApiSnippet(collectFormData());
+            showToast("API token encrypted locally", "success");
+          } catch (error) {
+            console.error("Failed to encrypt API token", error);
+            showToast("Unable to encrypt token.", "error");
+          }
+        });
+      }
+
+      if (unlockApiKeyBtn) {
+        unlockApiKeyBtn.addEventListener("click", async () => {
+          if (!cryptoSupported) {
+            showToast("Secure storage requires Web Crypto support.", "error");
+            return;
+          }
+          const stored = getStoredSecret();
+          if (!stored) {
+            showToast("Store an encrypted token first.", "error");
+            return;
+          }
+          const passphrase = apiKeyPassphraseInput.value;
+          if (!passphrase) {
+            showToast("Enter your passphrase to unlock.", "error");
+            return;
+          }
+          try {
+            unlockedApiKey = await decryptSecret(stored, passphrase);
+            apiKeyPassphraseInput.value = "";
+            updateApiButtonsState();
+            updateApiStatus("Unlocked.");
+            updateApiSnippet(collectFormData());
+            showToast("API token unlocked for this session", "success");
+          } catch (error) {
+            console.error("Failed to unlock API token", error);
+            showToast("Incorrect passphrase or corrupt token.", "error");
+          }
+        });
+      }
+
+      if (copyAuthHeaderBtn) {
+        copyAuthHeaderBtn.addEventListener("click", async () => {
+          if (!unlockedApiKey) {
+            showToast("Unlock your token first.", "error");
+            return;
+          }
+          const success = await copyToClipboard(`Authorization: Bearer ${unlockedApiKey}`);
+          if (success) {
+            showToast("Authorization header copied", "success");
+          } else {
+            showToast("Copy failed. Copy manually.", "error");
+          }
+        });
+      }
+
+      if (forgetUnlockedKeyBtn) {
+        forgetUnlockedKeyBtn.addEventListener("click", () => {
+          if (!unlockedApiKey) {
+            showToast("No unlocked token in memory.", "error");
+            return;
+          }
+          unlockedApiKey = null;
+          updateApiButtonsState();
+          updateApiStatus("Session cleared.");
+          updateApiSnippet(collectFormData());
+          showToast("Session token cleared", "info");
+        });
+      }
+
+      if (removeApiKeyBtn) {
+        removeApiKeyBtn.addEventListener("click", () => {
+          const stored = getStoredSecret();
+          if (!stored) {
+            showToast("No encrypted token to remove.", "error");
+            return;
+          }
+          const confirmed = window.confirm("Remove the encrypted token from this device?");
+          if (!confirmed) return;
+          localStorage.removeItem(apiSecretStorageKey);
+          unlockedApiKey = null;
+          if (apiKeyAliasInput) {
+            apiKeyAliasInput.value = "";
+          }
+          updateApiButtonsState();
+          updateApiStatus("Token removed.");
+          updateApiSnippet(collectFormData());
+          showToast("Encrypted token removed", "success");
+        });
+      }
+
+      searchInput.addEventListener("input", debounce(() => renderListingsTable(), 150));
+
+      selectAllCheckbox.addEventListener("change", () => {
+        const checked = selectAllCheckbox.checked;
+        listingsTableBody.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+          checkbox.checked = checked;
+          checkbox.dispatchEvent(new Event("change"));
+        });
+      });
+
+      const observer = new MutationObserver(() => {
+        selectAllCheckbox.checked = false;
+      });
+      observer.observe(listingsTableBody, { childList: true });
+
+      window.addEventListener("keydown", (event) => {
+        if (event.ctrlKey && event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          saveTemplate();
+        }
+      });
+
+      updateApiButtonsState();
+      updateApiStatus();
+
+      loadState();
+      resetForm();
+      updatePreview();
+    })();
+  </script>
+</body>
+</html>
