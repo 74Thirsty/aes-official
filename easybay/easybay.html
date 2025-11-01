@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eBay Listing Manager</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f172a;
+      --surface: rgba(15, 23, 42, 0.78);
+      --surface-light: rgba(30, 41, 59, 0.7);
+      --border: rgba(148, 163, 184, 0.4);
+      --primary: #38bdf8;
+      --primary-strong: #0ea5e9;
+      --primary-soft: rgba(56, 189, 248, 0.14);
+      --text: #f8fafc;
+      --text-dim: #cbd5f5;
+      --accent: #f97316;
+      --success: #34d399;
+      --danger: #f87171;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.4);
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.12), transparent 40%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding: 24px clamp(18px, 5vw, 48px) 48px;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--text-dim);
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.9rem;
+      gap: 6px;
+      color: var(--text-dim);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.45);
+      color: inherit;
+      font: inherit;
+      transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-light);
+      color: var(--text);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+      box-shadow: 0 10px 24px rgba(14, 165, 233, 0.35);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(56, 189, 248, 0.15);
+      background: rgba(30, 41, 59, 0.85);
+    }
+
+    button.primary:hover {
+      box-shadow: 0 18px 32px rgba(14, 165, 233, 0.45);
+    }
+
+    .app-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 20px clamp(18px, 4vw, 36px);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(150deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.8));
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 18px;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .brand-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      background: rgba(56, 189, 248, 0.16);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-subtitle {
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    main {
+      display: grid;
+      gap: 24px;
+    }
+
+    .panels {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    .card {
+      background: linear-gradient(160deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.78));
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 28px);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 60%);
+      opacity: 0.8;
+    }
+
+    .card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px 18px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.16);
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    .chip button {
+      background: none;
+      color: inherit;
+      padding: 0;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none;
+    }
+
+    .helper-text {
+      font-size: 0.8rem;
+      color: rgba(203, 213, 225, 0.8);
+    }
+
+    .char-count {
+      font-size: 0.78rem;
+      color: rgba(148, 163, 184, 0.8);
+      margin-top: -4px;
+      text-align: right;
+    }
+
+    .form-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    #formErrors {
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      color: #fecaca;
+      display: none;
+    }
+
+    #listingPreview {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: rgba(15, 23, 42, 0.55);
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(148, 163, 184, 0.4);
+      padding: 18px;
+      min-height: 280px;
+    }
+
+    .preview-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .preview-pricing {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 24px;
+      align-items: baseline;
+    }
+
+    .price-tag {
+      font-size: 1.6rem;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .preview-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .preview-block {
+      background: rgba(15, 23, 42, 0.45);
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .preview-block h4 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(203, 213, 225, 0.82);
+      margin: 0;
+    }
+
+    .preview-description {
+      background: rgba(15, 23, 42, 0.35);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      line-height: 1.5;
+      color: rgba(226, 232, 240, 0.92);
+      max-height: 220px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .gallery {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    }
+
+    .gallery img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.55);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      color: inherit;
+    }
+
+    thead {
+      background: rgba(15, 23, 42, 0.65);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      font-size: 0.92rem;
+    }
+
+    tbody tr:hover {
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    tbody tr.selected {
+      background: rgba(56, 189, 248, 0.18);
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .muted {
+      color: rgba(148, 163, 184, 0.8);
+      font-size: 0.85rem;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(148, 163, 184, 0.16);
+      border: 1px solid rgba(148, 163, 184, 0.24);
+    }
+
+    .status-ready {
+      color: #bbf7d0;
+      border-color: rgba(74, 222, 128, 0.35);
+      background: rgba(74, 222, 128, 0.16);
+    }
+
+    .status-draft {
+      color: #fbcfe8;
+      border-color: rgba(244, 114, 182, 0.35);
+      background: rgba(244, 114, 182, 0.16);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    #searchListings {
+      min-width: 240px;
+    }
+
+    #summaryStats {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
+    .stat {
+      background: rgba(15, 23, 42, 0.45);
+      border-radius: 14px;
+      padding: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      display: grid;
+      gap: 4px;
+    }
+
+    .stat span {
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(203, 213, 225, 0.8);
+    }
+
+    .stat strong {
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
+    .bulk-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    textarea.small {
+      min-height: 70px;
+    }
+
+    .import-area {
+      display: grid;
+      gap: 12px;
+    }
+
+    #toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: var(--shadow);
+      transform: translateY(120%);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-success {
+      border-color: rgba(74, 222, 128, 0.45) !important;
+      color: #bbf7d0;
+    }
+
+    .toast-error {
+      border-color: rgba(248, 113, 113, 0.45) !important;
+      color: #fecaca;
+    }
+
+    .template-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .template-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      gap: 10px;
+    }
+
+    .template-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .empty-state {
+      padding: 24px;
+      text-align: center;
+      color: rgba(148, 163, 184, 0.8);
+      font-size: 0.95rem;
+    }
+
+    .accent {
+      color: var(--accent);
+    }
+
+    @media (max-width: 960px) {
+      body {
+        padding-bottom: 96px;
+      }
+
+      .app-header {
+        position: static;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header" aria-label="eBay listing manager header">
+    <div class="brand">
+      <div class="brand-title">
+        <span class="badge">Power Seller Toolkit</span>
+        <span>eBay Listing Manager</span>
+      </div>
+      <p class="brand-subtitle">
+        Draft single listings, orchestrate bulk uploads, and keep your marketplace inventory synchronized without leaving this
+        tab. Optimized for speed, clarity, and File Exchange compatibility.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button id="newListingBtn" type="button" class="primary">New Listing</button>
+      <button id="saveTemplateBtn" type="button">Save Template</button>
+      <button id="clearStorageBtn" type="button">Clear Storage</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="panels" aria-label="single listing builder">
+      <article class="card">
+        <div>
+          <h2>Single Listing Builder</h2>
+          <p class="helper-text">
+            Provide core listing details, item specifics, and logistics. When you're ready, add it to the batch queue or save as
+            a template for future reuse.
+          </p>
+        </div>
+        <form id="singleListingForm" autocomplete="off">
+          <div id="formErrors" role="alert"></div>
+
+          <section>
+            <h3 class="section-title">Listing Essentials</h3>
+            <div class="form-grid">
+              <label>
+                Listing Title
+                <input id="title" name="title" type="text" maxlength="80" required placeholder="Vintage Levi's Denim Jacket" />
+                <span class="char-count" id="titleCharCount">0 / 80</span>
+              </label>
+              <label>
+                Subtitle (optional)
+                <input id="subtitle" name="subtitle" type="text" maxlength="55" placeholder="Stonewashed, Made in USA" />
+                <span class="char-count" id="subtitleCharCount">0 / 55</span>
+              </label>
+              <label>
+                SKU
+                <input id="sku" name="sku" type="text" placeholder="SKU-001" />
+              </label>
+              <label>
+                Condition
+                <select id="condition" name="condition" required>
+                  <option value="">Choose condition</option>
+                  <option value="1000">New</option>
+                  <option value="1500">New (Other)</option>
+                  <option value="1750">New with defects</option>
+                  <option value="2000">Manufacturer refurbished</option>
+                  <option value="2500">Seller refurbished</option>
+                  <option value="3000">Used</option>
+                  <option value="4000">Very Good</option>
+                  <option value="5000">Good</option>
+                  <option value="6000">Acceptable</option>
+                  <option value="7000">For parts or not working</option>
+                </select>
+              </label>
+              <label>
+                Primary Category
+                <input id="category" name="category" type="text" list="categorySuggestions" required placeholder="57988" />
+                <datalist id="categorySuggestions">
+                  <option value="57988">Men's Coats & Jackets</option>
+                  <option value="9355">Cell Phones & Smartphones</option>
+                  <option value="11450">Women's Clothing</option>
+                  <option value="26395">Cameras & Photo</option>
+                  <option value="6028">Video Game Consoles</option>
+                  <option value="1249">Laptops & Netbooks</option>
+                  <option value="11233">Sneakers</option>
+                </datalist>
+                <span class="helper-text">Use the numeric eBay category ID for File Exchange compatibility.</span>
+              </label>
+              <label>
+                Listing Format
+                <select id="format" name="format">
+                  <option value="FixedPrice">Fixed Price</option>
+                  <option value="Auction">Auction</option>
+                </select>
+              </label>
+              <label>
+                Duration
+                <select id="duration" name="duration">
+                  <option value="GTC">Good 'Til Cancelled</option>
+                  <option value="Days_3">3 Days</option>
+                  <option value="Days_5">5 Days</option>
+                  <option value="Days_7">7 Days</option>
+                  <option value="Days_10">10 Days</option>
+                </select>
+              </label>
+              <label>
+                Quantity
+                <input id="quantity" name="quantity" type="number" min="1" value="1" required />
+              </label>
+              <label>
+                Start Price
+                <input id="startPrice" name="startPrice" type="number" min="0" step="0.01" placeholder="49.99" required />
+              </label>
+              <label>
+                Buy It Now Price
+                <input id="buyNowPrice" name="buyNowPrice" type="number" min="0" step="0.01" placeholder="65.00" />
+                <span class="helper-text">Optional for auctions; required for fixed price if different from start.</span>
+              </label>
+              <label>
+                Best Offer
+                <select id="bestOffer" name="bestOffer">
+                  <option value="Disabled">Disabled</option>
+                  <option value="Enabled">Enabled</option>
+                </select>
+              </label>
+              <label>
+                Auto Accept Offer ($)
+                <input id="autoAccept" name="autoAccept" type="number" min="0" step="0.01" placeholder="" />
+              </label>
+              <label>
+                Auto Decline Offer ($)
+                <input id="autoDecline" name="autoDecline" type="number" min="0" step="0.01" placeholder="" />
+              </label>
+              <label>
+                Handling Time (days)
+                <input id="handlingTime" name="handlingTime" type="number" min="0" max="30" value="1" />
+              </label>
+              <label>
+                Item Location
+                <input id="itemLocation" name="itemLocation" type="text" placeholder="Brooklyn, NY" />
+              </label>
+              <label>
+                Postal Code
+                <input id="postalCode" name="postalCode" type="text" placeholder="11201" />
+              </label>
+              <label>
+                UPC / EAN
+                <input id="upc" name="upc" type="text" placeholder="Does not apply" />
+              </label>
+              <label>
+                Status
+                <select id="status" name="status">
+                  <option value="Draft">Draft</option>
+                  <option value="Ready">Ready</option>
+                  <option value="Scheduled">Scheduled</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section>
+            <h3 class="section-title">Shipping & Fulfillment</h3>
+            <div class="form-grid">
+              <label>
+                Domestic Shipping Service
+                <input id="shippingService" name="shippingService" type="text" placeholder="USPS Priority Mail" />
+              </label>
+              <label>
+                Domestic Shipping Cost
+                <input id="shippingCost" name="shippingCost" type="number" min="0" step="0.01" placeholder="9.99" />
+              </label>
+              <label>
+                Additional Item Cost
+                <input id="shippingAdditional" name="shippingAdditional" type="number" min="0" step="0.01" placeholder="2.99" />
+              </label>
+              <label>
+                International Shipping Service
+                <input id="intlShippingService" name="intlShippingService" type="text" placeholder="eBay International Shipping" />
+              </label>
+              <label>
+                International Shipping Cost
+                <input id="intlShippingCost" name="intlShippingCost" type="number" min="0" step="0.01" />
+              </label>
+              <label>
+                Package Weight (lbs)
+                <input id="packageWeight" name="packageWeight" type="number" min="0" step="0.1" />
+              </label>
+              <label>
+                Package Dimensions (L x W x H in)
+                <input id="packageDimensions" name="packageDimensions" type="text" placeholder="12 x 10 x 4" />
+              </label>
+            </div>
+          </section>
+
+          <section>
+            <h3 class="section-title">Payment & Returns</h3>
+            <div class="form-grid">
+              <label>
+                Payment Policy
+                <select id="paymentPolicy" name="paymentPolicy">
+                  <option value="ImmediatePay">Immediate Pay</option>
+                  <option value="PayPal">PayPal</option>
+                  <option value="ManagedPayments">Managed Payments</option>
+                </select>
+              </label>
+              <label>
+                Returns Accepted
+                <select id="returnsAccepted" name="returnsAccepted">
+                  <option value="ReturnsAccepted">Yes</option>
+                  <option value="ReturnsNotAccepted">No</option>
+                </select>
+              </label>
+              <label>
+                Return Days
+                <select id="returnDays" name="returnDays">
+                  <option value="30">30 days</option>
+                  <option value="14">14 days</option>
+                  <option value="60">60 days</option>
+                </select>
+              </label>
+              <label>
+                Restocking Fee (%)
+                <input id="restockingFee" name="restockingFee" type="number" min="0" max="100" step="1" />
+              </label>
+              <label>
+                Return Shipping Paid By
+                <select id="returnShippingBy" name="returnShippingBy">
+                  <option value="Seller">Seller</option>
+                  <option value="Buyer">Buyer</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section>
+            <h3 class="section-title">Item Specifics</h3>
+            <p class="helper-text">Add searchable key/value pairs exactly as eBay expects them. Common examples include Brand, Size Type, Size, Color, and Material.</p>
+            <div id="itemSpecificsList" class="form-grid"></div>
+            <button type="button" id="addSpecificBtn">Add Item Specific</button>
+          </section>
+
+          <section>
+            <h3 class="section-title">Variations</h3>
+            <p class="helper-text">Define variation attributes (e.g., Size, Color). Provide comma separated values. Leave blank if your SKU does not use variations.</p>
+            <div id="variationList" class="form-grid"></div>
+            <button type="button" id="addVariationBtn">Add Variation Attribute</button>
+          </section>
+          <section>
+            <h3 class="section-title">Description & Media</h3>
+            <label>
+              Marketing Description
+              <textarea id="description" name="description" maxlength="10000" placeholder="Tell your buyer why this item is a must-have..."></textarea>
+              <span class="char-count" id="descriptionCharCount">0 characters</span>
+            </label>
+            <label>
+              Image URLs (one per line)
+              <textarea id="imageUrls" name="imageUrls" class="small" placeholder="https://i.ebayimg.com/images/g/....jpg"></textarea>
+            </label>
+            <label>
+              Internal Notes
+              <textarea id="internalNotes" name="internalNotes" class="small" placeholder="Warehouse bin A5, inspect for loose threads before shipping"></textarea>
+            </label>
+          </section>
+
+          <div class="form-footer">
+            <button type="button" id="previewBtn">Refresh Preview</button>
+            <button type="submit" id="saveListingBtn" class="primary">Add to Batch</button>
+          </div>
+        </form>
+      </article>
+
+      <aside class="card" aria-live="polite" aria-label="listing preview">
+        <div>
+          <h2>Listing Preview</h2>
+          <p class="helper-text">This instant preview renders File Exchange data into a customer facing listing mockup.</p>
+        </div>
+        <div id="listingPreview" aria-live="polite">
+          <p class="muted">Fill in the form to see a real-time preview.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="card" aria-label="batch queue">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <h2>Batch Queue</h2>
+          <input id="searchListings" type="search" placeholder="Search by title, SKU, or category" />
+        </div>
+        <div class="toolbar-right">
+          <button type="button" id="duplicateSelectedBtn">Duplicate</button>
+          <button type="button" id="deleteSelectedBtn">Delete</button>
+          <button type="button" id="markReadyBtn">Mark Ready</button>
+          <button type="button" id="exportCsvBtn">Export CSV</button>
+          <button type="button" id="exportJsonBtn">Export JSON</button>
+        </div>
+      </div>
+      <div class="table-wrapper" role="region" aria-live="polite">
+        <table id="listingsTable">
+          <thead>
+            <tr>
+              <th scope="col"><input type="checkbox" id="selectAll" /></th>
+              <th scope="col">Title</th>
+              <th scope="col">SKU</th>
+              <th scope="col">Format</th>
+              <th scope="col">Start Price</th>
+              <th scope="col">BIN</th>
+              <th scope="col">Qty</th>
+              <th scope="col">Category</th>
+              <th scope="col">Status</th>
+              <th scope="col">Updated</th>
+              <th scope="col" aria-label="Row actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="tableEmptyState" class="empty-state" hidden>Nothing in the queue yet. Add listings above or import a CSV.</div>
+    </section>
+
+    <section class="panels" aria-label="batch controls">
+      <article class="card">
+        <div>
+          <h3>Bulk Optimizations</h3>
+          <p class="helper-text">Select listings in the table, then apply global adjustments. Leave any field blank to skip that update.</p>
+        </div>
+        <div class="bulk-grid">
+          <label>
+            Price Adjustment Value
+            <input id="bulkPriceValue" type="number" min="0" step="0.01" placeholder="5" />
+          </label>
+          <label>
+            Adjustment Type
+            <select id="bulkPriceType">
+              <option value="percent">Percent</option>
+              <option value="flat">Flat Amount</option>
+            </select>
+          </label>
+          <label>
+            Direction
+            <select id="bulkPriceMode">
+              <option value="increase">Increase</option>
+              <option value="decrease">Decrease</option>
+            </select>
+          </label>
+          <label>
+            Set Quantity
+            <input id="bulkQuantity" type="number" min="0" />
+          </label>
+          <label>
+            Set Shipping Service
+            <input id="bulkShippingService" type="text" placeholder="FedEx Ground" />
+          </label>
+          <label>
+            Set Shipping Cost
+            <input id="bulkShippingCost" type="number" min="0" step="0.01" placeholder="12.99" />
+          </label>
+          <label>
+            Handling Time (days)
+            <input id="bulkHandling" type="number" min="0" />
+          </label>
+          <label>
+            Set Status
+            <select id="bulkStatus">
+              <option value="">-- Keep current --</option>
+              <option value="Draft">Draft</option>
+              <option value="Ready">Ready</option>
+              <option value="Scheduled">Scheduled</option>
+            </select>
+          </label>
+          <label>
+            Returns Policy
+            <select id="bulkReturns">
+              <option value="">-- Keep current --</option>
+              <option value="ReturnsAccepted">Accept returns</option>
+              <option value="ReturnsNotAccepted">No returns</option>
+            </select>
+          </label>
+          <label>
+            Return Days
+            <select id="bulkReturnDays">
+              <option value="">-- Keep current --</option>
+              <option value="14">14</option>
+              <option value="30">30</option>
+              <option value="60">60</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-footer">
+          <button type="button" id="applyBulkBtn" class="primary">Apply to Selected</button>
+          <button type="button" id="clearBulkBtn">Reset Fields</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <h3>Import Listings</h3>
+          <p class="helper-text">
+            Paste CSV content exported from spreadsheets or other tools. Required headers: Title, Description, Category,
+            ConditionID, Format, StartPrice, Quantity. Optional headers: SKU, BuyItNowPrice, ImageURLs (pipe separated),
+            ItemSpecifics (Brand=Apple;Color=Red), ShippingService, ShippingCost, HandlingTime, Status, ReturnsAccepted,
+            ReturnDays.
+          </p>
+        </div>
+        <div class="import-area">
+          <textarea id="importCsv" placeholder="Title,Description,Category,ConditionID,Format,StartPrice,Quantity
+Vintage Jacket,..."></textarea>
+          <div class="form-footer">
+            <button type="button" id="importCsvBtn">Parse CSV</button>
+            <button type="button" id="downloadTemplateBtn">Download Blank Template</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panels" aria-label="templates and analytics">
+      <article class="card">
+        <div>
+          <h3>Templates</h3>
+          <p class="helper-text">Save common listing skeletons and reapply them instantly to new inventory.</p>
+        </div>
+        <div id="templateList" class="template-list"></div>
+        <div class="empty-state" id="templateEmptyState" hidden>No templates saved yet.</div>
+      </article>
+
+      <article class="card">
+        <div>
+          <h3>Batch Insights</h3>
+          <p class="helper-text">Monitor overall value and readiness of your queue.</p>
+        </div>
+        <div id="summaryStats"></div>
+        <div class="preview-block">
+          <h4>Category Mix</h4>
+          <div id="categorySummary" class="helper-text"></div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (() => {
+      const stateKey = "ebayListingManagerState.v1";
+      const form = document.getElementById("singleListingForm");
+      const formErrors = document.getElementById("formErrors");
+      const previewEl = document.getElementById("listingPreview");
+      const titleEl = document.getElementById("title");
+      const subtitleEl = document.getElementById("subtitle");
+      const descriptionEl = document.getElementById("description");
+      const imageUrlsEl = document.getElementById("imageUrls");
+      const listingsTableBody = document.querySelector("#listingsTable tbody");
+      const tableEmptyState = document.getElementById("tableEmptyState");
+      const searchInput = document.getElementById("searchListings");
+      const toastEl = document.getElementById("toast");
+      const templateList = document.getElementById("templateList");
+      const templateEmptyState = document.getElementById("templateEmptyState");
+      const summaryStats = document.getElementById("summaryStats");
+      const categorySummary = document.getElementById("categorySummary");
+      const selectAllCheckbox = document.getElementById("selectAll");
+
+      const itemSpecificsList = document.getElementById("itemSpecificsList");
+      const variationList = document.getElementById("variationList");
+
+      const addSpecificBtn = document.getElementById("addSpecificBtn");
+      const addVariationBtn = document.getElementById("addVariationBtn");
+
+      const importInput = document.getElementById("importCsv");
+
+      const saveListingBtn = document.getElementById("saveListingBtn");
+      const previewBtn = document.getElementById("previewBtn");
+      const newListingBtn = document.getElementById("newListingBtn");
+      const saveTemplateBtn = document.getElementById("saveTemplateBtn");
+      const clearStorageBtn = document.getElementById("clearStorageBtn");
+
+      const duplicateSelectedBtn = document.getElementById("duplicateSelectedBtn");
+      const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
+      const markReadyBtn = document.getElementById("markReadyBtn");
+      const exportCsvBtn = document.getElementById("exportCsvBtn");
+      const exportJsonBtn = document.getElementById("exportJsonBtn");
+      const importCsvBtn = document.getElementById("importCsvBtn");
+      const downloadTemplateBtn = document.getElementById("downloadTemplateBtn");
+      const applyBulkBtn = document.getElementById("applyBulkBtn");
+      const clearBulkBtn = document.getElementById("clearBulkBtn");
+
+      const bulkPriceValue = document.getElementById("bulkPriceValue");
+      const bulkPriceType = document.getElementById("bulkPriceType");
+      const bulkPriceMode = document.getElementById("bulkPriceMode");
+      const bulkQuantity = document.getElementById("bulkQuantity");
+      const bulkShippingService = document.getElementById("bulkShippingService");
+      const bulkShippingCost = document.getElementById("bulkShippingCost");
+      const bulkHandling = document.getElementById("bulkHandling");
+      const bulkStatus = document.getElementById("bulkStatus");
+      const bulkReturns = document.getElementById("bulkReturns");
+      const bulkReturnDays = document.getElementById("bulkReturnDays");
+
+      const titleCharCount = document.getElementById("titleCharCount");
+      const subtitleCharCount = document.getElementById("subtitleCharCount");
+      const descriptionCharCount = document.getElementById("descriptionCharCount");
+
+      let listings = [];
+      let templates = [];
+      let editingIndex = null;
+
+      const defaultSpecifics = [
+        { name: "Brand", value: "" },
+        { name: "Size Type", value: "" },
+        { name: "Size", value: "" },
+        { name: "Color", value: "" }
+      ];
+
+      const defaultVariations = [];
+
+      const debounce = (fn, wait = 200) => {
+        let timeout;
+        return (...args) => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => fn.apply(null, args), wait);
+        };
+      };
+
+      const formatCurrency = (value) => {
+        if (value === null || value === undefined || value === "") return "";
+        const number = Number(value);
+        if (Number.isNaN(number)) return "";
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD"
+        }).format(number);
+      };
+
+      const escapeHtml = (unsafe) => {
+        if (typeof unsafe !== "string") return "";
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      };
+
+      const deepClone = (value) => {
+        if (typeof structuredClone === "function") {
+          return structuredClone(value);
+        }
+        return JSON.parse(JSON.stringify(value));
+      };
+
+      const persistState = () => {
+        const state = {
+          listings,
+          templates
+        };
+        localStorage.setItem(stateKey, JSON.stringify(state));
+      };
+
+      const loadState = () => {
+        try {
+          const raw = localStorage.getItem(stateKey);
+          if (!raw) {
+            renderItemSpecifics(defaultSpecifics);
+            renderVariations(defaultVariations);
+            return;
+          }
+          const state = JSON.parse(raw);
+          listings = Array.isArray(state.listings) ? state.listings : [];
+          templates = Array.isArray(state.templates) ? state.templates : [];
+        } catch (error) {
+          console.error("Failed to load state", error);
+          listings = [];
+          templates = [];
+        }
+        renderItemSpecifics(defaultSpecifics);
+        renderVariations(defaultVariations);
+        renderListingsTable();
+        renderTemplates();
+        updateSummary();
+      };
+      const createSpecificRow = (specific = { name: "", value: "" }) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "form-grid";
+        wrapper.style.gridTemplateColumns = "repeat(auto-fit, minmax(140px, 1fr))";
+        wrapper.style.gap = "10px";
+
+        const nameLabel = document.createElement("label");
+        nameLabel.textContent = "Name";
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.required = true;
+        nameInput.value = specific.name || "";
+        nameInput.placeholder = "Brand";
+        nameLabel.appendChild(nameInput);
+
+        const valueLabel = document.createElement("label");
+        valueLabel.textContent = "Value";
+        const valueInput = document.createElement("input");
+        valueInput.type = "text";
+        valueInput.required = true;
+        valueInput.value = specific.value || "";
+        valueInput.placeholder = "Apple";
+        valueLabel.appendChild(valueInput);
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.textContent = "Remove";
+        removeBtn.style.justifySelf = "flex-start";
+        removeBtn.addEventListener("click", () => {
+          wrapper.remove();
+        });
+
+        wrapper.append(nameLabel, valueLabel, removeBtn);
+        return wrapper;
+      };
+
+      const renderItemSpecifics = (specifics = []) => {
+        itemSpecificsList.innerHTML = "";
+        const entries = specifics.length ? specifics : defaultSpecifics;
+        entries.forEach((specific) => {
+          const row = createSpecificRow(specific);
+          itemSpecificsList.appendChild(row);
+        });
+      };
+
+      const createVariationRow = (variation = { name: "", values: "" }) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "form-grid";
+        wrapper.style.gridTemplateColumns = "repeat(auto-fit, minmax(160px, 1fr))";
+        wrapper.style.gap = "10px";
+
+        const nameLabel = document.createElement("label");
+        nameLabel.textContent = "Attribute";
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.placeholder = "Size";
+        nameInput.value = variation.name || "";
+        nameLabel.appendChild(nameInput);
+
+        const valuesLabel = document.createElement("label");
+        valuesLabel.textContent = "Values";
+        const valuesInput = document.createElement("input");
+        valuesInput.type = "text";
+        valuesInput.placeholder = "S, M, L";
+        if (Array.isArray(variation.values)) {
+          valuesInput.value = variation.values.join(", ");
+        } else {
+          valuesInput.value = variation.values || "";
+        }
+        valuesLabel.appendChild(valuesInput);
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.textContent = "Remove";
+        removeBtn.addEventListener("click", () => {
+          wrapper.remove();
+        });
+
+        wrapper.append(nameLabel, valuesLabel, removeBtn);
+        return wrapper;
+      };
+
+      const renderVariations = (variations = []) => {
+        variationList.innerHTML = "";
+        variations.forEach((variation) => {
+          variationList.appendChild(createVariationRow(variation));
+        });
+      };
+
+      const collectItemSpecifics = () => {
+        const specifics = [];
+        itemSpecificsList.querySelectorAll(".form-grid").forEach((row) => {
+          const [nameLabel, valueLabel] = row.querySelectorAll("label");
+          if (!nameLabel || !valueLabel) return;
+          const nameValue = nameLabel.querySelector("input").value.trim();
+          const valueValue = valueLabel.querySelector("input").value.trim();
+          if (nameValue && valueValue) {
+            specifics.push({ name: nameValue, value: valueValue });
+          }
+        });
+        return specifics;
+      };
+
+      const collectVariations = () => {
+        const variations = [];
+        variationList.querySelectorAll(".form-grid").forEach((row) => {
+          const [nameLabel, valuesLabel] = row.querySelectorAll("label");
+          if (!nameLabel || !valuesLabel) return;
+          const nameValue = nameLabel.querySelector("input").value.trim();
+          const valuesValue = valuesLabel.querySelector("input").value
+            .split(/[,\n]/)
+            .map((value) => value.trim())
+            .filter(Boolean);
+          if (nameValue && valuesValue.length) {
+            variations.push({ name: nameValue, values: valuesValue });
+          }
+        });
+        return variations;
+      };
+      const collectFormData = () => {
+        const formData = new FormData(form);
+        const listing = Object.fromEntries(formData.entries());
+        listing.quantity = Number(listing.quantity || 0);
+        listing.startPrice = Number(listing.startPrice || 0);
+        listing.buyNowPrice = listing.buyNowPrice ? Number(listing.buyNowPrice) : "";
+        listing.autoAccept = listing.autoAccept ? Number(listing.autoAccept) : "";
+        listing.autoDecline = listing.autoDecline ? Number(listing.autoDecline) : "";
+        listing.handlingTime = listing.handlingTime ? Number(listing.handlingTime) : "";
+        listing.shippingCost = listing.shippingCost ? Number(listing.shippingCost) : "";
+        listing.shippingAdditional = listing.shippingAdditional ? Number(listing.shippingAdditional) : "";
+        listing.intlShippingCost = listing.intlShippingCost ? Number(listing.intlShippingCost) : "";
+        listing.packageWeight = listing.packageWeight ? Number(listing.packageWeight) : "";
+        listing.restockingFee = listing.restockingFee ? Number(listing.restockingFee) : "";
+
+        listing.itemSpecifics = collectItemSpecifics();
+        listing.variations = collectVariations();
+        listing.imageUrls = imageUrlsEl.value
+          .split(/\n|,|;/)
+          .map((url) => url.trim())
+          .filter(Boolean);
+        listing.internalNotes = formData.get("internalNotes") || "";
+        listing.updatedAt = new Date().toISOString();
+        return listing;
+      };
+
+      const validateForm = (listing) => {
+        const errors = [];
+        if (!listing.title) errors.push("Title is required.");
+        if (!listing.category) errors.push("Category is required.");
+        if (!listing.condition) errors.push("Condition is required.");
+        if (!Number.isFinite(listing.startPrice) || listing.startPrice <= 0) {
+          errors.push("Start price must be a positive number.");
+        }
+        if (listing.format === "FixedPrice" && (!listing.buyNowPrice || listing.buyNowPrice <= 0)) {
+          errors.push("Fixed price listings require a Buy It Now price.");
+        }
+        if (!Number.isFinite(listing.quantity) || listing.quantity <= 0) {
+          errors.push("Quantity must be at least 1.");
+        }
+        if (listing.autoAccept && listing.autoDecline && listing.autoDecline >= listing.autoAccept) {
+          errors.push("Auto-decline must be lower than auto-accept.");
+        }
+        if (listing.restockingFee && (listing.restockingFee < 0 || listing.restockingFee > 100)) {
+          errors.push("Restocking fee must be between 0 and 100%.");
+        }
+
+        formErrors.style.display = errors.length ? "block" : "none";
+        formErrors.innerHTML = errors
+          .map((error) => `<div>• ${error}</div>`)
+          .join("");
+        return errors.length === 0;
+      };
+
+      const generateId = () => {
+        if (window.crypto?.randomUUID) {
+          return crypto.randomUUID();
+        }
+        return `listing-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+      };
+      const resetForm = () => {
+        form.reset();
+        editingIndex = null;
+        saveListingBtn.textContent = "Add to Batch";
+        saveListingBtn.classList.add("primary");
+        formErrors.style.display = "none";
+        renderItemSpecifics(defaultSpecifics);
+        renderVariations(defaultVariations);
+        updateCharCounts();
+        updatePreview();
+      };
+
+      const populateForm = (listing) => {
+        form.reset();
+        Object.entries(listing).forEach(([key, value]) => {
+          if (key === "itemSpecifics" || key === "variations" || key === "imageUrls" || key === "internalNotes") return;
+          const element = form.elements.namedItem(key);
+          if (!element) return;
+          if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) {
+            element.value = value != null ? value : "";
+          }
+        });
+        (form.elements.namedItem("internalNotes")).value = listing.internalNotes || "";
+        imageUrlsEl.value = (listing.imageUrls || []).join("\n");
+        renderItemSpecifics(listing.itemSpecifics?.length ? listing.itemSpecifics : defaultSpecifics);
+        renderVariations(listing.variations || []);
+        updateCharCounts();
+        updatePreview(listing);
+        saveListingBtn.textContent = "Update Listing";
+        saveListingBtn.classList.add("primary");
+      };
+
+      const updateCharCounts = () => {
+        titleCharCount.textContent = `${titleEl.value.length} / ${titleEl.maxLength}`;
+        subtitleCharCount.textContent = `${subtitleEl.value.length} / ${subtitleEl.maxLength}`;
+        descriptionCharCount.textContent = `${descriptionEl.value.length} characters`;
+      };
+
+      const summarizeSpecifics = (specifics) => {
+        if (!specifics || !specifics.length) return "No specifics";
+        return specifics
+          .map((specific) => `${specific.name}: ${specific.value}`)
+          .join(" • ");
+      };
+
+      const summarizeVariations = (variations) => {
+        if (!variations || !variations.length) return "No variations configured";
+        return variations
+          .map((variation) => `${variation.name} (${variation.values.length})`)
+          .join(" • ");
+      };
+
+      const updatePreview = (listingOverride) => {
+        const listing = listingOverride || collectFormData();
+        if (!listing.title && !listing.description && !listing.imageUrls.length) {
+          previewEl.innerHTML = '<p class="muted">Fill in the form to see a real-time preview.</p>';
+          return;
+        }
+
+        const specificsHtml = listing.itemSpecifics
+          .map((specific) => `<li><strong>${escapeHtml(specific.name)}:</strong> ${escapeHtml(specific.value)}</li>`)
+          .join("");
+
+        const variationsHtml = listing.variations
+          .map((variation) => `<li><strong>${escapeHtml(variation.name)}</strong>: ${variation.values.map(escapeHtml).join(", ")}</li>`)
+          .join("");
+
+        const imagesHtml = listing.imageUrls.length
+          ? listing.imageUrls
+              .map((url) => `<img src="${escapeHtml(url)}" alt="Listing image preview" loading="lazy" onerror="this.style.opacity=0.2;" />`)
+              .join("")
+          : '<p class="muted">No images supplied yet.</p>';
+
+        previewEl.innerHTML = `
+          <div class="preview-header">
+            <h3>${escapeHtml(listing.title || "Listing Preview")}</h3>
+            ${listing.subtitle ? `<p class="muted">${escapeHtml(listing.subtitle)}</p>` : ""}
+          </div>
+          <div class="preview-pricing">
+            <span class="price-tag">${formatCurrency(listing.buyNowPrice || listing.startPrice)}</span>
+            <span class="muted">Format: ${escapeHtml(listing.format || "")}</span>
+            <span class="muted">Qty: ${listing.quantity || 1}</span>
+          </div>
+          <div class="preview-grid">
+            <div class="preview-block">
+              <h4>Highlights</h4>
+              <ul class="muted">
+                ${specificsHtml || '<li>No item specifics yet.</li>'}
+              </ul>
+            </div>
+            <div class="preview-block">
+              <h4>Variations</h4>
+              <ul class="muted">
+                ${variationsHtml || '<li>Single SKU listing</li>'}
+              </ul>
+            </div>
+            <div class="preview-block">
+              <h4>Shipping</h4>
+              <p>${escapeHtml(listing.shippingService || "Shipping service TBD")}</p>
+              <p>${listing.shippingCost ? formatCurrency(listing.shippingCost) : "Calculated or free"}</p>
+              <p class="muted">Handling time: ${listing.handlingTime || "n/a"} day(s)</p>
+            </div>
+          </div>
+          <div class="preview-block preview-description">
+            ${listing.description ? escapeHtml(listing.description) : '<span class="muted">Add a compelling description to increase conversion.</span>'}
+          </div>
+          <div class="preview-block">
+            <h4>Gallery</h4>
+            <div class="gallery">${imagesHtml}</div>
+          </div>
+        `;
+      };
+      const renderListingsTable = (filter = searchInput.value.trim().toLowerCase()) => {
+        listingsTableBody.innerHTML = "";
+        const entries = listings.map((listing, index) => ({ listing, index }));
+        const filteredEntries = filter
+          ? entries.filter(({ listing }) => {
+              const haystack = [listing.title, listing.sku, listing.category]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+              return haystack.includes(filter);
+            })
+          : entries;
+
+        tableEmptyState.hidden = filteredEntries.length !== 0;
+
+        filteredEntries.forEach(({ listing, index }) => {
+          const row = document.createElement("tr");
+          row.dataset.index = index;
+
+          const checkboxCell = document.createElement("td");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.dataset.index = index;
+          checkbox.addEventListener("change", () => {
+            row.classList.toggle("selected", checkbox.checked);
+          });
+          checkboxCell.appendChild(checkbox);
+
+          const titleCell = document.createElement("td");
+          titleCell.innerHTML = `<strong>${escapeHtml(listing.title)}</strong><div class="muted">${escapeHtml(listing.subtitle || "")}</div>`;
+
+          const skuCell = document.createElement("td");
+          skuCell.textContent = listing.sku || "—";
+
+          const formatCell = document.createElement("td");
+          formatCell.innerHTML = `${escapeHtml(listing.format)}<div class="muted">${escapeHtml(listing.duration || "GTC")}</div>`;
+
+          const startPriceCell = document.createElement("td");
+          startPriceCell.textContent = formatCurrency(listing.startPrice);
+
+          const binCell = document.createElement("td");
+          binCell.textContent = listing.buyNowPrice ? formatCurrency(listing.buyNowPrice) : "—";
+
+          const quantityCell = document.createElement("td");
+          quantityCell.textContent = listing.quantity;
+
+          const categoryCell = document.createElement("td");
+          categoryCell.textContent = listing.category;
+
+          const statusCell = document.createElement("td");
+          const statusSpan = document.createElement("span");
+          statusSpan.className = `status-chip ${listing.status === "Ready" ? "status-ready" : "status-draft"}`;
+          statusSpan.textContent = listing.status || "Draft";
+          statusCell.appendChild(statusSpan);
+
+          const updatedCell = document.createElement("td");
+          updatedCell.textContent = new Date(listing.updatedAt || Date.now()).toLocaleString();
+
+          const actionCell = document.createElement("td");
+          actionCell.className = "table-actions";
+
+          const editBtn = document.createElement("button");
+          editBtn.type = "button";
+          editBtn.textContent = "Edit";
+          editBtn.addEventListener("click", () => {
+            editingIndex = index;
+            populateForm(listing);
+            showToast("Loaded listing into editor");
+          });
+
+          const duplicateBtn = document.createElement("button");
+          duplicateBtn.type = "button";
+          duplicateBtn.textContent = "Clone";
+          duplicateBtn.addEventListener("click", () => {
+            const clone = deepClone(listing);
+            clone.id = generateId();
+            clone.updatedAt = new Date().toISOString();
+            listings.push(clone);
+            persistState();
+            renderListingsTable();
+            updateSummary();
+            showToast("Listing duplicated", "success");
+          });
+
+          actionCell.append(editBtn, duplicateBtn);
+
+          row.append(
+            checkboxCell,
+            titleCell,
+            skuCell,
+            formatCell,
+            startPriceCell,
+            binCell,
+            quantityCell,
+            categoryCell,
+            statusCell,
+            updatedCell,
+            actionCell
+          );
+
+          listingsTableBody.appendChild(row);
+        });
+      };
+      const updateSummary = () => {
+        const totalListings = listings.length;
+        const readyCount = listings.filter((listing) => listing.status === "Ready").length;
+        const totalQuantity = listings.reduce((sum, listing) => sum + (Number(listing.quantity) || 0), 0);
+        const totalValue = listings.reduce((sum, listing) => sum + (Number(listing.buyNowPrice || listing.startPrice) || 0) * (Number(listing.quantity) || 0), 0);
+
+        summaryStats.innerHTML = `
+          <div class="stat">
+            <span>Total listings</span>
+            <strong>${totalListings}</strong>
+          </div>
+          <div class="stat">
+            <span>Ready to launch</span>
+            <strong>${readyCount}</strong>
+          </div>
+          <div class="stat">
+            <span>Total quantity</span>
+            <strong>${totalQuantity}</strong>
+          </div>
+          <div class="stat">
+            <span>Inventory value</span>
+            <strong>${formatCurrency(totalValue)}</strong>
+          </div>
+        `;
+
+        const categoryMap = new Map();
+        listings.forEach((listing) => {
+          if (!listing.category) return;
+          categoryMap.set(listing.category, (categoryMap.get(listing.category) || 0) + 1);
+        });
+        if (!categoryMap.size) {
+          categorySummary.textContent = "No categories yet.";
+        } else {
+          categorySummary.innerHTML = Array.from(categoryMap.entries())
+            .sort((a, b) => b[1] - a[1])
+            .map(([category, count]) => `<div>${escapeHtml(category)} <span class="muted">(${count})</span></div>`)
+            .join("");
+        }
+      };
+
+      const renderTemplates = () => {
+        templateList.innerHTML = "";
+        templateEmptyState.hidden = templates.length > 0;
+        templates.forEach((template) => {
+          const container = document.createElement("div");
+          container.className = "template-item";
+
+          const info = document.createElement("div");
+          info.innerHTML = `<strong>${escapeHtml(template.name)}</strong><div class="muted">${escapeHtml(template.data.title || "")}</div>`;
+
+          const actions = document.createElement("div");
+          actions.className = "template-actions";
+
+          const applyBtn = document.createElement("button");
+          applyBtn.type = "button";
+          applyBtn.textContent = "Apply";
+          applyBtn.addEventListener("click", () => {
+            populateForm(template.data);
+            showToast(`Template "${template.name}" applied`, "success");
+          });
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.type = "button";
+          deleteBtn.textContent = "Delete";
+          deleteBtn.addEventListener("click", () => {
+            templates = templates.filter((item) => item.id !== template.id);
+            persistState();
+            renderTemplates();
+            showToast("Template removed");
+          });
+
+          actions.append(applyBtn, deleteBtn);
+          container.append(info, actions);
+          templateList.appendChild(container);
+        });
+      };
+      const showToast = (message, variant = "info") => {
+        toastEl.textContent = message;
+        toastEl.classList.remove("toast-success", "toast-error");
+        if (variant === "success") {
+          toastEl.classList.add("toast-success");
+        }
+        if (variant === "error") {
+          toastEl.classList.add("toast-error");
+        }
+        toastEl.classList.add("show");
+        setTimeout(() => {
+          toastEl.classList.remove("show");
+        }, 2800);
+      };
+
+      const getSelectedIndexes = () => {
+        const checkboxes = listingsTableBody.querySelectorAll('input[type="checkbox"]:checked');
+        return Array.from(checkboxes).map((checkbox) => Number(checkbox.dataset.index));
+      };
+
+      const getSelectedListings = () => {
+        const indexes = getSelectedIndexes();
+        return indexes.map((index) => listings[index]).filter(Boolean);
+      };
+
+      const deleteSelectedListings = () => {
+        const indexes = getSelectedIndexes();
+        if (!indexes.length) {
+          showToast("Select rows first", "error");
+          return;
+        }
+        const confirmed = window.confirm(`Delete ${indexes.length} listing(s)? This cannot be undone.`);
+        if (!confirmed) return;
+        listings = listings.filter((_, index) => !indexes.includes(index));
+        persistState();
+        renderListingsTable();
+        updateSummary();
+        showToast("Listings deleted", "success");
+      };
+
+      const duplicateSelectedListings = () => {
+        const selected = getSelectedListings();
+        if (!selected.length) {
+          showToast("Select rows to duplicate", "error");
+          return;
+        }
+        selected.forEach((listing) => {
+          const clone = deepClone(listing);
+          clone.id = generateId();
+          clone.updatedAt = new Date().toISOString();
+          listings.push(clone);
+        });
+        persistState();
+        renderListingsTable();
+        updateSummary();
+        showToast(`Duplicated ${selected.length} listing(s)`, "success");
+      };
+
+      const markSelectedReady = () => {
+        const indexes = getSelectedIndexes();
+        if (!indexes.length) {
+          showToast("No listings selected", "error");
+          return;
+        }
+        indexes.forEach((index) => {
+          if (listings[index]) {
+            listings[index].status = "Ready";
+            listings[index].updatedAt = new Date().toISOString();
+          }
+        });
+        persistState();
+        renderListingsTable();
+        updateSummary();
+        showToast("Marked as ready", "success");
+      };
+      const applyBulkChanges = () => {
+        const indexes = getSelectedIndexes();
+        if (!indexes.length) {
+          showToast("Select listings to update", "error");
+          return;
+        }
+
+        const priceDelta = Number(bulkPriceValue.value);
+        const quantityValue = bulkQuantity.value ? Number(bulkQuantity.value) : null;
+        const shippingServiceValue = bulkShippingService.value.trim();
+        const shippingCostValue = bulkShippingCost.value ? Number(bulkShippingCost.value) : null;
+        const handlingValue = bulkHandling.value ? Number(bulkHandling.value) : null;
+        const statusValue = bulkStatus.value;
+        const returnsValue = bulkReturns.value;
+        const returnDaysValue = bulkReturnDays.value;
+
+        indexes.forEach((index) => {
+          const listing = listings[index];
+          if (!listing) return;
+
+          if (!Number.isNaN(priceDelta) && priceDelta > 0) {
+            const adjust = bulkPriceType.value === "percent"
+              ? listing.startPrice * (priceDelta / 100)
+              : priceDelta;
+            const delta = bulkPriceMode.value === "decrease" ? -adjust : adjust;
+            listing.startPrice = Math.max(0, Number(listing.startPrice || 0) + delta);
+            if (listing.buyNowPrice) {
+              listing.buyNowPrice = Math.max(0, Number(listing.buyNowPrice || 0) + delta);
+            }
+          }
+
+          if (quantityValue != null && !Number.isNaN(quantityValue)) {
+            listing.quantity = quantityValue;
+          }
+
+          if (shippingServiceValue) {
+            listing.shippingService = shippingServiceValue;
+          }
+
+          if (shippingCostValue != null && !Number.isNaN(shippingCostValue)) {
+            listing.shippingCost = shippingCostValue;
+          }
+
+          if (handlingValue != null && !Number.isNaN(handlingValue)) {
+            listing.handlingTime = handlingValue;
+          }
+
+          if (statusValue) {
+            listing.status = statusValue;
+          }
+
+          if (returnsValue) {
+            listing.returnsAccepted = returnsValue;
+          }
+
+          if (returnDaysValue) {
+            listing.returnDays = returnDaysValue;
+          }
+
+          listing.updatedAt = new Date().toISOString();
+        });
+
+        persistState();
+        renderListingsTable();
+        updateSummary();
+        showToast("Bulk update applied", "success");
+      };
+
+      const clearBulkFields = () => {
+        bulkPriceValue.value = "";
+        bulkQuantity.value = "";
+        bulkShippingService.value = "";
+        bulkShippingCost.value = "";
+        bulkHandling.value = "";
+        bulkStatus.value = "";
+        bulkReturns.value = "";
+        bulkReturnDays.value = "";
+      };
+      const splitCsvLine = (line) => {
+        const result = [];
+        let current = "";
+        let insideQuotes = false;
+        for (let i = 0; i < line.length; i += 1) {
+          const char = line[i];
+          if (char === '"') {
+            if (insideQuotes && line[i + 1] === '"') {
+              current += '"';
+              i += 1;
+            } else {
+              insideQuotes = !insideQuotes;
+            }
+          } else if (char === ',' && !insideQuotes) {
+            result.push(current.trim());
+            current = "";
+          } else {
+            current += char;
+          }
+        }
+        result.push(current.trim());
+        return result;
+      };
+
+      const parseCsv = (text) => {
+        const rows = text
+          .split(/\r?\n/)
+          .map((row) => row.trim())
+          .filter(Boolean);
+        if (!rows.length) return [];
+        const headers = splitCsvLine(rows[0]).map((header) => header.toLowerCase());
+        return rows.slice(1).map((row) => {
+          const values = splitCsvLine(row);
+          const record = {};
+          headers.forEach((header, index) => {
+            record[header] = values[index] ?? "";
+          });
+          return record;
+        });
+      };
+      const normalizeImportedListing = (record) => {
+        const listing = {
+          id: generateId(),
+          title: record.title || "",
+          description: record.description || "",
+          category: record.category || record["categoryid"] || "",
+          condition: record.conditionid || record.condition || "",
+          format: record.format || "FixedPrice",
+          duration: record.duration || "GTC",
+          quantity: Number(record.quantity || 1),
+          startPrice: Number(record.startprice || record.price || 0),
+          buyNowPrice: record.buyitnowprice ? Number(record.buyitnowprice) : "",
+          sku: record.sku || "",
+          subtitle: record.subtitle || "",
+          status: record.status || "Draft",
+          shippingService: record.shippingservice || "",
+          shippingCost: record.shippingcost ? Number(record.shippingcost) : "",
+          handlingTime: record.handlingtime ? Number(record.handlingtime) : "",
+          returnsAccepted: record.returnsaccepted || "ReturnsAccepted",
+          returnDays: record.returndays || "30",
+          itemSpecifics: [],
+          variations: [],
+          imageUrls: [],
+          internalNotes: record.internalnotes || "",
+          updatedAt: new Date().toISOString()
+        };
+
+        if (record.images || record.imageurls) {
+          listing.imageUrls = (record.images || record.imageurls)
+            .split(/\||\n|,/)
+            .map((url) => url.trim())
+            .filter(Boolean);
+        }
+
+        if (record.itemspecifics) {
+          listing.itemSpecifics = record.itemspecifics
+            .split(/;|\|/)
+            .map((pair) => pair.trim())
+            .filter(Boolean)
+            .map((pair) => {
+              const [name, value] = pair.split("=").map((part) => part.trim());
+              return name && value ? { name, value } : null;
+            })
+            .filter(Boolean);
+        }
+
+        if (record.variations) {
+          listing.variations = record.variations
+            .split("|")
+            .map((entry) => entry.trim())
+            .filter(Boolean)
+            .map((entry) => {
+              const [name, values] = entry.split(":");
+              if (!name || !values) return null;
+              return {
+                name: name.trim(),
+                values: values
+                  .split(/[,\n]/)
+                  .map((value) => value.trim())
+                  .filter(Boolean)
+              };
+            })
+            .filter(Boolean);
+        }
+
+        if (!listing.itemSpecifics.length) {
+          listing.itemSpecifics = deepClone(defaultSpecifics);
+        }
+
+        if (!listing.variations.length) {
+          listing.variations = [];
+        }
+
+        return listing;
+      };
+
+      const importFromCsv = () => {
+        const text = importInput.value.trim();
+        if (!text) {
+          showToast("Paste CSV content first", "error");
+          return;
+        }
+        try {
+          const records = parseCsv(text);
+          if (!records.length) {
+            showToast("No rows detected", "error");
+            return;
+          }
+          const newListings = records.map(normalizeImportedListing);
+          listings.push(...newListings);
+          persistState();
+          renderListingsTable();
+          updateSummary();
+          showToast(`Imported ${newListings.length} listing(s)`, "success");
+        } catch (error) {
+          console.error("Failed to import CSV", error);
+          showToast("Failed to parse CSV", "error");
+        }
+      };
+      const downloadFile = (filename, content, mime = "text/plain") => {
+        const blob = new Blob([content], { type: mime });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        requestAnimationFrame(() => {
+          URL.revokeObjectURL(link.href);
+          document.body.removeChild(link);
+        });
+      };
+      const exportToCsv = () => {
+        if (!listings.length) {
+          showToast("No listings to export", "error");
+          return;
+        }
+        const headers = [
+          "Title",
+          "Subtitle",
+          "Description",
+          "Category",
+          "ConditionID",
+          "Format",
+          "Duration",
+          "Quantity",
+          "StartPrice",
+          "BuyItNowPrice",
+          "SKU",
+          "ShippingService",
+          "ShippingCost",
+          "HandlingTime",
+          "ReturnsAccepted",
+          "ReturnDays",
+          "ItemSpecifics",
+          "Variations",
+          "ImageURLs",
+          "Status"
+        ];
+
+        const escapeField = (value) => {
+          if (value === null || value === undefined) return "";
+          const stringValue = String(value);
+          const newlineChar = String.fromCharCode(10);
+          const needsQuoting =
+            stringValue.includes('"') ||
+            stringValue.includes(',') ||
+            stringValue.includes(newlineChar);
+          if (needsQuoting) {
+            return '"' + stringValue.split('"').join('""') + '"';
+          }
+          return stringValue;
+        };
+
+        const rows = listings.map((listing) => {
+          const specifics = listing.itemSpecifics
+            .map((specific) => `${specific.name}=${specific.value}`)
+            .join(";");
+          const variations = listing.variations
+            .map((variation) => `${variation.name}:${variation.values.join("|")}`)
+            .join(";");
+          const images = (listing.imageUrls || []).join("|");
+
+          const values = [
+            listing.title,
+            listing.subtitle || "",
+            listing.description || "",
+            listing.category || "",
+            listing.condition || "",
+            listing.format || "",
+            listing.duration || "GTC",
+            listing.quantity || 1,
+            listing.startPrice || 0,
+            listing.buyNowPrice || "",
+            listing.sku || "",
+            listing.shippingService || "",
+            listing.shippingCost || "",
+            listing.handlingTime || "",
+            listing.returnsAccepted || "ReturnsAccepted",
+            listing.returnDays || "30",
+            specifics,
+            variations,
+            images,
+            listing.status || "Draft"
+          ];
+          return values.map(escapeField).join(",");
+        });
+
+        const csvContent = [headers.join(","), ...rows].join("\n");
+        downloadFile(`ebay-listings-${Date.now()}.csv`, csvContent, "text/csv");
+        showToast("CSV exported", "success");
+      };
+      const exportToJson = () => {
+        if (!listings.length) {
+          showToast("No listings to export", "error");
+          return;
+        }
+        const json = JSON.stringify(listings, null, 2);
+        downloadFile(`ebay-listings-${Date.now()}.json`, json, "application/json");
+        showToast("JSON exported", "success");
+      };
+
+      const downloadBlankTemplate = () => {
+        const headers = [
+          "Title",
+          "Description",
+          "Category",
+          "ConditionID",
+          "Format",
+          "StartPrice",
+          "Quantity",
+          "SKU",
+          "BuyItNowPrice",
+          "ItemSpecifics",
+          "ImageURLs"
+        ];
+        const csv = headers.join(",");
+        downloadFile("ebay-template.csv", csv, "text/csv");
+        showToast("Template downloaded", "success");
+      };
+      const saveTemplate = () => {
+        const listing = collectFormData();
+        if (!listing.title) {
+          showToast("Add a title before saving a template", "error");
+          return;
+        }
+        const name = window.prompt("Template name", listing.title.slice(0, 40));
+        if (!name) return;
+        const template = {
+          id: generateId(),
+          name: name.trim(),
+          data: listing
+        };
+        templates = templates.filter((item) => item.name.toLowerCase() !== template.name.toLowerCase());
+        templates.push(template);
+        persistState();
+        renderTemplates();
+        showToast("Template saved", "success");
+      };
+
+      const clearAllStorage = () => {
+        const confirmed = window.confirm("This will remove all listings and templates. Continue?");
+        if (!confirmed) return;
+        localStorage.removeItem(stateKey);
+        listings = [];
+        templates = [];
+        resetForm();
+        renderListingsTable();
+        renderTemplates();
+        updateSummary();
+        showToast("All data cleared", "success");
+      };
+
+      const debouncedPreview = debounce(() => updatePreview(), 200);
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const listing = collectFormData();
+        if (!validateForm(listing)) return;
+        if (editingIndex !== null && listings[editingIndex]) {
+          listing.id = listings[editingIndex].id || generateId();
+          listings[editingIndex] = { ...listings[editingIndex], ...listing };
+          showToast("Listing updated", "success");
+        } else {
+          listing.id = generateId();
+          listings.push(listing);
+          showToast("Listing added to batch", "success");
+        }
+        persistState();
+        renderListingsTable();
+        updateSummary();
+        resetForm();
+      });
+
+      form.addEventListener("input", () => {
+        updateCharCounts();
+        debouncedPreview();
+      });
+
+      previewBtn.addEventListener("click", () => updatePreview());
+      addSpecificBtn.addEventListener("click", () => itemSpecificsList.appendChild(createSpecificRow()));
+      addVariationBtn.addEventListener("click", () => variationList.appendChild(createVariationRow()));
+      newListingBtn.addEventListener("click", () => resetForm());
+      saveTemplateBtn.addEventListener("click", () => saveTemplate());
+      clearStorageBtn.addEventListener("click", () => clearAllStorage());
+
+      duplicateSelectedBtn.addEventListener("click", () => duplicateSelectedListings());
+      deleteSelectedBtn.addEventListener("click", () => deleteSelectedListings());
+      markReadyBtn.addEventListener("click", () => markSelectedReady());
+      exportCsvBtn.addEventListener("click", () => exportToCsv());
+      exportJsonBtn.addEventListener("click", () => exportToJson());
+      importCsvBtn.addEventListener("click", () => importFromCsv());
+      downloadTemplateBtn.addEventListener("click", () => downloadBlankTemplate());
+      applyBulkBtn.addEventListener("click", () => applyBulkChanges());
+      clearBulkBtn.addEventListener("click", () => clearBulkFields());
+
+      searchInput.addEventListener("input", debounce(() => renderListingsTable(), 150));
+
+      selectAllCheckbox.addEventListener("change", () => {
+        const checked = selectAllCheckbox.checked;
+        listingsTableBody.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+          checkbox.checked = checked;
+          checkbox.dispatchEvent(new Event("change"));
+        });
+      });
+
+      const observer = new MutationObserver(() => {
+        selectAllCheckbox.checked = false;
+      });
+      observer.observe(listingsTableBody, { childList: true });
+
+      window.addEventListener("keydown", (event) => {
+        if (event.ctrlKey && event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          saveTemplate();
+        }
+      });
+
+      loadState();
+      resetForm();
+      updatePreview();
+    })();
+  </script>
+</body>
+</html>
