@@ -1,4 +1,4 @@
-## 4. Launching the Control Tower (Hello World Style)
+## 4. Launching the Control Tower
 
 The quickest way to prove everything works is to bootstrap the control tower and register a loopback device. Drop the following snippet into a file named `launch_phreak_v5.py` inside the repository root:
 
