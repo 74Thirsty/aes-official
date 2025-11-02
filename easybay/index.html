@@ -637,23 +637,35 @@
   </style>
 </head>
 <body>
-  <header class="app-header" aria-label="eBay listing manager header">
+  
+ <header class="app-header">
+  <div class="header-left">
+    <aside id="previewContainer" class="live-preview-area" aria-label="Listing preview">
+      <h2 style="margin-bottom:10px;">Live Preview</h2>
+      <div id="listingPreview" aria-live="polite">
+        <p class="muted">Fill in the form to see a real-time preview.</p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="header-right">
     <div class="brand">
       <div class="brand-title">
         <span class="badge">Power Seller Toolkit</span>
         <span>eBay Listing Manager</span>
       </div>
       <p class="brand-subtitle">
-        Draft single listings, orchestrate bulk uploads, and keep your marketplace inventory synchronized without leaving this
-        tab. Optimized for speed, clarity, and File Exchange compatibility.
+        Draft single listings, orchestrate bulk uploads, and keep your marketplace inventory synchronized without leaving this tab.
       </p>
     </div>
+
     <div class="header-actions">
       <button id="newListingBtn" type="button" class="primary">New Listing</button>
       <button id="saveTemplateBtn" type="button">Save Template</button>
       <button id="clearStorageBtn" type="button">Clear Storage</button>
     </div>
-  </header>
+  </div>
+</header>
 
   <main class="app-main">
     <section id="listing-configuration" class="workspace-section" aria-label="Listing configuration">
@@ -1025,25 +1037,6 @@ Vintage Jacket,..."></textarea>
         </article>
       </div>
     </section>
-
-    <section id="live-preview-area" class="workspace-section" aria-label="Live preview area">
-      <header class="section-header">
-        <h2>Live Preview</h2>
-        <p class="helper-text">Preview the buyer-facing rendering of your listing as you type. This area must remain visible and functional.</p>
-      </header>
-      <div class="section-grid section-grid--single">
-        <aside class="card" aria-live="polite" aria-label="listing preview">
-          <div>
-            <h2>Listing Preview</h2>
-            <p class="helper-text">This instant preview renders File Exchange data into a customer facing listing mockup.</p>
-          </div>
-          <div id="listingPreview" aria-live="polite">
-            <p class="muted">Fill in the form to see a real-time preview.</p>
-          </div>
-        </aside>
-      </div>
-    </section>
-
     <section id="preview-output" class="workspace-section" aria-label="Preview and output panel">
       <header class="section-header">
         <h2>Preview &amp; Output Panel</h2>
