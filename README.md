@@ -13,6 +13,10 @@ This is a fully automated financial document system built to facilitate efficien
 
 ---
 
+![Sheen Banner](https://raw.githubusercontent.com/74Thirsty/74Thirsty/main/assets/banner.svg)
+
+---
+
 ## Introduction to Accounting
 
 Accounting is the process of recording, classifying, and summarizing financial transactions to provide useful financial information for decision-making. A core part of accounting is **journalizing**, which involves recording transactions in the appropriate accounts. Each transaction impacts at least two accounts, typically involving a **debit** and a **credit**.
