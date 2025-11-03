@@ -275,6 +275,39 @@
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
+    .item-specific-row {
+      align-items: end;
+    }
+
+    .item-specific-static-label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    .item-specific-static-heading {
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      color: rgba(203, 213, 225, 0.9);
+    }
+
+    .item-specific-static-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.45);
+      color: var(--text-dim);
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      min-height: 44px;
+    }
+
     .form-grid-note {
       grid-column: 1 / -1;
     }
@@ -1299,10 +1332,10 @@ Vintage Jacket,..."></textarea>
       let editingIndex = null;
 
       const defaultSpecifics = [
-        { name: "Brand", value: "" },
-        { name: "Size Type", value: "" },
-        { name: "Size", value: "" },
-        { name: "Color", value: "" }
+        { name: "Brand", value: "", valuePlaceholder: "Apple", locked: true },
+        { name: "Size Type", value: "", valuePlaceholder: "Regular", locked: true },
+        { name: "Size", value: "", valuePlaceholder: "Large", locked: true },
+        { name: "Color", value: "", valuePlaceholder: "Navy", locked: true }
       ];
 
       const defaultVariations = [];
@@ -1372,52 +1405,63 @@ Vintage Jacket,..."></textarea>
         renderTemplates();
         updateSummary();
       };
-      let specificsRowCounter = 0;
-
-      const createSpecificRow = (specific = { name: "", value: "" }) => {
-        specificsRowCounter += 1;
+      const createSpecificRow = (
+        specific = { name: "", value: "", valuePlaceholder: "", namePlaceholder: "", locked: false }
+      ) => {
         const wrapper = document.createElement("div");
-        wrapper.className = "form-grid specifics-row";
+        wrapper.className = "form-grid item-specific-row";
+        wrapper.style.gridTemplateColumns = "repeat(auto-fit, minmax(160px, 1fr))";
+        wrapper.style.gap = "10px";
 
-        const nameLabel = document.createElement("label");
-        const nameId = `itemSpecificName-${specificsRowCounter}`;
-        const nameTitle = document.createElement("span");
-        nameTitle.className = "label-title";
-        nameTitle.textContent = "Item Specific Name";
-        const nameHint = document.createElement("span");
-        nameHint.className = "label-hint";
-        nameHint.textContent = "Matches eBay's field label (e.g., Brand)";
-        const nameHintId = `itemSpecificNameHint-${specificsRowCounter}`;
-        nameHint.id = nameHintId;
-        const nameInput = document.createElement("input");
-        nameInput.type = "text";
-        nameInput.required = true;
-        nameInput.id = nameId;
-        nameInput.placeholder = "Brand";
-        nameInput.value = specific.name || "";
-        nameInput.setAttribute("aria-describedby", nameHintId);
-        nameLabel.setAttribute("for", nameId);
-        nameLabel.append(nameTitle, nameHint, nameInput);
+        let nameContainer;
+
+        if (specific.locked) {
+          const nameLabel = document.createElement("label");
+          nameLabel.className = "item-specific-static-label";
+
+          const labelTitle = document.createElement("span");
+          labelTitle.textContent = specific.name || "Item Specific";
+          labelTitle.className = "item-specific-static-heading";
+          const pill = document.createElement("span");
+          pill.className = "item-specific-static-pill";
+          pill.textContent = "Preset field";
+
+          nameLabel.append(labelTitle, pill);
+
+          const nameInput = document.createElement("input");
+          nameInput.type = "hidden";
+          nameInput.value = specific.name || "";
+          nameInput.dataset.locked = "true";
+          nameInput.className = "item-specific-name-input";
+          nameLabel.appendChild(nameInput);
+          nameContainer = nameLabel;
+        } else {
+          const nameLabel = document.createElement("label");
+          nameLabel.textContent = "Item Specific Name";
+          nameLabel.className = "item-specific-name-label";
+
+          const nameInput = document.createElement("input");
+          nameInput.type = "text";
+          nameInput.required = true;
+          nameInput.value = specific.name || "";
+          nameInput.placeholder = specific.namePlaceholder || "Item Specific (e.g., Material)";
+          nameInput.dataset.locked = "false";
+          nameInput.className = "item-specific-name-input";
+          nameLabel.appendChild(nameInput);
+          nameContainer = nameLabel;
+        }
 
         const valueLabel = document.createElement("label");
-        const valueId = `itemSpecificValue-${specificsRowCounter}`;
-        const valueTitle = document.createElement("span");
-        valueTitle.className = "label-title";
-        valueTitle.textContent = "Item Specific Value";
-        const valueHint = document.createElement("span");
-        valueHint.className = "label-hint";
-        valueHint.textContent = "What buyers will see (e.g., Apple)";
-        const valueHintId = `itemSpecificValueHint-${specificsRowCounter}`;
-        valueHint.id = valueHintId;
+        valueLabel.className = "item-specific-value-label";
+        valueLabel.textContent = specific.name ? `${specific.name} Value` : "Item Specific Value";
+
         const valueInput = document.createElement("input");
         valueInput.type = "text";
         valueInput.required = true;
-        valueInput.id = valueId;
-        valueInput.placeholder = "Apple";
         valueInput.value = specific.value || "";
-        valueInput.setAttribute("aria-describedby", valueHintId);
-        valueLabel.setAttribute("for", valueId);
-        valueLabel.append(valueTitle, valueHint, valueInput);
+        valueInput.placeholder = specific.valuePlaceholder || "Enter value";
+        valueInput.className = "item-specific-value-input";
+        valueLabel.appendChild(valueInput);
 
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
@@ -1435,16 +1479,30 @@ Vintage Jacket,..."></textarea>
           wrapper.remove();
         });
 
-        wrapper.append(nameLabel, valueLabel, removeBtn);
+        if (nameContainer) {
+          wrapper.appendChild(nameContainer);
+        }
+        wrapper.append(valueLabel, removeBtn);
         return wrapper;
       };
 
       const renderItemSpecifics = (specifics = []) => {
         itemSpecificsList.innerHTML = "";
-        specificsRowCounter = 0;
-        const entries = specifics.length ? specifics : defaultSpecifics;
-        entries.forEach((specific) => {
-          const row = createSpecificRow(specific);
+        const source = specifics.length ? specifics : defaultSpecifics;
+        const isDefaultSource = source === defaultSpecifics;
+
+        source.forEach((specific) => {
+          const preset = defaultSpecifics.find((item) => item.name === specific.name);
+          const locked =
+            specific.locked !== undefined
+              ? specific.locked
+              : isDefaultSource && preset
+              ? Boolean(preset.locked)
+              : false;
+          const mergedSpecific = preset
+            ? { ...preset, ...specific, locked }
+            : { ...specific, locked: Boolean(locked) };
+          const row = createSpecificRow(mergedSpecific);
           itemSpecificsList.appendChild(row);
         });
       };
@@ -1528,13 +1586,18 @@ Vintage Jacket,..."></textarea>
 
       const collectItemSpecifics = () => {
         const specifics = [];
-        itemSpecificsList.querySelectorAll(".specifics-row").forEach((row) => {
-          const [nameLabel, valueLabel] = row.querySelectorAll("label");
-          if (!nameLabel || !valueLabel) return;
-          const nameValue = nameLabel.querySelector("input").value.trim();
-          const valueValue = valueLabel.querySelector("input").value.trim();
+        itemSpecificsList.querySelectorAll(".item-specific-row").forEach((row) => {
+          const nameField = row.querySelector(".item-specific-name-input");
+          const valueField = row.querySelector(".item-specific-value-input");
+          if (!nameField || !valueField) return;
+          const nameValue = nameField.value.trim();
+          const valueValue = valueField.value.trim();
           if (nameValue && valueValue) {
-            specifics.push({ name: nameValue, value: valueValue });
+            const specific = { name: nameValue, value: valueValue };
+            if (nameField.dataset.locked === "true") {
+              specific.locked = true;
+            }
+            specifics.push(specific);
           }
         });
         return specifics;
