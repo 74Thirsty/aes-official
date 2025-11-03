@@ -941,12 +941,11 @@
             <div>
               <h3>Import Listings</h3>
               <p class="helper-text">
-                Paste CSV content exported from spreadsheets or other tools. Required headers: Title, Description, Category, ConditionID, Format, StartPrice, Quantity. Optional headers: SKU, BuyItNowPrice, ImageURLs (pipe separated), ItemSpecifics (Brand=Apple;Color=Red), ShippingService, ShippingCost, HandlingTime, Status, ReturnsAccepted, ReturnDays.
+                
               </p>
             </div>
             <div class="import-area">
-              <textarea id="importCsv" placeholder="Title,Description,Category,ConditionID,Format,StartPrice,Quantity
-Vintage Jacket,..."></textarea>
+              <textarea id="importCsv" placeholder="Paste CSV content exported from spreadsheets or other tools. Required headers: Title, Description, Category, ConditionID, Format, StartPrice, Quantity. Optional headers: SKU, BuyItNowPrice, ImageURLs (pipe separated), ItemSpecifics (Brand=Apple;Color=Red), ShippingService, ShippingCost, HandlingTime, Status, ReturnsAccepted, ReturnDays."></textarea>
               <div class="form-footer">
                 <button type="button" id="importCsvBtn">Parse CSV</button>
                 <button type="button" id="downloadTemplateBtn">Download Blank Template</button>
