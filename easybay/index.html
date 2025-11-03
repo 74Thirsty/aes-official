@@ -65,6 +65,19 @@
       color: var(--text-dim);
     }
 
+    label .label-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      color: rgba(226, 232, 240, 0.85);
+    }
+
+    label .label-hint {
+      font-size: 0.75rem;
+      color: rgba(148, 163, 184, 0.9);
+    }
+
     input, select, textarea {
       width: 100%;
       padding: 10px 12px;
@@ -264,6 +277,22 @@
 
     .form-grid-note {
       grid-column: 1 / -1;
+    }
+
+    .specifics-row,
+    .variations-row {
+      grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;
+      align-items: end;
+    }
+
+    .variations-row {
+      grid-template-columns: minmax(200px, 1fr) minmax(220px, 1fr) auto;
+    }
+
+    .specifics-row > button,
+    .variations-row > button {
+      justify-self: flex-start;
+      align-self: end;
     }
 
     .api-grid {
@@ -1343,34 +1372,65 @@ Vintage Jacket,..."></textarea>
         renderTemplates();
         updateSummary();
       };
+      let specificsRowCounter = 0;
+
       const createSpecificRow = (specific = { name: "", value: "" }) => {
+        specificsRowCounter += 1;
         const wrapper = document.createElement("div");
-        wrapper.className = "form-grid";
-        wrapper.style.gridTemplateColumns = "repeat(auto-fit, minmax(140px, 1fr))";
-        wrapper.style.gap = "10px";
+        wrapper.className = "form-grid specifics-row";
 
         const nameLabel = document.createElement("label");
-        nameLabel.textContent = "Item Specific Name";
+        const nameId = `itemSpecificName-${specificsRowCounter}`;
+        const nameTitle = document.createElement("span");
+        nameTitle.className = "label-title";
+        nameTitle.textContent = "Item Specific Name";
+        const nameHint = document.createElement("span");
+        nameHint.className = "label-hint";
+        nameHint.textContent = "Matches eBay's field label (e.g., Brand)";
+        const nameHintId = `itemSpecificNameHint-${specificsRowCounter}`;
+        nameHint.id = nameHintId;
         const nameInput = document.createElement("input");
         nameInput.type = "text";
         nameInput.required = true;
-        nameInput.value = specific.name || "";
+        nameInput.id = nameId;
         nameInput.placeholder = "Brand";
-        nameLabel.appendChild(nameInput);
+        nameInput.value = specific.name || "";
+        nameInput.setAttribute("aria-describedby", nameHintId);
+        nameLabel.setAttribute("for", nameId);
+        nameLabel.append(nameTitle, nameHint, nameInput);
 
         const valueLabel = document.createElement("label");
-        valueLabel.textContent = "Item Specific Value";
+        const valueId = `itemSpecificValue-${specificsRowCounter}`;
+        const valueTitle = document.createElement("span");
+        valueTitle.className = "label-title";
+        valueTitle.textContent = "Item Specific Value";
+        const valueHint = document.createElement("span");
+        valueHint.className = "label-hint";
+        valueHint.textContent = "What buyers will see (e.g., Apple)";
+        const valueHintId = `itemSpecificValueHint-${specificsRowCounter}`;
+        valueHint.id = valueHintId;
         const valueInput = document.createElement("input");
         valueInput.type = "text";
         valueInput.required = true;
-        valueInput.value = specific.value || "";
+        valueInput.id = valueId;
         valueInput.placeholder = "Apple";
-        valueLabel.appendChild(valueInput);
+        valueInput.value = specific.value || "";
+        valueInput.setAttribute("aria-describedby", valueHintId);
+        valueLabel.setAttribute("for", valueId);
+        valueLabel.append(valueTitle, valueHint, valueInput);
 
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
         removeBtn.textContent = "Remove";
-        removeBtn.style.justifySelf = "flex-start";
+        const updateSpecificRemoveLabel = () => {
+          const labelName = nameInput.value.trim();
+          removeBtn.setAttribute(
+            "aria-label",
+            labelName ? `Remove item specific ${labelName}` : "Remove item specific"
+          );
+        };
+        updateSpecificRemoveLabel();
+        nameInput.addEventListener("input", updateSpecificRemoveLabel);
         removeBtn.addEventListener("click", () => {
           wrapper.remove();
         });
@@ -1381,6 +1441,7 @@ Vintage Jacket,..."></textarea>
 
       const renderItemSpecifics = (specifics = []) => {
         itemSpecificsList.innerHTML = "";
+        specificsRowCounter = 0;
         const entries = specifics.length ? specifics : defaultSpecifics;
         entries.forEach((specific) => {
           const row = createSpecificRow(specific);
@@ -1388,22 +1449,42 @@ Vintage Jacket,..."></textarea>
         });
       };
 
+      let variationsRowCounter = 0;
+
       const createVariationRow = (variation = { name: "", values: "" }) => {
+        variationsRowCounter += 1;
         const wrapper = document.createElement("div");
-        wrapper.className = "form-grid";
-        wrapper.style.gridTemplateColumns = "repeat(auto-fit, minmax(160px, 1fr))";
-        wrapper.style.gap = "10px";
+        wrapper.className = "form-grid variations-row";
 
         const nameLabel = document.createElement("label");
-        nameLabel.textContent = "Attribute";
+        const variationNameId = `variationName-${variationsRowCounter}`;
+        const nameTitle = document.createElement("span");
+        nameTitle.className = "label-title";
+        nameTitle.textContent = "Attribute Name";
+        const nameHint = document.createElement("span");
+        nameHint.className = "label-hint";
+        nameHint.textContent = "e.g., Size";
+        const nameHintId = `variationNameHint-${variationsRowCounter}`;
+        nameHint.id = nameHintId;
         const nameInput = document.createElement("input");
         nameInput.type = "text";
         nameInput.placeholder = "Size";
         nameInput.value = variation.name || "";
-        nameLabel.appendChild(nameInput);
+        nameInput.id = variationNameId;
+        nameInput.setAttribute("aria-describedby", nameHintId);
+        nameLabel.setAttribute("for", variationNameId);
+        nameLabel.append(nameTitle, nameHint, nameInput);
 
         const valuesLabel = document.createElement("label");
-        valuesLabel.textContent = "Values";
+        const variationValuesId = `variationValues-${variationsRowCounter}`;
+        const valuesTitle = document.createElement("span");
+        valuesTitle.className = "label-title";
+        valuesTitle.textContent = "Attribute Values";
+        const valuesHint = document.createElement("span");
+        valuesHint.className = "label-hint";
+        valuesHint.textContent = "Separate with commas (e.g., S, M, L)";
+        const valuesHintId = `variationValuesHint-${variationsRowCounter}`;
+        valuesHint.id = valuesHintId;
         const valuesInput = document.createElement("input");
         valuesInput.type = "text";
         valuesInput.placeholder = "S, M, L";
@@ -1412,11 +1493,23 @@ Vintage Jacket,..."></textarea>
         } else {
           valuesInput.value = variation.values || "";
         }
-        valuesLabel.appendChild(valuesInput);
+        valuesInput.id = variationValuesId;
+        valuesInput.setAttribute("aria-describedby", valuesHintId);
+        valuesLabel.setAttribute("for", variationValuesId);
+        valuesLabel.append(valuesTitle, valuesHint, valuesInput);
 
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
         removeBtn.textContent = "Remove";
+        const updateVariationRemoveLabel = () => {
+          const labelName = nameInput.value.trim();
+          removeBtn.setAttribute(
+            "aria-label",
+            labelName ? `Remove variation attribute ${labelName}` : "Remove variation attribute"
+          );
+        };
+        updateVariationRemoveLabel();
+        nameInput.addEventListener("input", updateVariationRemoveLabel);
         removeBtn.addEventListener("click", () => {
           wrapper.remove();
         });
@@ -1427,6 +1520,7 @@ Vintage Jacket,..."></textarea>
 
       const renderVariations = (variations = []) => {
         variationList.innerHTML = "";
+        variationsRowCounter = 0;
         variations.forEach((variation) => {
           variationList.appendChild(createVariationRow(variation));
         });
@@ -1434,7 +1528,7 @@ Vintage Jacket,..."></textarea>
 
       const collectItemSpecifics = () => {
         const specifics = [];
-        itemSpecificsList.querySelectorAll(".form-grid").forEach((row) => {
+        itemSpecificsList.querySelectorAll(".specifics-row").forEach((row) => {
           const [nameLabel, valueLabel] = row.querySelectorAll("label");
           if (!nameLabel || !valueLabel) return;
           const nameValue = nameLabel.querySelector("input").value.trim();
@@ -1448,7 +1542,7 @@ Vintage Jacket,..."></textarea>
 
       const collectVariations = () => {
         const variations = [];
-        variationList.querySelectorAll(".form-grid").forEach((row) => {
+        variationList.querySelectorAll(".variations-row").forEach((row) => {
           const [nameLabel, valuesLabel] = row.querySelectorAll("label");
           if (!nameLabel || !valuesLabel) return;
           const nameValue = nameLabel.querySelector("input").value.trim();
