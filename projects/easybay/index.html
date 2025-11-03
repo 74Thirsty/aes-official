@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>eBay Listing Manager</title>
+  <title>Power Lister for eBay</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -120,10 +120,8 @@
 
     .app-header {
       display: flex;
+      justify-content: flex-end;
       flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 18px;
       padding: 20px clamp(18px, 4vw, 36px);
       border-radius: var(--radius-lg);
       background: linear-gradient(150deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.8));
@@ -135,17 +133,18 @@
       backdrop-filter: blur(16px);
     }
 
-    .brand {
+    .header-content {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 18px;
+      align-items: flex-start;
+      max-width: min(540px, 100%);
+      width: 100%;
+      text-align: left;
     }
 
-    .brand-title {
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .header-content h1 {
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
     }
 
     .badge {
@@ -168,6 +167,8 @@
       flex-wrap: wrap;
       gap: 12px;
       align-items: center;
+      justify-content: center;
+      width: 100%;
     }
 
     main {
@@ -179,6 +180,13 @@
       display: grid;
       gap: 24px;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      align-items: start;
+    }
+
+    .listing-preview-card {
+      position: sticky;
+      top: clamp(24px, 6vw, 48px);
+      align-self: start;
     }
 
     .card {
@@ -564,32 +572,36 @@
 
       .app-header {
         position: static;
+        justify-content: center;
+      }
+
+      .header-content {
+        align-items: center;
+        text-align: center;
       }
 
       .header-actions {
         width: 100%;
-        justify-content: flex-start;
+        justify-content: center;
       }
     }
   </style>
 </head>
 <body>
   <code>Copyright 2025 C. Hirschauer - All Rights Reserved</code>
-  <header class="app-header" aria-label="eBay listing manager header">
-    <div class="brand">
-      <div class="brand-title">
-        <span class="badge">Power Seller Toolkit</span>
-        <span>eBay Listing Manager</span>
-      </div>
+  <header class="app-header" aria-label="Power Lister for eBay header">
+    <div class="header-content">
+      <span class="badge">Power Lister Toolkit</span>
+      <h1>Power Lister for eBay</h1>
       <p class="brand-subtitle">
         Draft single listings, orchestrate bulk uploads, and keep your marketplace inventory synchronized without leaving this
         tab. Optimized for speed, clarity, and File Exchange compatibility.
       </p>
-    </div>
-    <div class="header-actions">
-      <button id="newListingBtn" type="button" class="primary">New Listing</button>
-      <button id="saveTemplateBtn" type="button">Save Template</button>
-      <button id="clearStorageBtn" type="button">Clear Storage</button>
+      <div class="header-actions">
+        <button id="newListingBtn" type="button" class="primary">Power Listing</button>
+        <button id="saveTemplateBtn" type="button">Save Template</button>
+        <button id="clearStorageBtn" type="button">Erase Storage</button>
+      </div>
     </div>
   </header>
 
@@ -830,13 +842,13 @@
           </section>
 
           <div class="form-footer">
-            <button type="button" id="previewBtn">Refresh Preview</button>
+            <button type="button" id="previewBtn" aria-controls="listingPreview">Refresh Preview</button>
             <button type="submit" id="saveListingBtn" class="primary">Add to Batch</button>
           </div>
         </form>
       </article>
 
-      <aside class="card" aria-live="polite" aria-label="listing preview">
+      <aside class="card listing-preview-card" aria-live="polite" aria-label="listing preview">
         <div>
           <h2>Listing Preview</h2>
           <p class="helper-text">This instant preview renders File Exchange data into a customer facing listing mockup.</p>
