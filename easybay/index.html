@@ -200,6 +200,20 @@
       grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
     }
 
+    .workspace-columns {
+      align-items: stretch;
+    }
+
+    .workspace-column {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .workspace-column .column-header {
+      gap: 8px;
+    }
+
     .section-grid--single {
       grid-template-columns: minmax(280px, 1fr);
     }
@@ -736,64 +750,159 @@
 
   <main class="app-main">
     <section id="listing-configuration" class="workspace-section" aria-label="Listing configuration">
-      <header class="section-header">
-        <h2>Listing Configuration</h2>
-        <p class="helper-text">Combine secure API access with the detailed listing builder in one focused workspace.</p>
-      </header>
-      <div class="section-grid section-grid--two">
-        <article class="card" aria-label="API workspace">
-          <div>
-            <h2>API Workspace</h2>
-            <p class="helper-text">
-              Securely encrypt your personal eBay API token with a passphrase that never leaves this browser. Unlock it for the
-              current session to generate tailored request snippets and power features without exposing secrets.
-            </p>
-          </div>
-          <form id="apiKeyForm" autocomplete="off">
-            <div class="form-grid api-grid">
+      <div class="section-grid section-grid--two workspace-columns">
+        <div class="workspace-column workspace-column--left">
+          <header class="section-header column-header">
+            <h2>Upload Manager</h2>
+            <p class="helper-text">Prepare bulk adjustments and import-ready CSV data before exporting listings to File Exchange.</p>
+          </header>
+          <article class="card" aria-label="API workspace">
+            <div>
+              <h2>API Workspace</h2>
+              <p class="helper-text">
+                Securely encrypt your personal eBay API token with a passphrase that never leaves this browser. Unlock it for the
+                current session to generate tailored request snippets and power features without exposing secrets.
+              </p>
+            </div>
+            <form id="apiKeyForm" autocomplete="off">
+              <div class="form-grid api-grid">
+                <label>
+                  Token Alias
+                  <input id="apiKeyAlias" type="text" maxlength="60" placeholder="Primary OAuth token" autocomplete="off" />
+                </label>
+                <label>
+                  OAuth Token
+                  <input
+                    id="apiKeySecret"
+                    type="password"
+                    minlength="20"
+                    placeholder="v^1.1#i^1#p^3#..."
+                    autocomplete="off"
+                  />
+                  <span class="helper-text">Stored only after encryption. Paste the long-lived OAuth access token.</span>
+                </label>
+                <label>
+                  Encryption Passphrase
+                  <input
+                    id="apiKeyPassphrase"
+                    type="password"
+                    minlength="8"
+                    placeholder="Create a passphrase"
+                    autocomplete="new-password"
+                  />
+                  <span class="helper-text">Required to encrypt and later unlock your stored token.</span>
+                </label>
+                <div class="helper-text form-grid-note">
+                  AES-256-GCM encryption with PBKDF2 (100k iterations) protects the token at rest. Forgetting the passphrase means the
+                  token must be re-entered.
+                </div>
+              </div>
+              <div class="api-actions">
+                <button type="submit" class="primary">Encrypt &amp; Store Locally</button>
+                <button type="button" id="unlockApiKeyBtn">Unlock for Session</button>
+              </div>
+            </form>
+          </article>
+          <article class="card">
+            <div>
+              <h3>Bulk Optimizations</h3>
+              <p class="helper-text">Select listings in the table, then apply global adjustments. Leave any field blank to skip that update.</p>
+            </div>
+            <div class="bulk-grid">
               <label>
-                Token Alias
-                <input id="apiKeyAlias" type="text" maxlength="60" placeholder="Primary OAuth token" autocomplete="off" />
+                Price Adjustment Value
+                <input id="bulkPriceValue" type="number" min="0" step="0.01" placeholder="5" />
               </label>
               <label>
-                OAuth Token
-                <input
-                  id="apiKeySecret"
-                  type="password"
-                  minlength="20"
-                  placeholder="v^1.1#i^1#p^3#..."
-                  autocomplete="off"
-                />
-                <span class="helper-text">Stored only after encryption. Paste the long-lived OAuth access token.</span>
+                Adjustment Type
+                <select id="bulkPriceType">
+                  <option value="percent">Percent</option>
+                  <option value="flat">Flat Amount</option>
+                </select>
               </label>
               <label>
-                Encryption Passphrase
-                <input
-                  id="apiKeyPassphrase"
-                  type="password"
-                  minlength="8"
-                  placeholder="Create a passphrase"
-                  autocomplete="new-password"
-                />
-                <span class="helper-text">Required to encrypt and later unlock your stored token.</span>
+                Direction
+                <select id="bulkPriceMode">
+                  <option value="increase">Increase</option>
+                  <option value="decrease">Decrease</option>
+                </select>
               </label>
-              <div class="helper-text form-grid-note">
-                AES-256-GCM encryption with PBKDF2 (100k iterations) protects the token at rest. Forgetting the passphrase means the
-                token must be re-entered.
+              <label>
+                Set Quantity
+                <input id="bulkQuantity" type="number" min="0" />
+              </label>
+              <label>
+                Set Shipping Service
+                <input id="bulkShippingService" type="text" placeholder="FedEx Ground" />
+              </label>
+              <label>
+                Set Shipping Cost
+                <input id="bulkShippingCost" type="number" min="0" step="0.01" placeholder="12.99" />
+              </label>
+              <label>
+                Handling Time (days)
+                <input id="bulkHandling" type="number" min="0" />
+              </label>
+              <label>
+                Set Status
+                <select id="bulkStatus">
+                  <option value="">-- Keep current --</option>
+                  <option value="Draft">Draft</option>
+                  <option value="Ready">Ready</option>
+                  <option value="Scheduled">Scheduled</option>
+                </select>
+              </label>
+              <label>
+                Returns Policy
+                <select id="bulkReturns">
+                  <option value="">-- Keep current --</option>
+                  <option value="ReturnsAccepted">Accept returns</option>
+                  <option value="ReturnsNotAccepted">No returns</option>
+                </select>
+              </label>
+              <label>
+                Return Days
+                <select id="bulkReturnDays">
+                  <option value="">-- Keep current --</option>
+                  <option value="14">14</option>
+                  <option value="30">30</option>
+                  <option value="60">60</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-footer">
+              <button type="button" id="applyBulkBtn" class="primary">Apply to Selected</button>
+              <button type="button" id="clearBulkBtn">Reset Fields</button>
+            </div>
+          </article>
+          <article class="card">
+            <div>
+              <h3>Import Listings</h3>
+              <p class="helper-text">
+                Paste CSV content exported from spreadsheets or other tools. Required headers: Title, Description, Category, ConditionID, Format, StartPrice, Quantity. Optional headers: SKU, BuyItNowPrice, ImageURLs (pipe separated), ItemSpecifics (Brand=Apple;Color=Red), ShippingService, ShippingCost, HandlingTime, Status, ReturnsAccepted, ReturnDays.
+              </p>
+            </div>
+            <div class="import-area">
+              <textarea id="importCsv" placeholder="Title,Description,Category,ConditionID,Format,StartPrice,Quantity
+Vintage Jacket,..."></textarea>
+              <div class="form-footer">
+                <button type="button" id="importCsvBtn">Parse CSV</button>
+                <button type="button" id="downloadTemplateBtn">Download Blank Template</button>
               </div>
             </div>
-            <div class="api-actions">
-              <button type="submit" class="primary">Encrypt &amp; Store Locally</button>
-              <button type="button" id="unlockApiKeyBtn">Unlock for Session</button>
+          </article>
+        </div>
+        <div class="workspace-column workspace-column--right">
+          <header class="section-header column-header">
+            <h2>Listing Configuration</h2>
+            <p class="helper-text">Combine secure API access with the detailed listing builder in one focused workspace.</p>
+          </header>
+          <article class="card" aria-label="Single listing builder">
+            <div>
+              <h2>Single Listing Builder</h2>
+              <p class="helper-text">Provide core listing details, item specifics, and logistics. When you're ready, add it to the batch queue or save it as a template for future reuse.</p>
             </div>
-          </form>
-        </article>
-        <article class="card" aria-label="Single listing builder">
-          <div>
-            <h2>Single Listing Builder</h2>
-            <p class="helper-text">Provide core listing details, item specifics, and logistics. When you're ready, add it to the batch queue or save it as a template for future reuse.</p>
-          </div>
-          <form id="singleListingForm" autocomplete="off">
+            <form id="singleListingForm" autocomplete="off">
             <div id="formErrors" role="alert"></div>
 
             <section>
@@ -1008,102 +1117,7 @@
       </div>
     </section>
 
-    <section id="upload-manager" class="workspace-section" aria-label="Upload manager">
-      <header class="section-header">
-        <h2>Upload Manager</h2>
-        <p class="helper-text">Prepare bulk adjustments and import-ready CSV data before exporting listings to File Exchange.</p>
-      </header>
-      <div class="section-grid section-grid--two">
-        <article class="card">
-          <div>
-            <h3>Bulk Optimizations</h3>
-            <p class="helper-text">Select listings in the table, then apply global adjustments. Leave any field blank to skip that update.</p>
-          </div>
-          <div class="bulk-grid">
-            <label>
-              Price Adjustment Value
-              <input id="bulkPriceValue" type="number" min="0" step="0.01" placeholder="5" />
-            </label>
-            <label>
-              Adjustment Type
-              <select id="bulkPriceType">
-                <option value="percent">Percent</option>
-                <option value="flat">Flat Amount</option>
-              </select>
-            </label>
-            <label>
-              Direction
-              <select id="bulkPriceMode">
-                <option value="increase">Increase</option>
-                <option value="decrease">Decrease</option>
-              </select>
-            </label>
-            <label>
-              Set Quantity
-              <input id="bulkQuantity" type="number" min="0" />
-            </label>
-            <label>
-              Set Shipping Service
-              <input id="bulkShippingService" type="text" placeholder="FedEx Ground" />
-            </label>
-            <label>
-              Set Shipping Cost
-              <input id="bulkShippingCost" type="number" min="0" step="0.01" placeholder="12.99" />
-            </label>
-            <label>
-              Handling Time (days)
-              <input id="bulkHandling" type="number" min="0" />
-            </label>
-            <label>
-              Set Status
-              <select id="bulkStatus">
-                <option value="">-- Keep current --</option>
-                <option value="Draft">Draft</option>
-                <option value="Ready">Ready</option>
-                <option value="Scheduled">Scheduled</option>
-              </select>
-            </label>
-            <label>
-              Returns Policy
-              <select id="bulkReturns">
-                <option value="">-- Keep current --</option>
-                <option value="ReturnsAccepted">Accept returns</option>
-                <option value="ReturnsNotAccepted">No returns</option>
-              </select>
-            </label>
-            <label>
-              Return Days
-              <select id="bulkReturnDays">
-                <option value="">-- Keep current --</option>
-                <option value="14">14</option>
-                <option value="30">30</option>
-                <option value="60">60</option>
-              </select>
-            </label>
-          </div>
-          <div class="form-footer">
-            <button type="button" id="applyBulkBtn" class="primary">Apply to Selected</button>
-            <button type="button" id="clearBulkBtn">Reset Fields</button>
-          </div>
-        </article>
-        <article class="card">
-          <div>
-            <h3>Import Listings</h3>
-            <p class="helper-text">
-              Paste CSV content exported from spreadsheets or other tools. Required headers: Title, Description, Category, ConditionID, Format, StartPrice, Quantity. Optional headers: SKU, BuyItNowPrice, ImageURLs (pipe separated), ItemSpecifics (Brand=Apple;Color=Red), ShippingService, ShippingCost, HandlingTime, Status, ReturnsAccepted, ReturnDays.
-            </p>
-          </div>
-          <div class="import-area">
-            <textarea id="importCsv" placeholder="Title,Description,Category,ConditionID,Format,StartPrice,Quantity
-Vintage Jacket,..."></textarea>
-            <div class="form-footer">
-              <button type="button" id="importCsvBtn">Parse CSV</button>
-              <button type="button" id="downloadTemplateBtn">Download Blank Template</button>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
+    
     <section id="preview-output" class="workspace-section" aria-label="Preview and output panel">
       <header class="section-header">
         <h2>Preview &amp; Output Panel</h2>
@@ -1336,7 +1350,7 @@ Vintage Jacket,..."></textarea>
         wrapper.style.gap = "10px";
 
         const nameLabel = document.createElement("label");
-        nameLabel.textContent = "Name";
+        nameLabel.textContent = "Item Specific Name";
         const nameInput = document.createElement("input");
         nameInput.type = "text";
         nameInput.required = true;
@@ -1345,7 +1359,7 @@ Vintage Jacket,..."></textarea>
         nameLabel.appendChild(nameInput);
 
         const valueLabel = document.createElement("label");
-        valueLabel.textContent = "Value";
+        valueLabel.textContent = "Item Specific Value";
         const valueInput = document.createElement("input");
         valueInput.type = "text";
         valueInput.required = true;
