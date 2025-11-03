@@ -13,7 +13,7 @@ This is a fully automated financial document system built to facilitate efficien
 
 ---
 
-![Sheen Banner](https://raw.githubusercontent.com/74Thirsty/74Thirsty/main/assets/banner.svg)
+![Sheen Banner](https://raw.githubusercontent.com/74Thirsty/74Thirsty/main/assets/powerlister.svg)
 
 ---
 
