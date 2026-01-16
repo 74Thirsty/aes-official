@@ -644,7 +644,7 @@
     .hero-main {
       display: grid;
       gap: clamp(28px, 6vw, 44px);
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.85fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       align-items: start;
     }
 
@@ -652,7 +652,7 @@
       display: flex;
       flex-direction: column;
       gap: 22px;
-      max-width: 720px;
+      max-width: 680px;
     }
 
     .hero-copy h1 {
@@ -663,7 +663,7 @@
 
     .hero-highlight {
       display: block;
-      width: clamp(240px, 30vw, 420px);
+      width: clamp(260px, 28vw, 380px);
       aspect-ratio: 1 / 1;
       border-radius: var(--radius-xl);
       border: 1px solid rgba(148, 163, 184, 0.35);
@@ -671,6 +671,7 @@
       box-shadow: var(--glow, 0 18px 48px rgba(8, 12, 26, 0.6));
       position: relative;
       overflow: hidden;
+      align-self: flex-start;
     }
 
     .hero-highlight::after {
@@ -725,7 +726,8 @@
       position: relative;
       min-height: 280px;
       display: grid;
-      place-items: center;
+      place-items: start center;
+      padding-top: 6px;
     }
 
     .hero-illustration {
@@ -768,7 +770,7 @@
 
     .hero-device {
       position: relative;
-      width: min(320px, 100%);
+      width: min(360px, 100%);
       border-radius: 26px;
       border: 1px solid rgba(148, 163, 184, 0.28);
       background: linear-gradient(160deg, rgba(13, 22, 42, 0.88), rgba(15, 23, 42, 0.65));
