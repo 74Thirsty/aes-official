@@ -644,7 +644,7 @@
     .hero-main {
       display: grid;
       gap: clamp(28px, 6vw, 44px);
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
       align-items: start;
     }
 
@@ -663,8 +663,8 @@
 
     .hero-highlight {
       display: block;
-      width: clamp(260px, 28vw, 380px);
-      aspect-ratio: 1 / 1;
+      width: clamp(220px, 26vw, 340px);
+      aspect-ratio: 4 / 5;
       border-radius: var(--radius-xl);
       border: 1px solid rgba(148, 163, 184, 0.35);
       background: linear-gradient(155deg, rgba(15, 23, 42, 0.7), rgba(8, 47, 73, 0.55));
