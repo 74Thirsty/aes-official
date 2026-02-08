@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chris Hirschauer — Web3 Resume</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Base Styles */
+    body {
+      margin: 0;
+      font-family: 'JetBrains Mono', monospace;
+      background: #0f0f14;
+      color: #00fff0;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4 {
+      color: #ff008c;
+      margin: 0.2em 0;
+    }
+    a { color: #ff66cc; text-decoration: none; }
+    a:hover { color: #00fff0; }
+    section { padding: 80px 10%; }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Header */
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 0;
+      background: linear-gradient(90deg, #0f0f14, #1a1a27);
+      text-align: center;
+    }
+
+    header h1 { font-size: 3em; }
+    header p { font-size: 1.2em; color: #00fff0cc; margin-top: 10px; }
+
+    /* Sections */
+    .section-title { margin-bottom: 40px; text-align: center; }
+
+    /* Cards */
+    .card {
+      background: #12121c;
+      border: 1px solid #ff008c44;
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 30px #ff008c33;
+    }
+
+    /* Grid for skills / projects */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    /* Interactive repo counters */
+    .counter {
+      font-size: 2em;
+      color: #ff66cc;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      padding: 10px 25px;
+      margin-top: 15px;
+      border: 1px solid #ff008c;
+      border-radius: 8px;
+      color: #ff008c;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      background: #ff008c;
+      color: #0f0f14;
+    }
+
+    /* Footer */
+    footer { text-align: center; padding: 40px 0; color: #00fff0aa; }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Chris Hirschauer</h1>
+  <p>Self-Taught Web3 / DeFi Architect — Lead Developer of VANTAGE</p>
+</header>
+
+<section id="summary">
+  <div class="container">
+    <h2 class="section-title">Professional Summary</h2>
+    <div class="card">
+      <p>Self-taught blockchain and DeFi systems architect with expertise in multi-chain arbitrage, smart contract execution, and autonomous financial engines. Built <strong>VANTAGE</strong>, 50+ GitHub repos, 130+ Gists, Docker containers, and PyPI packages — all in under 1 year — while publishing a book on DeFi security.</p>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="container">
+    <h2 class="section-title">Core Skills</h2>
+    <div class="grid">
+      <div class="card"><h3>Blockchain & Web3</h3><p>Ethereum, Solana, EVM, Solidity, Gnosis Safe, Flashbots</p></div>
+      <div class="card"><h3>Programming & ML</h3><p>Python 3.11, Web3.py, PyTorch, TensorFlow, ML optimization</p></div>
+      <div class="card"><h3>DeFi & Arbitrage</h3><p>Multi-DEX integration, Flash-loan execution, RPZE algorithm</p></div>
+      <div class="card"><h3>Architecture & Security</h3><p>Stateless proxies, forensic logs, adaptive gas calibration</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="container">
+    <h2 class="section-title">Projects & Open Source</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>VANTAGE</h3>
+        <p>Fully autonomous DeFi engine with ephemeral execution layer and self-learning ML arbitrage.</p>
+        <span class="counter" data-count="50">0</span>+ GitHub Repos<br>
+        <span class="counter" data-count="130">0</span>+ Gists
+      </div>
+      <div class="card">
+        <h3>PyPI Packages</h3>
+        <p>vantage-utils, ephemeral-wallet, gas-calibrator</p>
+      </div>
+      <div class="card">
+        <h3>Docker Containers</h3>
+        <p>Official containers for VANTAGE modules and ephemeral execution services.</p>
+      </div>
+      <div class="card">
+        <h3>Book</h3>
+        <p><em>Uncovering the Dark Side of Cash App</em> — DeFi security & regulatory gaps</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="container">
+    <h2 class="section-title">Contact</h2>
+    <div class="card">
+      <p>Email: <a href="mailto:chris@yourdomain.com">chris@yourdomain.com</a></p>
+      <p>GitHub: <a href="https://github.com/74Thirsty" target="_blank">github.com/74Thirsty</a></p>
+      <p>Portfolio: <a href="https://christopherhirschauer.bio" target="_blank">christopherhirschauer.bio</a></p>
+      <p>Twitter: <a href="https://twitter.com/hirschauerdev" target="_blank">@hirschauerdev</a></p>
+      <a href="mailto:chris@yourdomain.com" class="btn">Get in Touch</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Built by Chris Hirschauer — Self-taught Web3 / DeFi Architect
+</footer>
+
+<script>
+  // Animated counters for repos / gists
+  const counters = document.querySelectorAll('.counter');
+  counters.forEach(counter => {
+    const updateCount = () => {
+      const target = +counter.getAttribute('data-count');
+      const count = +counter.innerText;
+      const speed = 50;
+      const inc = target / speed;
+      if(count < target) {
+        counter.innerText = Math.ceil(count + inc);
+        setTimeout(updateCount, 20);
+      } else {
+        counter.innerText = target;
+      }
+    }
+    updateCount();
+  });
+</script>
+
+</body>
+</html>
