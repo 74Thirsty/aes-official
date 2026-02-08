@@ -29,10 +29,19 @@
         <div class="nav-links">
           <a href="#top">Home</a>
           <a href="#resume">Resume</a>
-          <a href="#proof">Proof</a>
-          <a href="#gnoman">GNOMAN</a>
-          <a href="#books">Books</a>
-          <a href="#projects">Projects</a>
+          <div class="nav-item">
+            <button class="nav-button" type="button" aria-expanded="false" aria-haspopup="true">
+              Projects <span class="caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="nav-dropdown" role="menu">
+              <a href="projects/aes/" role="menuitem">VANTAGE</a>
+              <a href="autogaap/" role="menuitem">Auto GAAP</a>
+              <a href="easybay/" role="menuitem">EasyBay</a>
+              <a href="projects/gnoman/" role="menuitem">GNOMAN</a>
+              <a href="projects/smart-contract-wizard/" role="menuitem">Shop Saavy</a>
+            </div>
+          </div>
+          <a href="books/">Books</a>
           <a href="#contact">Contact</a>
         </div>
         <a class="button primary nav-cta" href="#contact">Collaborate</a>
@@ -88,18 +97,18 @@
                 <span>Execution command deck</span>
               </div>
               <div class="hero-device-body">
-                <strong>VANTAGE · Execution Pulse</strong>
-                <p>Machine-learned cycle scoring, forensic logs, and multi-DEX execution in one autonomous pipeline.</p>
+                <strong>Resume control room</strong>
+                <p>Signal-rich overview of live DeFi systems, self-taught research output, and execution milestones.</p>
                 <div class="chip-row">
-                  <span class="hero-chip">MEV-safe</span>
-                  <span class="hero-chip">Non-custodial</span>
-                  <span class="hero-chip">Multi-chain</span>
-                  <span class="hero-chip">Audit-ready</span>
+                  <span class="hero-chip">Solidity</span>
+                  <span class="hero-chip">Python 3.11</span>
+                  <span class="hero-chip">Web3.py</span>
+                  <span class="hero-chip">Flashbots</span>
                 </div>
               </div>
               <div class="hero-device-footer">
-                <span>Verified contracts · 0xA9C41DE3...5bb925Dc3</span>
-                <span>Latest broadcast · 02.07.26</span>
+                <span>Last Milestone · 02.07.26 - Verified smart contract deployments.</span>
+                <span>Now highlighting: VANTAGE, GNOMAN, and on-chain execution research.</span>
               </div>
             </div>
             <div class="hero-image">
@@ -116,12 +125,12 @@
           <article class="card stat-card">
             <small>Published books</small>
             <strong>11+</strong>
-            <p>Web3, finance, and systems engineering titles across 2024–2026.</p>
+            <p>Web3, finance, and systems engineering titles released across 2024–2026.</p>
           </article>
           <article class="card stat-card">
-            <small>Open-source engines</small>
+            <small>Open-source repos</small>
             <strong>30+</strong>
-            <p>GitHub repos, PyPI packages, and Docker Hub deployments.</p>
+            <p>GitHub, PyPI, and Docker Hub tooling across DeFi, security, and automation.</p>
           </article>
         </div>
       </div>
@@ -131,35 +140,34 @@
       <section id="resume" class="section resume-section">
         <div class="section-heading">
           <span class="eyebrow">Interactive resume</span>
-          <h2>Execution-first Web3 resume</h2>
-          <p>Everything below is the full resume — rewritten with proof, live systems, and self-taught depth. Tap the tabs to explore each slice of the story.</p>
+          <h2>Chris Hirschauer · Web3 execution architect</h2>
+          <p>Explore the resume highlights below. Tap each category to see the details you want to share with investors, founders, or collaborators.</p>
         </div>
         <div class="resume-layout">
           <div class="card resume-nav">
-            <h3>Resume console</h3>
-            <p>Fast access to the full Web3 profile.</p>
+            <h3>Navigate the resume</h3>
+            <p>Each tab reveals a focused view of the Web3 resume.</p>
             <div class="resume-tabs" role="tablist" aria-label="Resume sections">
               <button class="resume-tab is-active" role="tab" aria-selected="true" aria-controls="resume-summary" id="tab-summary" type="button">Summary</button>
               <button class="resume-tab" role="tab" aria-selected="false" aria-controls="resume-skills" id="tab-skills" type="button">Core skills</button>
               <button class="resume-tab" role="tab" aria-selected="false" aria-controls="resume-experience" id="tab-experience" type="button">Experience</button>
               <button class="resume-tab" role="tab" aria-selected="false" aria-controls="resume-education" id="tab-education" type="button">Education</button>
-              <button class="resume-tab" role="tab" aria-selected="false" aria-controls="resume-publications" id="tab-publications" type="button">Books</button>
-              <button class="resume-tab" role="tab" aria-selected="false" aria-controls="resume-links" id="tab-links" type="button">Proof</button>
+              <button class="resume-tab" role="tab" aria-selected="false" aria-controls="resume-publications" id="tab-publications" type="button">Publications</button>
+              <button class="resume-tab" role="tab" aria-selected="false" aria-controls="resume-links" id="tab-links" type="button">Links & Proof</button>
             </div>
           </div>
           <div class="card resume-panel is-active" id="resume-summary" role="tabpanel" aria-labelledby="tab-summary">
             <h3>Professional Summary</h3>
-            <p>Self-taught blockchain and DeFi systems architect with hands-on expertise in multi-chain arbitrage, smart contract execution, and autonomous financial engines. Built VANTAGE solo and engineered execution workflows that remain non-custodial, MEV-aware, and audit-ready.</p>
+            <p>Self-taught blockchain and DeFi systems architect with hands-on expertise in multi-chain arbitrage, smart contract execution, and autonomous financial engines.</p>
             <ul class="feature-list">
-              <li>Built VANTAGE, a fully autonomous, network-agnostic DeFi execution framework.</li>
-              <li>Optimizes revenue generation with machine-learned cycle scoring and forensic telemetry.</li>
-              <li>Ships live tools across GitHub, PyPI, Docker Hub, and verified on-chain contracts.</li>
+              <li>Built VANTAGE, a fully autonomous, network-agnostic DeFi execution framework, solo since graduation.</li>
+              <li>Optimizes revenue generation while keeping funds non-custodial, secure, and MEV-aware.</li>
+              <li>Pairs ML-driven optimization with forensically complete execution logging.</li>
             </ul>
             <div class="tag-list">
               <span class="tag">Self-taught</span>
               <span class="tag">DeFi execution</span>
               <span class="tag">MEV-safe</span>
-              <span class="tag">Non-custodial</span>
             </div>
           </div>
           <div class="card resume-panel" id="resume-skills" role="tabpanel" aria-labelledby="tab-skills">
@@ -208,9 +216,9 @@
               </article>
               <article class="timeline-item">
                 <div>
-                  <h4>Open-source release cadence</h4>
+                  <h4>Open-source ecosystem</h4>
                   <p>PyPI packages: gnoman-cli, tarotteller, svg2gif, git-r-done, streamsnatcher, sprouter, and more.</p>
-                  <p>GitHub: aes-official, Demo, GNOMAN 2.0, smart-contracts, CardPulse, StreamSaavy, TES, bidder, alpha_indicator, and 30+ public repos.</p>
+                  <p>GitHub: AES, Demo, GNOMAN 2.0, smart-contracts, CardPulse, StreamSaavy, TES, and 30+ public repos.</p>
                 </div>
               </article>
             </div>
@@ -234,18 +242,17 @@
               <li>Smart Contracts: The Future of Business Finance &amp; Law Enforcement (2025)</li>
               <li>Ctrl+C, Ctrl+V, and the Death of Reason (2025)</li>
             </ul>
-            <p class="resume-note">Author page: books.apple.com/us/author/c-e-hirschauer/id1728452111</p>
           </div>
           <div class="card resume-panel" id="resume-links" role="tabpanel" aria-labelledby="tab-links">
-            <h3>Proof Vault</h3>
+            <h3>Links & Proof</h3>
             <div class="resume-links-grid">
               <div class="resume-link-card">
                 <h4>GitHub</h4>
-                <p>github.com/74Thirsty · aes-official, VANTAGE (private), Demo, GNOMAN 2.0, smart-contracts, CardPulse, StreamSaavy, TES.</p>
+                <p>github.com/74Thirsty · aes-official, Demo, GNOMAN 2.0, smart-contracts, CardPulse.</p>
               </div>
               <div class="resume-link-card">
                 <h4>PyPI</h4>
-                <p>pypi.org/user/gadgetsaavy · gnoman-cli, tarotteller, svg2gif, git-r-done, streamsnatcher, sprouter, and more.</p>
+                <p>pypi.org/user/gadgetsaavy · gnoman-cli, tarotteller, svg2gif, git-r-done, streamsnatcher, sprouter.</p>
               </div>
               <div class="resume-link-card">
                 <h4>Docker Hub</h4>
@@ -256,10 +263,6 @@
                 <p>0xA9C41DE3...5bb925Dc3 · 0x37aade1F...2f8f7073B · 0x0D39ba77...a6Ec226D9 · 0xe911bAC0...83B6bB1A6</p>
               </div>
               <div class="resume-link-card">
-                <h4>Gists</h4>
-                <p>158 gists with smart contract research, MEV notes, and execution audits.</p>
-              </div>
-              <div class="resume-link-card">
                 <h4>Bookshelf</h4>
                 <p>books.apple.com/us/author/c-e-hirschauer/id1728452111</p>
               </div>
@@ -268,62 +271,190 @@
         </div>
       </section>
 
-      <section id="proof" class="section proof-section">
+      <section id="skills" class="section">
         <div class="section-heading">
-          <span class="eyebrow">Proof vault</span>
-          <h2>Every claim backed by a live artifact</h2>
-          <p>Verified contracts, public repos, packages, and production tooling in one vault.</p>
+          <span class="eyebrow">Skills & Stack</span>
+          <h2>Focused stacks for DeFi execution</h2>
+          <p>Tooling and systems that power autonomous arbitrage, secure execution, and continuous learning loops.</p>
         </div>
-        <div class="proof-grid">
-          <article class="card proof-card">
-            <h3>Verified on-chain contracts</h3>
-            <p>0xA9C41DE3...5bb925Dc3 · 0x37aade1F...2f8f7073B · 0x0D39ba77...a6Ec226D9 · 0xe911bAC0...83B6bB1A6</p>
-            <div class="tag-list">
-              <span class="tag">2026-02-07</span>
-              <span class="tag">2026-02-06</span>
-              <span class="tag">2026-02-01</span>
-              <span class="tag">2026-01-12</span>
+        <div class="cards-grid books-grid">
+          <article class="card book-card">
+            <div class="book-cover">
+              <img src="assets/tokenization.png" alt="Tokenization book cover">
+            </div>
+            <div class="book-body">
+              <div class="book-top">
+                <h3>Blockchain & Web3</h3>
+                <span class="badge success">Execution ready</span>
+              </div>
+              <p>Ethereum, Solana, and EVM networks with Solidity, Gnosis Safe, Flashbots, and MEV-aware execution design.</p>
+              <div class="book-meta">
+                <span class="price">Primary focus</span>
+                <span>Non-custodial workflows + secure execution.</span>
+              </div>
+              <div class="card-actions">
+                <a class="button primary" href="#projects">See projects</a>
+                <a class="button outline" href="#resume">Resume details</a>
+              </div>
+            </div>
+          </div>
+          <div class="card resume-panel" id="resume-experience" role="tabpanel" aria-labelledby="tab-experience">
+            <h3>Experience / Projects</h3>
+            <div class="resume-timeline">
+              <article class="timeline-item">
+                <div>
+                  <h4>Lead Developer — VANTAGE (Solo Project, 2025–Present)</h4>
+                  <ul class="feature-list">
+                    <li>Built autonomous DeFi execution engine for multi-chain, multi-DEX arbitrage with machine-learned cycle scoring.</li>
+                    <li>Engineered ephemeral execution layers and non-custodial workflows for user-controlled funds.</li>
+                    <li>Developed forensic intelligence pipeline to train ML models on execution outcomes.</li>
+                    <li>Integrated Flashbots bundles for MEV-safe execution and Gnosis Safe custody.</li>
+                  </ul>
+                </div>
+              </article>
+              <article class="timeline-item">
+                <div>
+                  <h4>Web3 Arbitrage POC (Python / Solidity)</h4>
+                  <ul class="feature-list">
+                    <li>Deployed and interacted with Ethereum smart contracts using Python/Web3.py.</li>
+                    <li>Demonstrated atomic multi-DEX swaps with ephemeral wallets and gasless paymaster simulation.</li>
+                  </ul>
+                </div>
+              </article>
+              <article class="timeline-item">
+                <div>
+                  <h4>Open-source release cadence</h4>
+                  <p>PyPI packages: gnoman-cli, tarotteller, svg2gif, git-r-done, streamsnatcher, sprouter, and more.</p>
+                  <p>GitHub: aes-official, Demo, GNOMAN 2.0, smart-contracts, CardPulse, StreamSaavy, TES, bidder, alpha_indicator, and 30+ public repos.</p>
+                </div>
+              </article>
+            </div>
+            <div class="book-body">
+              <div class="book-top">
+                <h3>Programming & ML</h3>
+                <span class="badge">Self-taught</span>
+              </div>
+              <p>Python 3.11, Web3.py, PyTorch, TensorFlow, and ML-driven optimization for arbitrage cycles.</p>
+              <div class="book-meta">
+                <span class="price">Key tech</span>
+                <span>Python, ML pipelines, telemetry, scoring.</span>
+              </div>
+              <div class="card-actions">
+                <a class="button primary" href="#contact">Start a project</a>
+                <a class="button outline" href="#resume">See experience</a>
+              </div>
             </div>
           </article>
-          <article class="card proof-card">
-            <h3>Open-source footprint</h3>
-            <p>aes-official, Demo, GNOMAN 2.0, smart-contracts, gnosis, gnosis-multisig, custom-derivation, CardPulse, StreamSaavy, TES, bidder, alpha_indicator, and 30+ public repos.</p>
+
+          <article class="card book-card">
+            <div class="book-cover accent">
+                <img src="assets/copypastedeath.png" alt="Copy Paste and the Death of Reason">
+            </div>
+            <div class="book-body">
+              <div class="book-top">
+                <h3>DeFi & Security</h3>
+                <span class="badge accent">High assurance</span>
+              </div>
+              <p>Flash-loan execution, RPZE algorithm, stateless proxies, forensic logs, adaptive gas calibration.</p>
+              <div class="book-meta">
+                <span class="price">Execution lens</span>
+                <span>MEV-safe, verified contracts, audit-ready.</span>
+              </div>
+              <div class="card-actions">
+                <a class="button primary" href="#contact">Let’s collaborate</a>
+                <a class="button outline" href="#resume">Proof & links</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="proof" class="section proof-section">
+        <div class="section-heading">
+          <span class="eyebrow">Featured work</span>
+          <h2>Projects powering the Web3 resume</h2>
+          <p>Live systems, research tooling, and open-source stacks that demonstrate execution depth.</p>
+        </div>
+        <div class="cards-grid">
+          <article class="card service-card">
+            <div class="service-header">
+              <h3>VANTAGE</h3>
+              <span class="service-rate">Flagship</span>
+            </div>
+            <p>Autonomous, network-agnostic DeFi execution framework for multi-chain arbitrage and MEV-safe execution.</p>
+            <ul class="feature-list">
+              <li>Machine-learned cycle scoring and forensic intelligence pipeline</li>
+              <li>Ephemeral execution layers with non-custodial workflows</li>
+              <li>Flashbots bundles + Gnosis Safe deployment flow</li>
+            </ul>
+            <div class="card-actions">
+              <a class="button primary" href="projects/aes/">Explore VANTAGE</a>
+            </div>
           </article>
-          <article class="card proof-card">
-            <h3>PyPI &amp; Docker Hub</h3>
-            <p>PyPI: gnoman-cli, tarotteller, svg2gif, git-r-done, streamsnatcher, sprouter.</p>
-            <p>Docker Hub: sprouter, gnoman, cloudchain.</p>
+
+          <article class="card service-card">
+            <div class="service-header">
+              <h3>GNOMAN 2.0</h3>
+              <span class="service-rate">Telemetry</span>
+            </div>
+            <p>Gnosis Safe and wallet management suite with telemetry, secure execution tooling, and governance controls.</p>
+            <ul class="feature-list">
+              <li>Managed safe operations and wallet automation</li>
+              <li>Security-aware execution workflows</li>
+              <li>Built to scale operational intelligence</li>
+            </ul>
+            <div class="card-actions">
+              <a class="button primary" href="projects/gnoman/">Inspect GNOMAN</a>
+            </div>
           </article>
-          <article class="card proof-card">
-            <h3>Research + gists</h3>
-            <p>158 gists including contract audits, MEV strategy breakdowns, and execution flow write-ups.</p>
+
+          <article class="card service-card">
+            <div class="service-header">
+              <h3>DeFi Execution Toolkit</h3>
+              <span class="service-rate">Open-source</span>
+            </div>
+            <p>Python and Solidity proof-of-concepts for flash-loan execution, gasless paymaster flows, and atomic swaps.</p>
+            <ul class="feature-list">
+              <li>Multi-DEX arbitrage demos with ephemeral wallets</li>
+              <li>Self-taught smart contract security patterns</li>
+              <li>Extensible modules for testing and auditing</li>
+            </ul>
+            <div class="card-actions">
+              <a class="button primary" href="#resume">Review experience</a>
+            </div>
+          </article>
+
+          <article class="card service-card">
+            <div class="service-header">
+              <h3>Publisher + OSS Ecosystem</h3>
+              <span class="service-rate">Public</span>
+            </div>
+            <p>11+ Web3 books, 150+ gists, and a growing open-source catalog across DeFi, security, and automation.</p>
+            <ul class="feature-list">
+              <li>Apple Books catalog covering MEV, tokenization, and smart contracts</li>
+              <li>PyPI + Docker Hub distribution for automation stacks</li>
+              <li>Verified contract deployments and security write-ups</li>
+            </ul>
+            <div class="card-actions">
+              <a class="button primary" href="#books">See publications</a>
+            </div>
           </article>
         </div>
       </section>
 
-      <section id="gnoman" class="section gnoman-section">
-        <div class="section-heading">
-          <span class="eyebrow">GNOMAN spotlight</span>
-          <h2>Mission control for multisig operators</h2>
-          <p>GNOMAN is a mission-control console for multisig operators, forensic auditors, and DeFi incident responders.</p>
-        </div>
-        <div class="cards-grid">
-          <article class="card project-card">
-            <h3>What GNOMAN fuses</h3>
+          <article class="card service-card">
+            <div class="service-header">
+              <h3>CardPulse + Consumer Tools</h3>
+              <span class="service-rate">Production</span>
+            </div>
+            <p>Consumer-facing tooling built with TypeScript and Python for data extraction, streaming, and market insight.</p>
             <ul class="feature-list">
-              <li>A modular command-line interface.</li>
-              <li>A curses-powered dashboard UI.</li>
-              <li>Forensic logging and signed audit trails.</li>
-              <li>Deep integrations with wallets, keyrings, and Gnosis Safes.</li>
+              <li>CardPulse value identification and community marketplace</li>
+              <li>StreamSnatcher, Sprouter, and automation helpers</li>
+              <li>Ongoing rapid iteration + release cadence</li>
             </ul>
-          </article>
-          <article class="card project-card">
-            <h3>Why it matters</h3>
-            <p>GNOMAN replaces a zoo of fragile scripts with a single god-tier control deck that keeps operators calm during incidents.</p>
-            <div class="tag-list">
-              <span class="tag">Forensics</span>
-              <span class="tag">Incident response</span>
-              <span class="tag">Multisig ops</span>
+            <div class="card-actions">
+              <a class="button primary" href="#contact">Request demos</a>
             </div>
           </article>
         </div>
@@ -333,12 +464,12 @@
         <div class="section-heading">
           <span class="eyebrow">Books & publications</span>
           <h2>Web3 playbooks and execution research</h2>
-          <p>From MEV strategy to Ethereum deep-dives, these books document the systems and stories I ship.</p>
+          <p>Writing documents how I learn, ship, and teach. These titles focus on MEV, tokenization, smart contracts, and execution systems.</p>
         </div>
         <div class="assistant-layout">
           <div class="card assistant-card">
             <h3>Featured titles</h3>
-            <p>Explore the full catalog on Apple Books.</p>
+            <p>Published between 2024–2026. Explore the full catalog on Apple Books.</p>
             <div class="assistant-log">
             <div class="message bot">
               <a href="https://books.apple.com/us/book/the-crypto-almanac/id6751018716" target="_blank" rel="noopener">
@@ -356,8 +487,28 @@
               </a>
             </div>
             <div class="message bot">
+              <a href="https://books.apple.com/us/book/evm-unlocked-the-hidden-engine-powering-modern-finance/id6749857598" target="_blank" rel="noopener">
+                EVM Unlocked: The Hidden Engine Powering Modern Finance
+              </a>
+            </div>
+            <div class="message bot">
+              <a href="https://books.apple.com/us/book/reactive-profit-zone-expansion/id6752804579" target="_blank" rel="noopener">
+                Reactive Profit Zone Expansion
+              </a>
+            </div>
+            <div class="message bot">
+              <a href="https://books.apple.com/us/book/neural-ledger/id6751048942" target="_blank" rel="noopener">
+               Neural Ledger - How Artificial Intelligence Is Rewiring The Financial World
+              </a>
+            </div>
+            <div class="message bot">
               <a href="https://books.apple.com/us/book/tokenization-of-real-world-assets/id6752820646" target="_blank" rel="noopener">
                Tokenization of Real World Assets
+              </a>
+            </div>
+            <div class="message bot">
+              <a href="https://books.apple.com/us/book/smart-contracts-the-future-of-business-finance/id6749497265" target="_blank" rel="noopener">
+                Smart Contracts - The Future of Business & Legal Systems
               </a>
             </div>
             <div class="message bot">
@@ -368,10 +519,14 @@
             <a class="button primary" href="books/">Browse the bookshelf</a>
           </div>
           <div class="card assistant-playbook">
-            <h3>EVM Unlocked — featured excerpt</h3>
-            <p>Ethereum represents one of the most transformative innovations in blockchain technology, redefining how digital value, applications, and decentralized systems operate.</p>
-            <p>This guide breaks down Ethereum’s architecture, smart contract capabilities, DeFi ecosystem, token standards, and real-world applications for technical and professional audiences.</p>
-            <p>It explains how the EVM executes deterministic, verifiable operations and how Ether powers validators, gas fees, and decentralized applications.</p>
+            <h3>Why I write</h3>
+            <p>Books make the invisible visible. They codify experiments, capture wins and missteps, and onboard collaborators into the execution discipline I ship daily.</p>
+            <ul class="feature-list">
+              <li>Explain MEV dynamics and multi-chain execution strategies</li>
+              <li>Provide step-by-step frameworks for smart contract deployments</li>
+              <li>Document self-taught learning paths for builders</li>
+              <li>Publish live research for investors and technical partners</li>
+            </ul>
             <div class="assistant-footnote">
               <span class="badge success">EVM</span>
               <span>Available now · $12.99</span>
@@ -478,7 +633,6 @@
               <li><a href="mailto:chris@yourdomain.com">chris@yourdomain.com</a></li>
               <li><a href="https://github.com/74Thirsty" target="_blank" rel="noopener">GitHub</a></li>
               <li><a href="https://christopherhirschauer.bio" target="_blank" rel="noopener">Portfolio</a></li>
-              <li><a href="https://twitter.com/hirschauerdev" target="_blank" rel="noopener">@hirschauerdev</a></li>
             </ul>
             <div class="contact-note">
               <span class="badge accent">Office hours</span>
@@ -494,9 +648,7 @@
       <div class="footer-links">
         <a href="#top">Home</a>
         <a href="#resume">Resume</a>
-        <a href="#proof">Proof</a>
-        <a href="#gnoman">GNOMAN</a>
-        <a href="#books">Books</a>
+        <a href="#skills">Skills</a>
         <a href="#projects">Projects</a>
         <a href="#contact">Contact</a>
       </div>
