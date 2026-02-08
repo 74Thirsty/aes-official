@@ -27,6 +27,49 @@ const applyMouseGlow = () => {
 
 applyMouseGlow();
 
+const resumeTabs = document.querySelectorAll('.resume-tab');
+const resumePanels = document.querySelectorAll('.resume-panel');
+
+if (resumeTabs.length && resumePanels.length) {
+  const activateTab = (tab) => {
+    resumeTabs.forEach((button) => {
+      const isActive = button === tab;
+      button.classList.toggle('is-active', isActive);
+      button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      button.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+
+    resumePanels.forEach((panel) => {
+      const isActive = panel.id === tab.getAttribute('aria-controls');
+      panel.classList.toggle('is-active', isActive);
+      panel.toggleAttribute('hidden', !isActive);
+    });
+  };
+
+  resumeTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => activateTab(tab));
+    tab.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        const next = resumeTabs[index + 1] || resumeTabs[0];
+        next.focus();
+        activateTab(next);
+      }
+      if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        const prev = resumeTabs[index - 1] || resumeTabs[resumeTabs.length - 1];
+        prev.focus();
+        activateTab(prev);
+      }
+    });
+  });
+
+  const activeTab = document.querySelector('.resume-tab.is-active') || resumeTabs[0];
+  if (activeTab) {
+    activateTab(activeTab);
+  }
+}
+
 const navItems = document.querySelectorAll('.nav-item');
 
 if (navItems.length) {
