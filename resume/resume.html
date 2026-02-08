@@ -10,14 +10,11 @@
     body {
       margin: 0;
       font-family: 'JetBrains Mono', monospace;
-      background: #0f0f14;
+      background: linear-gradient(135deg, #0d0d13, #1a1a27);
       color: #00fff0;
       overflow-x: hidden;
     }
-    h1, h2, h3, h4 {
-      color: #ff008c;
-      margin: 0.2em 0;
-    }
+    h1, h2, h3, h4 { color: #ff008c; margin: 0.3em 0; }
     a { color: #ff66cc; text-decoration: none; }
     a:hover { color: #00fff0; }
     section { padding: 80px 10%; }
@@ -29,28 +26,29 @@
       flex-direction: column;
       align-items: center;
       padding: 60px 0;
-      background: linear-gradient(90deg, #0f0f14, #1a1a27);
       text-align: center;
+      background: linear-gradient(90deg, #0f0f14, #1a1a27);
+      border-bottom: 2px solid #ff008c44;
     }
-
-    header h1 { font-size: 3em; }
+    header h1 { font-size: 3em; text-shadow: 0 0 20px #ff008c; }
     header p { font-size: 1.2em; color: #00fff0cc; margin-top: 10px; }
 
     /* Sections */
-    .section-title { margin-bottom: 40px; text-align: center; }
+    .section-title { margin-bottom: 40px; text-align: center; text-shadow: 0 0 15px #ff008c44; }
 
     /* Cards */
     .card {
       background: #12121c;
       border: 1px solid #ff008c44;
       border-radius: 15px;
-      padding: 20px;
+      padding: 25px;
       margin: 20px 0;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.25s, box-shadow 0.25s;
+      box-shadow: 0 0 10px #ff008c22;
     }
     .card:hover {
       transform: translateY(-10px);
-      box-shadow: 0 10px 30px #ff008c33;
+      box-shadow: 0 15px 30px #ff008c55;
     }
 
     /* Grid for skills / projects */
@@ -60,16 +58,17 @@
       gap: 20px;
     }
 
-    /* Interactive repo counters */
+    /* Interactive counter style */
     .counter {
       font-size: 2em;
+      font-weight: bold;
       color: #ff66cc;
     }
 
     /* Buttons */
     .btn {
       display: inline-block;
-      padding: 10px 25px;
+      padding: 12px 28px;
       margin-top: 15px;
       border: 1px solid #ff008c;
       border-radius: 8px;
@@ -97,7 +96,7 @@
   <div class="container">
     <h2 class="section-title">Professional Summary</h2>
     <div class="card">
-      <p>Self-taught blockchain and DeFi systems architect with expertise in multi-chain arbitrage, smart contract execution, and autonomous financial engines. Built <strong>VANTAGE</strong>, 50+ GitHub repos, 130+ Gists, Docker containers, and PyPI packages — all in under 1 year — while publishing a book on DeFi security.</p>
+      <p>Self-taught blockchain and DeFi systems architect. Built <strong>VANTAGE</strong>, 50+ GitHub repos, 130+ Gists, multiple Docker containers, and PyPI packages — all in under 1 year — while publishing a book on DeFi security.</p>
     </div>
   </div>
 </section>
@@ -120,7 +119,7 @@
     <div class="grid">
       <div class="card">
         <h3>VANTAGE</h3>
-        <p>Fully autonomous DeFi engine with ephemeral execution layer and self-learning ML arbitrage.</p>
+        <p>Autonomous DeFi engine with ephemeral execution layer and self-learning ML arbitrage.</p>
         <span class="counter" data-count="50">0</span>+ GitHub Repos<br>
         <span class="counter" data-count="130">0</span>+ Gists
       </div>
@@ -135,6 +134,10 @@
       <div class="card">
         <h3>Book</h3>
         <p><em>Uncovering the Dark Side of Cash App</em> — DeFi security & regulatory gaps</p>
+      </div>
+      <div class="card">
+        <h3>aes-official</h3>
+        <p>Automated financial document system with live charts, PDF export, and transaction automation. 150+ commits showcasing sustained development.</p>
       </div>
     </div>
   </div>
@@ -158,7 +161,7 @@
 </footer>
 
 <script>
-  // Animated counters for repos / gists
+  // Animated counters
   const counters = document.querySelectorAll('.counter');
   counters.forEach(counter => {
     const updateCount = () => {
