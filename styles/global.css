@@ -41,8 +41,6 @@
       margin: 0;
       min-height: 100%;
       font-family: var(--font-sans);
-      font-size: 16px;
-      line-height: 1.6;
       background: var(--bg);
       color: var(--text);
       display: flex;
@@ -183,14 +181,14 @@
       gap: 18px;
       padding: 18px clamp(20px, 4vw, 32px);
       padding-bottom: 28px;
-      background: rgba(10, 15, 32, 0.86);
-      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.65));
+      border: 1px solid rgba(148, 163, 184, 0.35);
       border-radius: var(--radius-lg);
-      box-shadow: 0 24px 50px rgba(6, 12, 32, 0.45);
+      box-shadow: var(--shadow-md);
       position: sticky;
       top: clamp(14px, 3vw, 28px);
       z-index: 40;
-      backdrop-filter: blur(18px) saturate(140%);
+      backdrop-filter: blur(16px);
       overflow: visible;
     }
 
@@ -266,10 +264,9 @@
 
     .nav-links a {
       font-size: 0.95rem;
-      letter-spacing: 0.01em;
-      text-transform: none;
-      font-weight: 500;
-      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
       padding: 8px 12px;
       border-radius: 999px;
       transition: background 0.2s ease, color 0.2s ease;
@@ -289,10 +286,9 @@
       align-items: center;
       gap: 6px;
       font-size: 0.95rem;
-      letter-spacing: 0.01em;
-      text-transform: none;
-      font-weight: 500;
-      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
       padding: 8px 12px;
       border-radius: 999px;
       border: none;
@@ -366,7 +362,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 12px 24px;
+      padding: 10px 22px;
       border-radius: 999px;
       border: 1px solid transparent;
       background: rgba(15, 23, 42, 0.6);
@@ -411,10 +407,10 @@
       flex-direction: column;
       gap: clamp(32px, 6vw, 48px);
       padding: clamp(36px, 7vw, 64px);
-      background: linear-gradient(135deg, rgba(9, 16, 36, 0.94), rgba(9, 16, 36, 0.7));
+      background: linear-gradient(135deg, rgba(10, 19, 45, 0.92), rgba(6, 12, 32, 0.78));
       border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      box-shadow: 0 32px 70px rgba(6, 12, 32, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.32);
+      box-shadow: var(--shadow-lg);
       position: relative;
       overflow: hidden;
       isolation: isolate;
@@ -604,68 +600,6 @@
       z-index: 1;
     }
 
-    .hero-title {
-      display: grid;
-      gap: 10px;
-      font-size: clamp(2.8rem, 5vw, 4.2rem);
-      letter-spacing: -0.02em;
-      font-family: var(--font-display);
-    }
-
-    .hero-title-sub {
-      font-size: clamp(1rem, 1.5vw, 1.2rem);
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: var(--text-muted);
-    }
-
-    .hero-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px 18px;
-      font-size: 0.95rem;
-      color: var(--text-muted);
-    }
-
-    .hero-link {
-      padding: 6px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      background: rgba(12, 18, 36, 0.6);
-      transition: border 0.2s ease, color 0.2s ease, transform 0.2s ease;
-    }
-
-    .hero-link:hover {
-      border-color: rgba(56, 189, 248, 0.6);
-      color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    .hero-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .hero-command {
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      box-shadow: 0 28px 60px rgba(6, 16, 40, 0.6);
-    }
-
-    .hero-image {
-      margin-top: 20px;
-      border-radius: 24px;
-      overflow: hidden;
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      box-shadow: 0 30px 60px rgba(6, 16, 40, 0.6);
-    }
-
-    .hero-image img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
     .hero-ribbon {
       display: inline-flex;
       align-items: center;
@@ -792,7 +726,6 @@
       position: relative;
       min-height: 280px;
       display: grid;
-      gap: 20px;
       place-items: start center;
       padding-top: 6px;
     }
@@ -954,14 +887,14 @@
 
     .card {
       position: relative;
-      background: linear-gradient(160deg, rgba(12, 20, 40, 0.92), rgba(15, 23, 42, 0.66));
-      border: 1px solid rgba(148, 163, 184, 0.26);
+      background: linear-gradient(160deg, rgba(13, 22, 42, 0.9), rgba(15, 23, 42, 0.6));
+      border: 1px solid rgba(148, 163, 184, 0.22);
       border-radius: var(--radius-md);
       padding: clamp(22px, 3vw, 28px);
       display: flex;
       flex-direction: column;
       gap: 16px;
-      box-shadow: 0 20px 44px rgba(6, 12, 32, 0.46);
+      box-shadow: 0 24px 48px rgba(6, 12, 32, 0.5);
       overflow: hidden;
       transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
       backdrop-filter: blur(10px);
@@ -995,7 +928,7 @@
       inset: 0;
       background: linear-gradient(120deg, rgba(56, 189, 248, 0.2), transparent 65%);
       pointer-events: none;
-      opacity: 0.22;
+      opacity: 0.28;
     }
 
     .card > * {
@@ -1006,7 +939,7 @@
     .card:hover {
       border-color: rgba(56, 189, 248, 0.45);
       transform: translateY(-4px);
-      box-shadow: 0 28px 52px rgba(6, 12, 32, 0.58);
+      box-shadow: 0 30px 54px rgba(6, 12, 32, 0.58);
     }
 
     .card:hover::before {
@@ -1032,10 +965,10 @@
     .section {
       position: relative;
       padding: clamp(32px, 6vw, 54px);
-      background: linear-gradient(150deg, rgba(9, 16, 36, 0.94), rgba(9, 16, 36, 0.78));
-      border: 1px solid var(--border);
+      background: linear-gradient(150deg, rgba(9, 16, 36, 0.92), rgba(13, 22, 44, 0.76));
+      border: 1px solid rgba(148, 163, 184, 0.28);
       border-radius: var(--radius-lg);
-      box-shadow: 0 32px 70px rgba(6, 12, 32, 0.55);
+      box-shadow: var(--shadow-lg);
       display: flex;
       flex-direction: column;
       gap: clamp(24px, 4vw, 36px);
@@ -1087,111 +1020,6 @@
       display: grid;
       gap: 20px;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    }
-
-    .resume-layout {
-      display: grid;
-      gap: 20px;
-      grid-template-columns: minmax(220px, 0.35fr) minmax(0, 1fr);
-      align-items: start;
-    }
-
-    .resume-nav {
-      gap: 16px;
-      position: sticky;
-      top: clamp(86px, 12vw, 120px);
-    }
-
-    .resume-tabs {
-      display: grid;
-      gap: 10px;
-    }
-
-    .resume-tab {
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      background: rgba(15, 23, 42, 0.7);
-      color: var(--text);
-      padding: 12px 16px;
-      border-radius: 999px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      text-align: left;
-      cursor: pointer;
-      transition: border 0.2s ease, transform 0.2s ease, background 0.2s ease;
-    }
-
-    .resume-tab:hover,
-    .resume-tab:focus-visible {
-      border-color: rgba(56, 189, 248, 0.6);
-      background: rgba(56, 189, 248, 0.14);
-      transform: translateX(2px);
-    }
-
-    .resume-tab.is-active {
-      border-color: rgba(56, 189, 248, 0.7);
-      background: rgba(56, 189, 248, 0.22);
-      color: var(--primary);
-    }
-
-    .resume-panel {
-      display: none;
-      gap: 16px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .resume-panel.is-active {
-      display: grid;
-    }
-
-    .resume-skill-grid {
-      display: grid;
-      gap: 18px;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
-
-    .resume-skill-grid h4 {
-      margin-bottom: 6px;
-      font-size: 1rem;
-      color: var(--text);
-    }
-
-    .resume-timeline {
-      display: grid;
-      gap: 18px;
-    }
-
-    .timeline-item {
-      padding: 16px;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      background: rgba(15, 23, 42, 0.62);
-    }
-
-    .timeline-item h4 {
-      margin-bottom: 10px;
-    }
-
-    .resume-note {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-    }
-
-    .resume-links-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    }
-
-    .resume-link-card {
-      padding: 14px 16px;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      background: rgba(12, 20, 40, 0.7);
-    }
-
-    .resume-link-card h4 {
-      margin-bottom: 8px;
-      font-size: 1rem;
     }
 
     .badge {
@@ -2227,14 +2055,6 @@
 
       .auto-gaap-grid {
         grid-template-columns: 1fr;
-      }
-
-      .resume-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .resume-nav {
-        position: static;
       }
     }
 
