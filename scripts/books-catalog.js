@@ -93,6 +93,19 @@
     "designing-and-launching-cryptocurrencies": "./designing-cryptocurrencies.html"
   };
 
+  const LOCAL_COVER_MAP = {
+    "ctrl-c-ctrl-v-and-the-death-of-reason-audiobook": "../assets/CopyPaste.webp",
+    "tokenization-of-real-world-assets": "../assets/Tokenization.webp",
+    "inside-the-black-forest-the-mev-playbook": "../assets/InsideBlackForest.webp",
+    "evm-unlocked": "../assets/EVM-Unlocked.webp",
+    "designing-and-launching-cryptocurrencies": "../assets/DesigningLaunching.webp",
+    "smart-contracts": "../assets/SmartContracts.webp",
+    "the-crypto-almanac": "../assets/CryptoAlmanac.webp",
+    "ctrl-c-ctrl-v-and-the-death-of-reason": "../assets/CopyPaste.webp",
+    "neural-ledger": "../assets/NeuralLedger.webp",
+    "reactive-profitable-zone-expansion-rpze": "../assets/RPZE.webp"
+  };
+
   function slugify(value) {
     return value
       .toLowerCase()
@@ -128,6 +141,10 @@
   }
 
   async function resolveCover(book) {
+    if (book.coverUrl) {
+      return book.coverUrl;
+    }
+
     if (typeof window.getBookCover !== "function") {
       return FALLBACK_PLACEHOLDER;
     }
