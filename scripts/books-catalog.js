@@ -134,8 +134,7 @@
           description: description || DEFAULT_DESCRIPTION,
           price,
           slug,
-          catalogUrl: CATALOG_URL_MAP[slug] || salesUrl,
-          coverUrl: LOCAL_COVER_MAP[slug] || ""
+          catalogUrl: CATALOG_URL_MAP[slug] || salesUrl
         };
       })
       .filter(Boolean);
