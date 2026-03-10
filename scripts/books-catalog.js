@@ -1,7 +1,7 @@
 (function () {
   const CATALOG_BASE_URL = "https://your-site.com/books";
   const DEFAULT_DESCRIPTION = "Detailed publication notes coming soon.";
-  const FALLBACK_PLACEHOLDER = "../assets/books/placeholder-cover.png";
+  const FALLBACK_PLACEHOLDER = "/assets/books/placeholder-cover.png";
 
   const BOOK_MATRIX_ROWS = [
     {
@@ -98,7 +98,8 @@
     return value
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim()
       .replace(/\s+/g, "-");
   }
 
@@ -148,7 +149,7 @@
     coverLink.href = book.catalogUrl;
 
     const coverImage = document.createElement("img");
-    coverImage.src = coverUrl;
+    coverImage.src = FALLBACK_PLACEHOLDER;
     coverImage.alt = `Cover art for ${book.title}`;
     coverImage.loading = "lazy";
     coverImage.referrerPolicy = "no-referrer";
@@ -216,10 +217,25 @@
     }
 
     const books = normalizeRows(BOOK_MATRIX_ROWS);
-    for (const book of books) {
-      const coverUrl = await resolveCover(book);
-      grid.appendChild(buildCard(book, coverUrl));
-    }
+    const renderJobs = books.map((book) => {
+      const card = buildCard(book);
+      const coverImage = card.querySelector("img");
+      grid.appendChild(card);
+
+      return resolveCover(book)
+        .then((coverUrl) => {
+          if (coverImage && coverUrl) {
+            coverImage.src = coverUrl;
+          }
+        })
+        .catch(() => {
+          if (coverImage) {
+            coverImage.src = FALLBACK_PLACEHOLDER;
+          }
+        });
+    });
+
+    await Promise.allSettled(renderJobs);
   }
 
   renderBooks();

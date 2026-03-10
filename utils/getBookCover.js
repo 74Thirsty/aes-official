@@ -1,5 +1,5 @@
 (function (globalScope) {
-  const LOCAL_ASSET_BASE = "../assets/books";
+  const LOCAL_ASSET_BASE = "/assets/books";
   const PLACEHOLDER_COVER = `${LOCAL_ASSET_BASE}/placeholder-cover.png`;
   const SUPPORTED_EXTENSIONS = ["jpg", "png", "webp"];
   const assetExistsCache = new Map();
