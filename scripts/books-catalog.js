@@ -208,6 +208,15 @@
     buyNow.rel = "noopener noreferrer";
     buyNow.textContent = "Buy Now";
 
+    const viewCatalog = document.createElement("a");
+    viewCatalog.className = "button outline";
+    viewCatalog.href = book.catalogUrl;
+    if (book.catalogUrl.startsWith("http")) {
+      viewCatalog.target = "_blank";
+      viewCatalog.rel = "noopener noreferrer";
+    }
+    viewCatalog.textContent = "View Catalog";
+
     actions.appendChild(buyNow);
 
     body.appendChild(top);
