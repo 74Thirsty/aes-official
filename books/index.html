@@ -123,106 +123,7 @@
           <h2>Stories, systems, and strategies for modern builders</h2>
           <p>Select a title to explore sample chapters, resources, and ways to bring the material into your organization.</p>
         </div>
-        <div class="cards-grid books-grid">
-          <article class="card book-card">
-            <a class="book-cover image" href="./copy-paste-death.html">
-              <img
-                src="../assets/copypastedeath.png"
-                alt="Cover art for Copy, Paste, and the Death of Reason"
-                loading="lazy"
-              />
-            </a>
-            <div class="book-body">
-              <div class="book-top">
-                <h3>Copy, Paste, and the Death of Reason</h3>
-                <span class="badge danger">New release</span>
-              </div>
-              <p>Hirschauer’s manifesto for builders tired of speed masquerading as craft—an invitation to reclaim engineering rigor.</p>
-              <div class="book-meta">
-                <span>Read the full broadside</span>
-              </div>
-              <div class="card-actions">
-                <a class="button primary" href="./copy-paste-death.html">See full poster</a>
-              </div>
-            </div>
-          </article>
-          <article class="card book-card">
-            <a class="book-cover image" href="./designing-cryptocurrencies.html">
-              <img
-                src="../assets/designlaunch.png"
-                alt="Cover art for Designing and Launching Cryptocurrencies"
-                loading="lazy"
-              />
-            </a>
-            <div class="book-body">
-              <div class="book-top">
-                <h3>Designing and Launching Cryptocurrencies</h3>
-                <span class="badge accent">Crypto roadmap</span>
-              </div>
-              <p>The end-to-end playbook for architecting, securing, and shipping competitive blockchain assets.</p>
-              <div class="book-meta">
-                <span>From concept to post-launch</span>
-              </div>
-              <div class="card-actions">
-                <a class="button primary" href="./designing-cryptocurrencies.html">Preview the guide</a>
-              </div>
-            </div>
-          </article>
-          <article class="card book-card">
-            <div class="book-cover">AG</div>
-            <div class="book-body">
-              <div class="book-top">
-                <h3>Auto GAAP Blueprint</h3>
-                <span class="badge success">Client favorite</span>
-              </div>
-              <p>Operationalizes compliance automation with stories that align controllers, engineers, and executives.</p>
-              <div class="book-meta">
-                <span class="price">$39</span>
-                <span>Print + digital bundle</span>
-              </div>
-              <div class="card-actions">
-                <a class="button primary" href="../autogaap/">Explore Auto GAAP</a>
-                <a class="button outline" href="mailto:hello@christopherhirschauer.com">Order copies</a>
-              </div>
-            </div>
-          </article>
-          <article class="card book-card">
-            <div class="book-cover alt">GF</div>
-            <div class="book-body">
-              <div class="book-top">
-                <h3>GNOMAN Field Guide</h3>
-                <span class="badge">2nd edition</span>
-              </div>
-              <p>Blends geospatial analytics, financial telemetry, and story-driven facilitation techniques.</p>
-              <div class="book-meta">
-                <span class="price">$45</span>
-                <span>Hardcover + labs</span>
-              </div>
-              <div class="card-actions">
-                <a class="button primary" href="../projects/gnoman/">View GNOMAN</a>
-                <a class="button outline" href="mailto:hello@christopherhirschauer.com">Reserve bundle</a>
-              </div>
-            </div>
-          </article>
-          <article class="card book-card">
-            <div class="book-cover accent">SC</div>
-            <div class="book-body">
-              <div class="book-top">
-                <h3>Smart Contract Narratives</h3>
-                <span class="badge accent">Community</span>
-              </div>
-              <p>Equips non-technical partners with the language and confidence to champion decentralized products.</p>
-              <div class="book-meta">
-                <span class="price">$29</span>
-                <span>Digital + workshop</span>
-              </div>
-              <div class="card-actions">
-                <a class="button primary" href="../projects/smart-contract-wizard/">Launch the wizard</a>
-                <a class="button outline" href="mailto:hello@christopherhirschauer.com">Book a session</a>
-              </div>
-            </div>
-          </article>
-        </div>
+        <div id="books-catalog-grid" class="cards-grid books-grid"></div>
       </section>
 
       <section id="extras" class="section">
@@ -328,5 +229,7 @@
   </div>
 
   <script src="../scripts/global.js" defer></script>
+  <script src="../utils/getBookCover.js" defer></script>
+  <script src="../scripts/books-catalog.js" defer></script>
 </body>
 </html>
