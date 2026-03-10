@@ -134,8 +134,7 @@
           description: description || DEFAULT_DESCRIPTION,
           price,
           slug,
-          catalogUrl: CATALOG_URL_MAP[slug] || salesUrl,
-          coverUrl: LOCAL_COVER_MAP[slug] || ""
+          catalogUrl: CATALOG_URL_MAP[slug] || salesUrl
         };
       })
       .filter(Boolean);
@@ -207,6 +206,15 @@
     buyNow.target = "_blank";
     buyNow.rel = "noopener noreferrer";
     buyNow.textContent = "Buy Now";
+
+    const viewCatalog = document.createElement("a");
+    viewCatalog.className = "button outline";
+    viewCatalog.href = book.catalogUrl;
+    if (book.catalogUrl.startsWith("http")) {
+      viewCatalog.target = "_blank";
+      viewCatalog.rel = "noopener noreferrer";
+    }
+    viewCatalog.textContent = "View Catalog";
 
     actions.appendChild(buyNow);
 
