@@ -147,3 +147,65 @@ By leveraging the power of **real-time data tracking**, **prepaid and accrued ex
 
 If you have any questions, or need additional features or adjustments, feel free to contact us!
 
+
+---
+
+## Books Catalog Architecture & Operations Guide
+
+This repository currently uses a **code-first catalog source** (not an external Google Sheet/Excel file).
+
+### Source of Truth (Spreadsheet Equivalent)
+
+- **Primary catalog data location:** `scripts/books-catalog.js`
+- **Data constant:** `BOOK_MATRIX_ROWS`
+- **Edit path to add/update books:** update `BOOK_MATRIX_ROWS` entries directly in that file.
+
+If you were looking for a spreadsheet to update, there is no standalone `.xlsx/.csv` wired into runtime today; the JS matrix is the active dataset.
+
+### Catalog Rendering Flow
+
+1. `books/index.html` provides the mount node: `#books-catalog-grid`.
+2. `scripts/books-catalog.js` normalizes `BOOK_MATRIX_ROWS` into renderable records.
+3. `LOCAL_COVER_MAP` resolves known slugs to local cover assets in `/assets`.
+4. `resolveCover()` prefers explicit local mapping and falls back to `getBookCover()`.
+5. Book cards render with **Buy Now** CTA on the books catalog page.
+
+### Files Involved
+
+- `books/index.html` → page shell + catalog mount target.
+- `scripts/books-catalog.js` → catalog dataset, slug normalization, card rendering.
+- `utils/getBookCover.js` → fallback cover resolver.
+- `assets/*.webp` → local cover art used by front page and books catalog.
+
+### How to Add a New Book (Production Checklist)
+
+1. Open `scripts/books-catalog.js`.
+2. Add a new object to `BOOK_MATRIX_ROWS` with:
+   - `platform`
+   - `book title`
+   - `url`
+   - `price`
+   - `description`
+3. Ensure the generated slug from title is stable (same slug algorithm as `slugify()`).
+4. Add local cover mapping in `LOCAL_COVER_MAP` for deterministic rendering.
+5. Place the matching cover file in `/assets` (prefer `.webp`).
+6. Validate in browser at `/books/`.
+
+### Front Page Featured Books
+
+The front page (`index.html`) currently has three featured book cards that mirror catalog behavior:
+
+- Real cover image assets.
+- Direct **Buy Now** links to publisher pages.
+- Direct link to full catalog (`books/`).
+
+### Operational Notes
+
+- Keep titles, pricing, and links synchronized between featured cards (`index.html`) and catalog source (`BOOK_MATRIX_ROWS`).
+- Prefer local cover assets to avoid external fetch fragility.
+- Keep outbound purchase links with `target="_blank" rel="noopener noreferrer"`.
+
+### Suggested Future Upgrade (Optional)
+
+If you want a real spreadsheet workflow later, migrate `BOOK_MATRIX_ROWS` into a versioned `data/books-catalog.json` (or CSV) and import it at build/render time. That creates clean non-code editing semantics while preserving deterministic deploy behavior.
+
