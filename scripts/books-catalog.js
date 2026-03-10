@@ -217,7 +217,6 @@
     viewCatalog.textContent = "View Catalog";
 
     actions.appendChild(buyNow);
-    actions.appendChild(viewCatalog);
 
     body.appendChild(top);
     body.appendChild(description);
