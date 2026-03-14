@@ -665,8 +665,8 @@
 
     .hero-main {
       display: grid;
-      gap: clamp(28px, 6vw, 44px);
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: clamp(24px, 4vw, 36px);
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
       align-items: start;
     }
 
@@ -674,19 +674,22 @@
       display: flex;
       flex-direction: column;
       gap: 22px;
-      max-width: 680px;
+      max-width: 100%;
     }
 
     .hero-copy h1 {
       font-family: var(--font-display);
       font-weight: 600;
       letter-spacing: -0.02em;
+      width: 100%;
+      line-height: 0;
     }
 
     .hero-highlight {
       display: block;
-      width: clamp(220px, 26vw, 340px);
-      aspect-ratio: 4 / 5;
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 5 / 6;
       border-radius: var(--radius-xl);
       border: 1px solid rgba(148, 163, 184, 0.35);
       background: linear-gradient(155deg, rgba(15, 23, 42, 0.7), rgba(8, 47, 73, 0.55));
@@ -746,9 +749,9 @@
 
     .hero-visual {
       position: relative;
-      min-height: 280px;
+      min-height: 0;
       display: grid;
-      place-items: start center;
+      place-items: start stretch;
       padding-top: 6px;
     }
 
@@ -792,7 +795,9 @@
 
     .hero-device {
       position: relative;
-      width: min(360px, 100%);
+      width: 100%;
+      max-width: 380px;
+      margin-left: auto;
       border-radius: 26px;
       border: 1px solid rgba(148, 163, 184, 0.28);
       background: linear-gradient(160deg, rgba(13, 22, 42, 0.88), rgba(15, 23, 42, 0.65));
@@ -2125,6 +2130,10 @@
 
       .hero-visual {
         min-height: 220px;
+      }
+
+      .hero-device {
+        margin-inline: auto;
       }
 
       .auto-gaap-shell .hero-visual .hero-device {
