@@ -14,6 +14,7 @@
     name="description"
     content="Interactive resume for Christopher Hirschauer: Web3/DeFi architect, creator of VANTAGE, and builder of automation systems across blockchain and financial tooling."
   />
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js" defer></script>
   <link rel="stylesheet" href="styles/global.css" />
 </head>
 <body>
@@ -54,6 +55,9 @@
           <span class="pulse-dot" aria-hidden="true"></span>
           Interactive resume synced with LinkedIn profile: linkedin.com/in/smartmoneytactic
           <span class="ribbon-pill">Live profile</span>
+        </div>
+        <div class="crypto-ticker-wrap" aria-label="Live crypto ticker">
+          <div id="cryptoTicker" class="crypto-ticker-canvas"></div>
         </div>
         <div class="hero-main">
           <div class="hero-copy">
@@ -508,5 +512,6 @@
   </div>
 
   <script src="scripts/global.js" defer></script>
+  <script src="scripts/crypto-ticker.js" defer></script>
 </body>
 </html>
