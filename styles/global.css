@@ -1407,6 +1407,44 @@
       border-color: rgba(56, 189, 248, 0.24);
     }
 
+    .badge-log {
+      gap: 16px;
+    }
+
+    .badge-group {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+    }
+
+    .badge-group h4 {
+      font-size: 1rem;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+
+    .badge-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .title-badge-link {
+      display: block;
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .title-badge-link img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      filter: drop-shadow(0 6px 16px rgba(14, 165, 233, 0.18));
+    }
+
     .assistant-form {
       display: grid;
       grid-template-columns: 1fr auto;
