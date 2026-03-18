@@ -9,8 +9,13 @@
       return chartInstance;
     }
 
+    if (typeof window.Chart === 'undefined') {
+      console.warn('chart.js: Chart.js is unavailable; skipping account balance chart initialization.');
+      return null;
+    }
+
     const context = canvas.getContext('2d');
-    chartInstance = new Chart(context, {
+    chartInstance = new window.Chart(context, {
       type: 'bar',
       data: {
         labels: ['Assets', 'Liabilities', 'Equity', 'Revenue', 'Expense'],
