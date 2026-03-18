@@ -472,6 +472,7 @@
                   <button class="button outline" type="button" id="exportPDF">Export PDF</button>
                   <button class="button outline" type="button" id="exportJSON">Export JSON</button>
                 </div>
+                <p class="payment-gate-note">Exports and downloads are gated at $1 per file. Choose Venmo, PayPal, Chime, or crypto/Gnosis Safe in the payment dialog.</p>
               </form>
 
               <div class="auto-gaap-kpis">
@@ -548,6 +549,7 @@
                   <button class="button outline" type="button" id="downloadStatementJson">Export JSON</button>
                   <button class="button outline" type="button" id="downloadStatementPdf">Export PDF</button>
                 </div>
+                <p class="payment-gate-note">Financial statement downloads are also gated at $1 per file via the same payment dialog.</p>
                 <div
                   id="financialStatementsOutput"
                   class="financial-statements-output"
@@ -647,12 +649,57 @@
       </footer>
     </div>
 
+    <dialog
+      id="autoGaapPaymentDialog"
+      class="payment-dialog"
+      aria-labelledby="paymentDialogTitle"
+      aria-describedby="paymentDialogDescription"
+      data-price="1.00"
+      data-venmo-handle="@set-venmo-handle"
+      data-paypal-url="https://paypal.me/set-paypal-handle/1"
+      data-chime-handle="$set-chime-handle"
+      data-crypto-address="SET_GNOSIS_SAFE_ADDRESS"
+      data-crypto-network="Ethereum / Gnosis Safe"
+    >
+      <form method="dialog" class="payment-dialog-card">
+        <div class="payment-dialog-header">
+          <div>
+            <p class="payment-dialog-eyebrow">Auto GAAP export gate</p>
+            <h2 id="paymentDialogTitle">Pay $1 to unlock this export</h2>
+          </div>
+          <button class="payment-dialog-close" type="submit" value="cancel" aria-label="Close payment dialog">✕</button>
+        </div>
+
+        <p id="paymentDialogDescription" class="payment-dialog-copy">
+          Pick a payment rail, send $1, then confirm to continue. Crypto receipts can route straight to your Gnosis Safe once the address is configured.
+        </p>
+
+        <div class="payment-dialog-target">
+          <span>Pending action</span>
+          <strong id="paymentDialogAction">Export file</strong>
+        </div>
+
+        <div id="paymentOptionGrid" class="payment-option-grid" role="list" aria-label="Payment methods"></div>
+
+        <label class="payment-confirm">
+          <input id="paymentConfirmation" type="checkbox" />
+          <span>I sent the $1 payment and want to continue with this export.</span>
+        </label>
+
+        <div class="payment-dialog-actions">
+          <button class="button outline" type="submit" value="cancel">Cancel</button>
+          <button class="button primary" type="button" id="confirmPaymentAction">Continue after payment</button>
+        </div>
+      </form>
+    </dialog>
+
     <script src="../scripts/base_app.js" defer></script>
     <script src="../scripts/global.js" defer></script>
     <script src="../scripts/journal.js" defer></script>
     <script src="../scripts/balance.js" defer></script>
     <script src="../scripts/depreciation.js" defer></script>
     <script src="../scripts/recurring.js" defer></script>
+    <script src="../scripts/payment_gate.js" defer></script>
     <script src="../scripts/export.js" defer></script>
     <script src="../scripts/chart.js" defer></script>
     <script src="../scripts/gaap_expansion.js" defer></script>

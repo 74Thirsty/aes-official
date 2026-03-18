@@ -1918,6 +1918,13 @@
       gap: 6px;
     }
 
+    .payment-gate-note {
+      margin: 6px 0 0;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
     .auto-gaap-health {
       display: grid;
       gap: 12px;
@@ -2012,6 +2019,169 @@
       border-top: 1px solid rgba(148, 163, 184, 0.12);
       padding-top: 18px;
       margin-top: 12px;
+    }
+
+    .payment-dialog {
+      width: min(760px, calc(100vw - 32px));
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 28px;
+      padding: 0;
+      background: linear-gradient(160deg, rgba(13, 22, 42, 0.96), rgba(15, 23, 42, 0.9));
+      color: var(--text);
+      box-shadow: 0 32px 70px rgba(2, 6, 23, 0.6);
+    }
+
+    .payment-dialog::backdrop {
+      background: rgba(2, 6, 23, 0.74);
+      backdrop-filter: blur(8px);
+    }
+
+    .payment-dialog-card {
+      display: grid;
+      gap: 22px;
+      padding: clamp(24px, 4vw, 32px);
+    }
+
+    .payment-dialog-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .payment-dialog-eyebrow {
+      margin: 0 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .payment-dialog-header h2 {
+      margin: 0;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+    }
+
+    .payment-dialog-close {
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      width: 42px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .payment-dialog-copy {
+      margin: 0;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .payment-dialog-target {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.64);
+      border: 1px solid rgba(56, 189, 248, 0.18);
+    }
+
+    .payment-dialog-target span {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .payment-option-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .payment-option-card {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.08);
+    }
+
+    .payment-option-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .payment-option-top h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .payment-option-price {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.16);
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .payment-option-detail,
+    .payment-option-note {
+      margin: 0;
+      color: var(--text-muted);
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .payment-option-detail {
+      font-family: var(--font-display);
+      color: var(--text);
+    }
+
+    .payment-option-footer {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .payment-option-action[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .payment-confirm {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .payment-confirm input {
+      width: 18px;
+      height: 18px;
+      margin-top: 3px;
+      flex: 0 0 auto;
+    }
+
+    .payment-dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     .ledger-controls {
