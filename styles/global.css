@@ -663,7 +663,7 @@
     .hero-main {
       display: grid;
       gap: clamp(24px, 4vw, 36px);
-      grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
       align-items: start;
     }
 
@@ -688,21 +688,16 @@
       max-width: 100%;
       aspect-ratio: 5 / 6;
       border-radius: var(--radius-xl);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      background: linear-gradient(155deg, rgba(15, 23, 42, 0.7), rgba(8, 47, 73, 0.55));
-      box-shadow: var(--glow, 0 18px 48px rgba(8, 12, 26, 0.6));
+      border: none;
+      background: transparent;
+      box-shadow: none;
       position: relative;
       overflow: hidden;
       align-self: flex-start;
     }
 
     .hero-highlight::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(200px circle at 0% 0%, rgba(56, 189, 248, 0.25), transparent 70%);
-      opacity: 0.5;
-      pointer-events: none;
+      content: none;
     }
 
     .hero-summary {
@@ -741,14 +736,21 @@
     .hero-actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 14px;
+      gap: 4%;
+    }
+
+    .hero-actions .button {
+      flex: 0 0 48%;
+      justify-content: center;
     }
 
     .hero-visual {
       position: relative;
       min-height: 0;
-      display: grid;
-      place-items: start stretch;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      justify-content: flex-end;
       padding-top: 6px;
     }
 
@@ -2258,10 +2260,13 @@
     }
 
     @media (max-width: 560px) {
-      .hero-actions,
       .card-actions {
         flex-direction: column;
         align-items: stretch;
+      }
+
+      .hero-actions .button {
+        flex: 1 1 100%;
       }
 
       .assistant-form {
