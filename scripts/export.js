@@ -76,7 +76,14 @@
   const bindButton = (selector, handler) => {
     const button = document.querySelector(selector);
     if (button) {
-      button.addEventListener('click', handler);
+      button.addEventListener('click', () => {
+        if (window.AutoGaapPaymentGate && typeof window.AutoGaapPaymentGate.requestAccess === 'function') {
+          const label = button.textContent ? button.textContent.trim() : 'Export file';
+          window.AutoGaapPaymentGate.requestAccess(label, handler);
+          return;
+        }
+        handler();
+      });
     }
   };
 
