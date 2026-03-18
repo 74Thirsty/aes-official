@@ -1070,7 +1070,14 @@
     bindings.forEach((binding) => {
       const button = document.getElementById(binding.id);
       if (!button) return;
-      button.addEventListener('click', binding.handler);
+      button.addEventListener('click', () => {
+        if (window.AutoGaapPaymentGate && typeof window.AutoGaapPaymentGate.requestAccess === 'function') {
+          const label = button.textContent ? button.textContent.trim() : 'Download file';
+          window.AutoGaapPaymentGate.requestAccess(label, binding.handler);
+          return;
+        }
+        binding.handler();
+      });
     });
   };
 
