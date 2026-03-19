@@ -29,7 +29,6 @@
     .claude-page .hero-visual {
       display: grid;
       gap: 18px;
-      align-content: start;
     }
 
     .claude-stack {
@@ -105,6 +104,8 @@
     .transcript-head,
     .library-head {
       display: flex;
+      align-items: center;
+      gap: 10px;
       flex-wrap: wrap;
       justify-content: space-between;
       gap: 12px 24px;
@@ -129,16 +130,20 @@
       font-size: 0.92rem;
     }
 
-    .tutorial-section {
+    .app-layout {
       display: grid;
-      gap: 14px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(148, 163, 184, 0.14);
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      gap: 18px;
+      min-height: calc(100vh - 120px);
     }
 
-    .tutorial-section:first-of-type {
-      border-top: none;
-      padding-top: 0;
+    .sidebar,
+    .chat-shell {
+      border-radius: 28px;
+      border: 1px solid var(--chat-border);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.92));
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
     }
 
     .tutorial-section ol,
@@ -153,7 +158,8 @@
       padding: 0;
       margin: 0;
       display: grid;
-      gap: 10px;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
     }
 
     .tutorial-section li,
@@ -176,17 +182,17 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
 
-    .code-shell header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      background: rgba(15, 23, 42, 0.88);
-      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    .sidebar-card {
+      display: grid;
       gap: 12px;
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      background: rgba(15, 23, 42, 0.56);
     }
 
-    .code-shell pre {
+    .sidebar-card h3,
+    .chat-head h1 {
       margin: 0;
       padding: 18px;
       overflow-x: auto;
@@ -208,9 +214,9 @@
       border: 1px solid rgba(148, 163, 184, 0.24);
       background: rgba(15, 23, 42, 0.75);
       color: var(--text);
-      cursor: pointer;
+      border-radius: 16px;
+      padding: 12px 14px;
       font: inherit;
-      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
 
     .mini-button:hover,
@@ -227,26 +233,33 @@
       color: #fecaca;
     }
 
+    .toggle input {
+      width: auto;
+      margin: 0;
+      accent-color: var(--primary);
+    }
+
+    .tiny-pill,
     .status-pill,
     .tiny-pill,
     .metric-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 12px;
+      padding: 7px 11px;
       border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
       background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.22);
       color: var(--primary);
-      font-size: 0.84rem;
-      letter-spacing: 0.04em;
+      font-size: 0.77rem;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
     }
 
     .status-pill.warn {
       color: #fbbf24;
-      background: rgba(251, 191, 36, 0.12);
-      border-color: rgba(251, 191, 36, 0.24);
+      border-color: rgba(251, 191, 36, 0.22);
+      background: rgba(251, 191, 36, 0.1);
     }
 
     .status-pill.good {
@@ -296,21 +309,30 @@
       font-size: 1.05rem;
     }
 
-    .claude-page select,
-    .claude-page textarea,
-    .claude-page input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(148, 163, 184, 0.24);
-      background: rgba(15, 23, 42, 0.72);
-      color: var(--text);
-      font: inherit;
+    .dropzone.dragover {
+      border-color: rgba(34, 211, 238, 0.92);
+      background: rgba(8, 47, 73, 0.26);
     }
 
-    .claude-page textarea {
-      min-height: 150px;
-      resize: vertical;
+    .attachment-list,
+    .context-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .attachment-item,
+    .context-item {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      background: rgba(2, 6, 23, 0.56);
+    }
+
+    .context-item.active {
+      border-color: rgba(56, 189, 248, 0.28);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.12);
     }
 
     .claude-page input[type="checkbox"] {
@@ -417,75 +439,107 @@
       top: calc(clamp(14px, 3vw, 28px) + 110px);
     }
 
+    .chat-head h1 {
+      font-size: clamp(1.45rem, 2.2vw, 1.95rem);
+      font-family: var(--font-display);
+    }
+
     .transcript {
       min-height: 680px;
       max-height: 920px;
       overflow: auto;
-      padding: 18px;
-      border-radius: var(--radius-md);
-      background: rgba(2, 6, 23, 0.88);
-      border: 1px solid rgba(148, 163, 184, 0.18);
+      padding: 26px clamp(18px, 3vw, 34px);
       display: grid;
-      gap: 12px;
+      gap: 18px;
+      background:
+        radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 34%),
+        linear-gradient(180deg, rgba(2, 6, 23, 0.96), rgba(2, 6, 23, 0.98));
+      min-height: 74vh;
     }
 
     .message {
       display: grid;
-      gap: 8px;
-      padding: 16px;
-      border-radius: 18px;
-      border: 1px solid rgba(148, 163, 184, 0.14);
+      gap: 10px;
+      max-width: min(920px, 100%);
+    }
+
+    .message.user {
+      justify-self: end;
+    }
+
+    .message.assistant,
+    .message.system,
+    .message.error {
+      justify-self: start;
     }
 
     .message header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 10px;
-      color: var(--text-muted);
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
+      color: var(--chat-muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
     }
 
-    .message.user {
-      background: rgba(37, 99, 235, 0.18);
-      border-color: rgba(96, 165, 250, 0.28);
-    }
-
-    .message.assistant {
-      background: rgba(15, 23, 42, 0.88);
-    }
-
-    .message.system {
-      background: rgba(52, 211, 153, 0.12);
-      border-color: rgba(52, 211, 153, 0.22);
-    }
-
-    .message.error {
-      background: rgba(248, 113, 113, 0.12);
-      border-color: rgba(248, 113, 113, 0.28);
-    }
-
-    .message-content {
+    .message-bubble {
+      padding: 18px 20px;
+      border-radius: 22px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      background: rgba(15, 23, 42, 0.78);
+      line-height: 1.72;
+      color: var(--text);
       white-space: pre-wrap;
       word-break: break-word;
-      color: var(--text);
-      line-height: 1.7;
+      box-shadow: 0 14px 34px rgba(2, 6, 23, 0.28);
     }
 
-    .kbd {
-      display: inline-flex;
+    .message.user .message-bubble {
+      background: linear-gradient(180deg, rgba(37, 99, 235, 0.24), rgba(37, 99, 235, 0.16));
+      border-color: rgba(96, 165, 250, 0.22);
+    }
+
+    .message.error .message-bubble {
+      background: rgba(127, 29, 29, 0.42);
+      border-color: rgba(248, 113, 113, 0.24);
+    }
+
+    .empty-state {
+      place-self: center;
+      max-width: 580px;
+      text-align: center;
+      padding: 28px;
+      border-radius: 22px;
+      border: 1px dashed rgba(148, 163, 184, 0.16);
+      background: rgba(15, 23, 42, 0.32);
+      color: var(--chat-muted);
+    }
+
+    .composer-wrap {
+      padding: 16px 18px 18px;
+      border-top: 1px solid var(--chat-border);
+      background: linear-gradient(180deg, rgba(2, 6, 23, 0.82), rgba(2, 6, 23, 0.96));
+    }
+
+    .composer {
+      display: grid;
+      gap: 10px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .composer-bar {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 10px;
       align-items: center;
-      justify-content: center;
-      min-width: 28px;
-      height: 28px;
-      padding: 0 8px;
-      border-radius: 8px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      color: var(--text-dim);
-      font-size: 0.82rem;
+      padding: 10px;
+      border-radius: 22px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background: rgba(15, 23, 42, 0.86);
+      box-shadow: 0 14px 32px rgba(2, 6, 23, 0.24);
     }
 
     .empty-state {
@@ -559,8 +613,8 @@
 </head>
 <body class="claude-page">
   <div class="page-shell">
-    <header id="top" class="site-header">
-      <nav class="top-nav">
+    <header class="claude-topbar">
+      <div class="brand-row">
         <a class="brand" href="../../#top">
           <span class="brand-mark">⌁</span>
           Christopher Hirschauer
@@ -877,6 +931,8 @@
               <span>Refactored March 19, 2026</span>
             </div>
           </div>
+          <p>Model, context, and attachments live here. Chat stays in the main pane.</p>
+        </div>
 
           <section class="tutorial-section">
             <h3>Bootstrap</h3>
@@ -935,8 +991,10 @@ for await (const part of response) {
                 <li><code>claude-3-haiku</code></li>
               </ul>
             </div>
+            <div id="generatedSnippet" class="request-preview"></div>
           </section>
-        </article>
+        </div>
+      </aside>
 
         <aside class="claude-console">
           <div class="console-head">
@@ -975,6 +1033,7 @@ for await (const part of response) {
     </footer>
   </div>
 
+  <textarea id="transcriptExport" class="sr-only" aria-hidden="true"></textarea>
   <script src="../../scripts/global.js" defer></script>
   <script>
     const presetPrompts = {
@@ -1026,7 +1085,6 @@ for await (const part of response) {
     const contextList = document.getElementById('contextList');
     const dropzone = document.getElementById('dropzone');
     const copyButtons = document.querySelectorAll('.copy-button');
-    const promptChips = document.querySelectorAll('.prompt-chip');
 
     let requestCounter = 0;
     let attachments = [];
@@ -1086,14 +1144,14 @@ for await (const part of response) {
       const header = document.createElement('header');
       const titleNode = document.createElement('strong');
       titleNode.textContent = title;
-      const stamp = document.createElement('span');
-      stamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      header.append(titleNode, stamp);
+      const metaNode = document.createElement('span');
+      metaNode.textContent = meta;
+      header.append(titleNode, metaNode);
 
-      const content = document.createElement('div');
-      content.className = 'message-content';
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
 
-      wrapper.append(header, content);
+      wrapper.append(header, bubble);
       transcript.appendChild(wrapper);
       transcript.scrollTop = transcript.scrollHeight;
       return {
@@ -1111,10 +1169,7 @@ for await (const part of response) {
       if (response?.message?.content?.[0]?.text) return response.message.content[0].text;
       if (response?.text) return response.text;
       if (Array.isArray(response?.message?.content)) {
-        return response.message.content
-          .map((part) => part?.text || '')
-          .filter(Boolean)
-          .join('\n');
+        return response.message.content.map((part) => part?.text || '').filter(Boolean).join('\n');
       }
       return JSON.stringify(response, null, 2);
     }
@@ -1420,6 +1475,7 @@ for await (const part of response) {
     function updateRuntimeStatus() {
       if (window.puter?.ai?.chat) {
         runtimeStatus.textContent = 'Puter runtime ready';
+        runtimeStatus.classList.add('good');
         runtimeStatus.classList.remove('warn');
         runtimeStatus.classList.add('good');
       } else {
@@ -1438,12 +1494,162 @@ for await (const part of response) {
         return;
       }
 
+      contextList.innerHTML = '';
+      contextDocs
+        .slice()
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .forEach((doc) => {
+          const item = document.createElement('article');
+          item.className = `context-item ${doc.active ? 'active' : ''}`;
+
+          const head = document.createElement('div');
+          head.className = 'item-head';
+
+          const titleWrap = document.createElement('div');
+          const title = document.createElement('strong');
+          title.textContent = doc.name;
+          const meta = document.createElement('div');
+          meta.className = 'context-meta';
+          meta.textContent = `Updated ${new Date(doc.updatedAt).toLocaleString()}`;
+          titleWrap.append(title, meta);
+
+          const controls = document.createElement('div');
+          controls.className = 'message-files';
+
+          const toggle = document.createElement('button');
+          toggle.type = 'button';
+          toggle.className = 'mini-button';
+          toggle.textContent = doc.active ? 'Active' : 'Activate';
+          toggle.addEventListener('click', () => {
+            contextDocs = contextDocs.map((entry) => entry.id === doc.id
+              ? { ...entry, active: !entry.active, updatedAt: Date.now() }
+              : entry);
+            persistContextDocs();
+            renderContextDocs();
+          });
+
+          const loadButton = document.createElement('button');
+          loadButton.type = 'button';
+          loadButton.className = 'mini-button';
+          loadButton.textContent = 'Load';
+          loadButton.addEventListener('click', () => {
+            contextInput.value = doc.content;
+            contextNameInput.value = doc.name;
+            syncComposerState();
+          });
+
+          const deleteButton = document.createElement('button');
+          deleteButton.type = 'button';
+          deleteButton.className = 'ghost-button danger';
+          deleteButton.textContent = 'Delete';
+          deleteButton.addEventListener('click', () => {
+            contextDocs = contextDocs.filter((entry) => entry.id !== doc.id);
+            persistContextDocs();
+            renderContextDocs();
+          });
+
+          controls.append(toggle, loadButton, deleteButton);
+          head.append(titleWrap, controls);
+
+          const preview = document.createElement('div');
+          preview.className = 'context-preview';
+          preview.textContent = clip(doc.content || '', 700) || '[Empty context pack]';
+
+          item.append(head, preview);
+          contextList.appendChild(item);
+        });
+
+      syncComposerState();
+    }
+
+    function saveEditorContext() {
+      const content = contextInput.value.trim();
+      if (!content) {
+        const msg = createMessage('error', 'Context error', 'missing content');
+        msg.commit('Working context is empty. Add markdown before saving a context pack.');
+        return;
+      }
+
+      const name = (contextNameInput.value || 'context-pack.md').trim();
+      const normalizedName = name.endsWith('.md') ? name : `${name}.md`;
+      const existing = contextDocs.find((doc) => doc.name === normalizedName);
+
+      if (existing) {
+        contextDocs = contextDocs.map((doc) => doc.id === existing.id
+          ? { ...doc, content, active: true, updatedAt: Date.now() }
+          : doc);
+      } else {
+        contextDocs.unshift({
+          id: crypto.randomUUID(),
+          name: normalizedName,
+          content,
+          active: true,
+          updatedAt: Date.now()
+        });
+      }
+
+      persistContextDocs();
+      renderContextDocs();
+    }
+
+    function downloadText(filename, content) {
+      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function importContextFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (!files.length) return;
+
+      const imported = await Promise.all(files.map(async (file) => ({
+        name: file.name.endsWith('.md') ? file.name : `${file.name}.md`,
+        content: await readFileAsText(file)
+      })));
+
+      imported.forEach((entry) => {
+        const existing = contextDocs.find((doc) => doc.name === entry.name);
+        if (existing) {
+          existing.content = entry.content;
+          existing.active = true;
+          existing.updatedAt = Date.now();
+        } else {
+          contextDocs.unshift({
+            id: crypto.randomUUID(),
+            name: entry.name,
+            content: entry.content,
+            active: true,
+            updatedAt: Date.now()
+          });
+        }
+      });
+
+      persistContextDocs();
+      renderContextDocs();
+      contextFileInput.value = '';
+    }
+
+    async function runPrompt() {
+      const prompt = promptInput.value.trim();
+      if (!prompt) return;
+
       if (!window.puter?.ai?.chat) {
         updateRuntimeStatus();
         const msg = createMessage('error', 'Runtime unavailable');
         msg.commit('Puter.js is not ready yet. Wait for the runtime to load, then retry.');
         return;
       }
+
+      const composedPrompt = composePrompt();
+      const model = modelSelect.value;
+      const stream = streamToggle.checked;
+      const requestId = ++requestCounter;
+      const attachmentSummary = attachments.length ? `${attachments.length} file${attachments.length === 1 ? '' : 's'}` : 'no files';
+      const contextSummary = getActiveContextDocs().length ? `${getActiveContextDocs().length} context doc${getActiveContextDocs().length === 1 ? '' : 's'}` : 'no context docs';
 
       if (clearOnSendToggle.checked) {
         clearTranscript();
@@ -1457,9 +1663,8 @@ for await (const part of response) {
       const userMessage = createMessage('user', `Request ${requestId}`);
       userMessage.commit(composedPrompt);
 
-      const assistantMessage = createMessage('assistant', `${model}${stream ? ' · stream' : ''}`);
       runPromptButton.disabled = true;
-      runPromptButton.textContent = stream ? 'Streaming…' : 'Waiting…';
+      runPromptButton.textContent = '…';
       runtimeStatus.textContent = stream ? 'Streaming response' : 'Running request';
       runtimeStatus.classList.remove('warn');
 
@@ -1489,7 +1694,10 @@ for await (const part of response) {
         runtimeStatus.classList.remove('good');
       } finally {
         runPromptButton.disabled = false;
-        runPromptButton.textContent = 'Run Claude request';
+        runPromptButton.textContent = '↑';
+        promptInput.value = '';
+        syncComposerState();
+        promptInput.focus();
       }
     }
 
