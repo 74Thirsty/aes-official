@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Free Claude API Lab | Christopher Hirschauer</title>
+  <title>Claude Workspace | Christopher Hirschauer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -12,21 +12,18 @@
   />
   <meta
     name="description"
-    content="Interactive Puter.js Claude playground with model selection, streaming chat, and tutorial sections modeled after the original Free Unlimited Claude API guide."
+    content="Production-grade Claude workspace with Puter.js chat, attachment ingestion, persistent markdown context packs, and a stronger browser-native operator UI."
   />
   <link rel="stylesheet" href="../../styles/global.css" />
   <script src="https://js.puter.com/v2/" defer></script>
   <style>
     .claude-page .hero {
-      gap: 24px;
+      gap: 28px;
     }
 
-    .claude-page .hero-summary {
-      max-width: 760px;
-    }
-
+    .claude-page .hero-summary,
     .claude-page .hero-list {
-      max-width: 760px;
+      max-width: 820px;
     }
 
     .claude-page .hero-visual {
@@ -38,7 +35,7 @@
     .claude-stack {
       display: grid;
       gap: 24px;
-      grid-template-columns: minmax(0, 1.3fr) minmax(340px, 0.9fr);
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
       align-items: start;
     }
 
@@ -47,7 +44,14 @@
     .claude-sidecard,
     .claude-playground,
     .model-catalog,
-    .disclaimer-card {
+    .disclaimer-card,
+    .workspace-shell,
+    .workspace-card,
+    .metrics-strip,
+    .attachment-panel,
+    .context-library,
+    .transcript-shell,
+    .snippet-shell {
       background: linear-gradient(160deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.72));
       border: 1px solid rgba(148, 163, 184, 0.22);
       border-radius: var(--radius-lg);
@@ -55,23 +59,72 @@
       padding: clamp(22px, 3vw, 30px);
     }
 
-    .claude-tutorial {
+    .claude-tutorial,
+    .claude-console,
+    .workspace-shell,
+    .workspace-card,
+    .transcript-shell,
+    .attachment-panel,
+    .context-library,
+    .snippet-shell {
       display: grid;
-      gap: 20px;
+      gap: 18px;
     }
 
-    .tutorial-head {
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .metrics-strip article,
+    .hero-metrics article,
+    .model-list li,
+    .tutorial-section li,
+    .capability-list li,
+    .context-item,
+    .attachment-item,
+    .stat-card {
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.52);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .hero-metrics article,
+    .stat-card,
+    .metrics-strip article {
+      padding: 18px;
+    }
+
+    .tutorial-head,
+    .workspace-head,
+    .console-head,
+    .playground-head,
+    .sidecard-head,
+    .panel-head,
+    .transcript-head,
+    .library-head {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       gap: 12px 24px;
-      align-items: end;
+      align-items: center;
     }
 
-    .tutorial-meta {
+    .tutorial-meta,
+    .helper-row,
+    .toggle-row,
+    .inline-actions,
+    .quick-prompts,
+    .status-row,
+    .pill-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      align-items: center;
+    }
+
+    .tutorial-meta {
       color: var(--text-muted);
       font-size: 0.92rem;
     }
@@ -91,7 +144,11 @@
     .tutorial-section ol,
     .tutorial-section ul,
     .capability-list,
-    .model-list {
+    .model-list,
+    .attachment-list,
+    .context-list,
+    .preset-list,
+    .workspace-list {
       list-style: none;
       padding: 0;
       margin: 0;
@@ -101,12 +158,14 @@
 
     .tutorial-section li,
     .capability-list li,
-    .model-list li {
+    .model-list li,
+    .workspace-list li {
       padding: 14px 16px;
-      border-radius: var(--radius-sm);
-      background: rgba(15, 23, 42, 0.48);
-      border: 1px solid rgba(148, 163, 184, 0.14);
       color: var(--text-dim);
+    }
+
+    .model-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .code-shell {
@@ -134,9 +193,12 @@
       color: #dbeafe;
       font-size: 0.9rem;
       line-height: 1.65;
+      max-height: 340px;
     }
 
-    .mini-button {
+    .mini-button,
+    .ghost-button,
+    .context-toggle {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -151,31 +213,23 @@
       transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
 
-    .mini-button:hover {
+    .mini-button:hover,
+    .ghost-button:hover,
+    .context-toggle:hover {
       transform: translateY(-1px);
       border-color: rgba(56, 189, 248, 0.4);
       background: rgba(30, 41, 59, 0.95);
     }
 
-    .claude-console {
-      display: grid;
-      gap: 18px;
-      position: sticky;
-      top: calc(clamp(14px, 3vw, 28px) + 110px);
-    }
-
-    .console-head,
-    .playground-head,
-    .sidecard-head {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
+    .mini-button.danger,
+    .ghost-button.danger {
+      border-color: rgba(248, 113, 113, 0.22);
+      color: #fecaca;
     }
 
     .status-pill,
-    .tiny-pill {
+    .tiny-pill,
+    .metric-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -195,26 +249,51 @@
       border-color: rgba(251, 191, 36, 0.24);
     }
 
-    .playground-grid {
+    .status-pill.good {
+      color: #6ee7b7;
+      background: rgba(52, 211, 153, 0.12);
+      border-color: rgba(52, 211, 153, 0.22);
+    }
+
+    .workspace-layout {
       display: grid;
       gap: 24px;
-      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
       align-items: start;
     }
 
-    .control-grid {
+    .composer-grid,
+    .workspace-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .control-grid,
+    .context-grid,
+    .metrics-strip {
       display: grid;
       gap: 16px;
+    }
+
+    .control-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .control-grid label,
-    .prompt-box label,
-    .transcript-panel label {
-      display: grid;
-      gap: 8px;
-      color: var(--text-dim);
-      font-size: 0.92rem;
+    .context-grid {
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+      align-items: start;
+    }
+
+    .metrics-strip {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      padding: 18px;
+    }
+
+    .metrics-strip strong,
+    .hero-metrics strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.05rem;
     }
 
     .claude-page select,
@@ -234,40 +313,113 @@
       resize: vertical;
     }
 
-    .toggle-row,
-    .inline-actions,
-    .quick-prompts {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      color: var(--text-dim);
-    }
-
-    .toggle input {
+    .claude-page input[type="checkbox"] {
       width: auto;
       margin: 0;
       accent-color: var(--primary);
     }
 
-    .transcript-panel {
+    .control-grid label,
+    .prompt-box label,
+    .transcript-panel label,
+    .field,
+    .field-stack {
       display: grid;
+      gap: 8px;
+      color: var(--text-dim);
+      font-size: 0.92rem;
+    }
+
+    .field small,
+    .support-copy,
+    .context-meta,
+    .attachment-meta,
+    .token-hint,
+    .muted {
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+
+    .dropzone {
+      position: relative;
+      border: 1px dashed rgba(56, 189, 248, 0.34);
+      border-radius: var(--radius-md);
+      background: linear-gradient(180deg, rgba(8, 15, 32, 0.92), rgba(15, 23, 42, 0.7));
+      padding: 22px;
+      min-height: 150px;
+      display: grid;
+      gap: 14px;
+      align-content: center;
+      text-align: center;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .dropzone.dragover {
+      border-color: rgba(34, 211, 238, 0.95);
+      background: linear-gradient(180deg, rgba(4, 18, 34, 0.96), rgba(15, 23, 42, 0.86));
+      transform: translateY(-1px);
+    }
+
+    .dropzone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .attachment-item,
+    .context-item {
+      padding: 14px 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .attachment-title,
+    .context-title {
+      display: flex;
+      justify-content: space-between;
       gap: 12px;
+      align-items: start;
+    }
+
+    .attachment-flags,
+    .context-flags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .attachment-preview,
+    .context-preview {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(2, 6, 23, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      color: #dbeafe;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 180px;
+      overflow: auto;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+
+    .context-item.active {
+      border-color: rgba(56, 189, 248, 0.38);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.16);
+    }
+
+    .transcript-shell {
+      position: sticky;
+      top: calc(clamp(14px, 3vw, 28px) + 110px);
     }
 
     .transcript {
-      min-height: 480px;
-      max-height: 720px;
+      min-height: 680px;
+      max-height: 920px;
       overflow: auto;
       padding: 18px;
       border-radius: var(--radius-md);
@@ -336,36 +488,6 @@
       font-size: 0.82rem;
     }
 
-    .model-list {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .model-list code,
-    .capability-list code,
-    .inline-code {
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      color: #93c5fd;
-    }
-
-    .meta-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .meta-grid article {
-      padding: 18px;
-      border-radius: var(--radius-md);
-      background: rgba(15, 23, 42, 0.55);
-      border: 1px solid rgba(148, 163, 184, 0.14);
-    }
-
-    .meta-grid strong {
-      display: block;
-      margin-top: 6px;
-      font-size: 1.05rem;
-    }
-
     .empty-state {
       color: var(--text-muted);
       text-align: center;
@@ -375,33 +497,62 @@
       background: rgba(15, 23, 42, 0.3);
     }
 
-    @media (max-width: 1080px) {
+    .inline-code,
+    .model-list code,
+    .capability-list code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      color: #93c5fd;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    @media (max-width: 1180px) {
       .claude-stack,
-      .playground-grid,
-      .meta-grid,
+      .workspace-layout,
+      .context-grid,
+      .hero-metrics,
+      .metrics-strip,
       .model-list {
         grid-template-columns: 1fr;
       }
 
+      .transcript-shell,
       .claude-console {
         position: static;
       }
     }
 
-    @media (max-width: 720px) {
+    @media (max-width: 840px) {
       .control-grid {
         grid-template-columns: 1fr;
+      }
+
+      .hero-metrics {
+        gap: 12px;
       }
 
       .tutorial-head,
       .console-head,
       .playground-head,
-      .sidecard-head {
+      .sidecard-head,
+      .workspace-head,
+      .panel-head,
+      .library-head,
+      .transcript-head {
         align-items: start;
       }
 
       .transcript {
-        min-height: 360px;
+        min-height: 420px;
       }
     }
   </style>
@@ -423,7 +574,7 @@
             <div class="nav-dropdown" role="menu">
               <a href="../../projects/aes/" role="menuitem">AES</a>
               <a href="../../autogaap/" role="menuitem">Auto GAAP</a>
-              <a href="../../projects/claude-api/" role="menuitem">Claude API Lab</a>
+              <a href="../../projects/claude-api/" role="menuitem">Claude Workspace</a>
               <a href="../../projects/gnoman/" role="menuitem">GNOMAN</a>
               <a href="../../projects/smart-contract-wizard/" role="menuitem">Smart Contract Wizard</a>
             </div>
@@ -431,7 +582,7 @@
           <a href="../../books/">Books</a>
           <a href="../../#contact">Contact</a>
         </div>
-        <a class="button primary nav-cta" href="#playground">Open playground</a>
+        <a class="button primary nav-cta" href="#workspace">Open workspace</a>
         <div class="scroll-progress" aria-hidden="true">
           <span></span>
         </div>
@@ -445,17 +596,17 @@
         </div>
         <div class="hero-main">
           <div class="hero-copy">
-            <span class="eyebrow">Free, Unlimited Claude API</span>
-            <h1><span class="hero-highlight">A browser-native Claude playground backed by Puter.js</span> with model switching, streaming output, and copy-ready examples.</h1>
-            <p class="hero-summary">This page mirrors the original tutorial structure: add <span class="inline-code">https://js.puter.com/v2/</span>, call <span class="inline-code">puter.ai.chat()</span>, choose a Claude model, and run requests directly in the client without provisioning your own server.</p>
+            <span class="eyebrow">Claude Workspace</span>
+            <h1><span class="hero-highlight">A materially better Claude interface</span> with attachments, persistent markdown context packs, and an operator-grade browser workspace.</h1>
+            <p class="hero-summary">This is no longer a thin demo. The page now supports file ingestion, reusable <span class="inline-code">.md</span> context documents, a structured system prompt lane, live request composition, and a transcript built for iterative work rather than one-off prompts.</p>
             <ul class="hero-list">
-              <li>Live chat surface wired to <span class="inline-code">puter.ai.chat()</span> for immediate testing</li>
-              <li>Preset prompts and code snippets matching the referenced tutorial flow</li>
-              <li>Model catalog covering Sonnet, Opus, and Haiku variants listed in the source copy</li>
+              <li>Attach text, code, JSON, and markdown files directly from the browser and inject parsed content into the request envelope.</li>
+              <li>Save, import, activate, export, and reuse custom <span class="inline-code">.md</span> context packs from local storage without rebuilding prompts by hand.</li>
+              <li>Track the actual composed request surface before execution, including system instructions, active context, attachment excerpts, and operator prompt.</li>
             </ul>
             <div class="hero-actions">
-              <a class="button primary" href="#playground">Launch the lab</a>
-              <a class="button outline" href="#tutorial">Read the guide</a>
+              <a class="button primary" href="#workspace">Launch workspace</a>
+              <a class="button outline" href="#tutorial">Read integration notes</a>
             </div>
           </div>
           <div class="hero-visual">
@@ -464,21 +615,21 @@
                 <h3>Runtime profile</h3>
                 <span class="tiny-pill">Puter.js v2</span>
               </div>
-              <div class="meta-grid">
+              <div class="hero-metrics">
+                <article>
+                  <span class="eyebrow">Composer</span>
+                  <strong>Structured request assembly</strong>
+                  <p>System lane, reusable context, and attachment summaries are composed into a deterministic prompt body.</p>
+                </article>
+                <article>
+                  <span class="eyebrow">Knowledge</span>
+                  <strong>Persistent markdown packs</strong>
+                  <p>Context documents survive page reloads through local storage and can be imported from external <span class="inline-code">.md</span> files.</p>
+                </article>
                 <article>
                   <span class="eyebrow">Execution</span>
-                  <strong>Client-side only</strong>
-                  <p>No self-hosted relay, no custom backend path, no API key form on this page.</p>
-                </article>
-                <article>
-                  <span class="eyebrow">Interop</span>
-                  <strong>Claude model switcher</strong>
-                  <p>Sonnet, Opus, and Haiku options exposed directly via the <span class="inline-code">model</span> parameter.</p>
-                </article>
-                <article>
-                  <span class="eyebrow">Mode</span>
                   <strong>Streaming or buffered</strong>
-                  <p>Flip streaming on for token-by-token output, or use standard completion semantics.</p>
+                  <p>Use Puter’s browser runtime directly, while still seeing exactly what collateral was attached to the request.</p>
                 </article>
               </div>
             </div>
@@ -488,22 +639,248 @@
     </header>
 
     <main class="site-main">
+      <section id="workspace" class="section">
+        <div class="workspace-head">
+          <div>
+            <span class="eyebrow">Operator workspace</span>
+            <h2>Compose richer Claude requests without leaving the page.</h2>
+            <p>Everything critical is explicit: model, system prompt, custom context, attachment payloads, request snippet, and transcript.</p>
+          </div>
+          <div class="inline-actions">
+            <span class="kbd">⌘/Ctrl</span>
+            <span class="kbd">Enter</span>
+            <span class="tiny-pill">Run request</span>
+          </div>
+        </div>
+
+        <div class="metrics-strip" aria-label="workspace metrics">
+          <article>
+            <span class="eyebrow">Model</span>
+            <strong id="activeModelMetric">claude-sonnet-4-6</strong>
+          </article>
+          <article>
+            <span class="eyebrow">Context docs</span>
+            <strong id="contextMetric">0 active</strong>
+          </article>
+          <article>
+            <span class="eyebrow">Attachments</span>
+            <strong id="attachmentMetric">0 loaded</strong>
+          </article>
+          <article>
+            <span class="eyebrow">Composed size</span>
+            <strong id="payloadMetric">0 chars</strong>
+          </article>
+        </div>
+
+        <div class="workspace-layout">
+          <div class="workspace-shell">
+            <div class="workspace-grid">
+              <div class="workspace-card">
+                <div class="panel-head">
+                  <div>
+                    <span class="eyebrow">Request controls</span>
+                    <h3>Execution profile</h3>
+                  </div>
+                  <div class="status-row">
+                    <span id="runtimeStatus" class="status-pill warn">Puter runtime loading</span>
+                    <span id="contextStatus" class="metric-pill">Context idle</span>
+                  </div>
+                </div>
+
+                <div class="control-grid">
+                  <label>
+                    Claude model
+                    <select id="modelSelect">
+                      <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+                      <option value="claude-opus-4-6">claude-opus-4-6</option>
+                      <option value="claude-opus-4-5">claude-opus-4-5</option>
+                      <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+                      <option value="claude-sonnet-4-5">claude-sonnet-4-5</option>
+                      <option value="claude-opus-4-1">claude-opus-4-1</option>
+                      <option value="claude-opus-4">claude-opus-4</option>
+                      <option value="claude-sonnet-4">claude-sonnet-4</option>
+                      <option value="claude-3-7-sonnet">claude-3-7-sonnet</option>
+                      <option value="claude-3-5-sonnet">claude-3-5-sonnet</option>
+                      <option value="claude-3-haiku">claude-3-haiku</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    Prompt template
+                    <select id="presetSelect">
+                      <option value="quantum">Explain quantum computing in simple terms</option>
+                      <option value="essay">Write a detailed essay on the impact of artificial intelligence on society</option>
+                      <option value="poem">Write a short poem about coding</option>
+                      <option value="security">Threat-model a cross-chain bridge relayer design with replay protections and liveness assumptions</option>
+                      <option value="audit">Review the attached Solidity module for reentrancy, authorization, storage collision, and griefing risk</option>
+                      <option value="custom">Custom prompt</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <label class="toggle">
+                    <input id="streamToggle" type="checkbox" />
+                    Stream tokens
+                  </label>
+                  <label class="toggle">
+                    <input id="clearOnSendToggle" type="checkbox" checked />
+                    Clear transcript on send
+                  </label>
+                  <label class="toggle">
+                    <input id="includeContextToggle" type="checkbox" checked />
+                    Inject saved context docs
+                  </label>
+                  <label class="toggle">
+                    <input id="includeAttachmentToggle" type="checkbox" checked />
+                    Inject attachment excerpts
+                  </label>
+                </div>
+              </div>
+
+              <div class="context-grid">
+                <div class="workspace-card prompt-box">
+                  <div class="panel-head">
+                    <div>
+                      <span class="eyebrow">Prompt assembly</span>
+                      <h3>System, context, and operator prompt</h3>
+                    </div>
+                    <div class="pill-row">
+                      <span class="tiny-pill">Deterministic composer</span>
+                    </div>
+                  </div>
+
+                  <label class="field">
+                    System instruction
+                    <textarea id="systemPromptInput" spellcheck="false">You are Claude operating inside a browser-native workspace. Use the active markdown context and attachments as first-class sources when they are relevant. Be explicit about uncertainty, preserve source distinctions, and avoid claiming you inspected data that is not included in the request.</textarea>
+                    <small>Prepended ahead of active context packs, attachment excerpts, and the operator prompt.</small>
+                  </label>
+
+                  <label class="field">
+                    Working context
+                    <textarea id="contextInput" spellcheck="false" placeholder="Add ephemeral context here. Example: repository notes, reviewer constraints, protocol-specific assumptions, acceptance criteria."></textarea>
+                    <small>Ad hoc context for the current session. Use the library panel to persist reusable markdown packs.</small>
+                  </label>
+
+                  <label class="field">
+                    Prompt
+                    <textarea id="promptInput" spellcheck="false">Explain quantum computing in simple terms</textarea>
+                    <small id="compositionHint" class="token-hint">Composed request size: 0 characters.</small>
+                  </label>
+
+                  <div class="quick-prompts">
+                    <button class="mini-button prompt-chip" type="button" data-prompt="Explain quantum computing in simple terms">Quantum</button>
+                    <button class="mini-button prompt-chip" type="button" data-prompt="Write a detailed essay on the impact of artificial intelligence on society">Essay</button>
+                    <button class="mini-button prompt-chip" type="button" data-prompt="Write a short poem about coding">Poem</button>
+                    <button class="mini-button prompt-chip" type="button" data-prompt="Threat-model a cross-chain bridge relayer design with replay protections and liveness assumptions">Bridge threat model</button>
+                    <button class="mini-button prompt-chip" type="button" data-prompt="Review the attached Solidity module for reentrancy, authorization, storage collision, and griefing risk">Solidity review</button>
+                  </div>
+
+                  <div class="inline-actions">
+                    <button id="runPromptButton" class="button primary" type="button">Run Claude request</button>
+                    <button id="resetTranscriptButton" class="button outline" type="button">Reset transcript</button>
+                    <button id="clearComposerButton" class="button outline" type="button">Clear composer</button>
+                  </div>
+                </div>
+
+                <div class="context-library">
+                  <div class="library-head">
+                    <div>
+                      <span class="eyebrow">Context library</span>
+                      <h3>Persistent <span class="inline-code">.md</span> packs</h3>
+                    </div>
+                    <span id="libraryMetric" class="tiny-pill">0 saved</span>
+                  </div>
+
+                  <label class="field">
+                    Context pack name
+                    <input id="contextNameInput" type="text" placeholder="bridge-audit-playbook.md" />
+                  </label>
+
+                  <div class="helper-row">
+                    <button id="saveContextButton" class="mini-button" type="button">Save editor as pack</button>
+                    <button id="importContextButton" class="mini-button" type="button">Import .md</button>
+                    <button id="exportContextButton" class="mini-button" type="button">Export editor .md</button>
+                  </div>
+                  <input id="contextFileInput" class="sr-only" type="file" accept=".md,text/markdown,text/plain" multiple />
+
+                  <div id="contextList" class="context-list">
+                    <div class="empty-state">No saved context packs yet.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="attachment-panel">
+                <div class="panel-head">
+                  <div>
+                    <span class="eyebrow">Attachment ingestion</span>
+                    <h3>Upload local files</h3>
+                  </div>
+                  <span id="attachmentStatus" class="tiny-pill">0 parsed</span>
+                </div>
+
+                <label id="dropzone" class="dropzone">
+                  <input id="fileInput" type="file" multiple />
+                  <strong>Drop files here or click to upload</strong>
+                  <span class="support-copy">Text, markdown, JSON, JS/TS, HTML, CSS, Solidity, logs, and other readable files are parsed inline. Binary assets are retained as metadata-only attachments.</span>
+                </label>
+
+                <div class="helper-row">
+                  <button id="clearFilesButton" class="ghost-button danger" type="button">Clear attachments</button>
+                </div>
+
+                <div id="attachmentList" class="attachment-list">
+                  <div class="empty-state">No attachments loaded.</div>
+                </div>
+              </div>
+
+              <div class="snippet-shell">
+                <div class="panel-head">
+                  <div>
+                    <span class="eyebrow">Request artifact</span>
+                    <h3>Generated snippet</h3>
+                  </div>
+                  <button class="mini-button copy-button" type="button" data-copy-target="generatedSnippet">Copy</button>
+                </div>
+                <div class="code-shell">
+                  <pre><code id="generatedSnippet"></code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="transcript-shell">
+            <div class="transcript-head">
+              <div>
+                <span class="eyebrow">Transcript</span>
+                <h3>Live request log</h3>
+              </div>
+              <button class="mini-button copy-button" type="button" data-copy-target="transcriptExport">Copy transcript</button>
+            </div>
+            <div id="transcript" class="transcript" aria-live="polite">
+              <div class="empty-state">Run a prompt to populate the transcript.</div>
+            </div>
+            <textarea id="transcriptExport" class="sr-only" aria-hidden="true"></textarea>
+          </div>
+        </div>
+      </section>
+
       <section id="tutorial" class="section claude-stack">
         <article class="claude-tutorial">
           <div class="tutorial-head">
             <div>
-              <span class="eyebrow">Tutorial replica</span>
-              <h2>Structured like the original guide, but operational.</h2>
+              <span class="eyebrow">Integration notes</span>
+              <h2>Still Puter-native, but no longer toy-grade.</h2>
             </div>
             <div class="tutorial-meta">
-              <span>Nariman Jelveh</span>
-              <span>Updated February 18, 2026</span>
+              <span>Nariman Jelveh reference flow</span>
+              <span>Refactored March 19, 2026</span>
             </div>
           </div>
 
           <section class="tutorial-section">
-            <h3>Getting Started</h3>
-            <p>Include the Puter runtime, then call Claude from the browser. The page below already loads the runtime and exposes a live console so you can verify the flow without scaffolding a separate app.</p>
+            <h3>Bootstrap</h3>
+            <p>Runtime setup is still one script tag. The material change is request composition in the client, not backend infrastructure.</p>
             <div class="code-shell">
               <header>
                 <span>HTML bootstrap</span>
@@ -514,32 +891,26 @@
           </section>
 
           <section class="tutorial-section">
-            <h3>Example 1: Basic Text Generation with Claude Sonnet 4.6</h3>
-            <p>Minimal call path: prompt plus explicit model selection. The playground uses the same API surface and normalizes the returned content into the transcript pane.</p>
-            <div class="code-shell">
-              <header>
-                <span>Basic completion</span>
-                <button class="mini-button copy-button" type="button" data-copy-target="basicExample">Copy</button>
-              </header>
-              <pre><code id="basicExample">puter.ai.chat("Explain quantum computing in simple terms", { model: "claude-sonnet-4-6" })
-  .then((response) =&gt; {
-    puter.print(response.message.content[0].text);
-  });</code></pre>
-            </div>
+            <h3>What changed</h3>
+            <ul class="workspace-list">
+              <li><strong>Prompt composer:</strong> request body is assembled from system instructions, ephemeral context, selected markdown packs, attachment excerpts, and the operator’s prompt.</li>
+              <li><strong>Attachment normalization:</strong> readable files are parsed in-browser and clipped into deterministic excerpts; unreadable files contribute metadata only.</li>
+              <li><strong>Markdown context library:</strong> custom <span class="inline-code">.md</span> files can be imported, activated, persisted, exported, and reused across sessions.</li>
+            </ul>
           </section>
 
           <section class="tutorial-section">
-            <h3>Example 2: Streaming Responses for Longer Queries</h3>
-            <p>Streaming is exposed through <span class="inline-code">stream: true</span>. When enabled in the lab, the assistant bubble is incrementally appended as chunks arrive.</p>
+            <h3>Streaming call path</h3>
+            <p>The execution primitive is unchanged: <span class="inline-code">puter.ai.chat()</span>. The difference is that the request string now carries richer structured context assembled on the page.</p>
             <div class="code-shell">
               <header>
                 <span>Streaming completion</span>
                 <button class="mini-button copy-button" type="button" data-copy-target="streamingExample">Copy</button>
               </header>
-              <pre><code id="streamingExample">const response = await puter.ai.chat(
-  "Write a detailed essay on the impact of artificial intelligence on society",
-  { model: "claude-sonnet-4-6", stream: true }
-);
+              <pre><code id="streamingExample">const response = await puter.ai.chat(composedPrompt, {
+  model: "claude-sonnet-4-6",
+  stream: true,
+});
 
 for await (const part of response) {
   puter.print(part?.text);
@@ -548,16 +919,7 @@ for await (const part of response) {
           </section>
 
           <section class="tutorial-section">
-            <h3>Example 3: Switching Claude Models</h3>
-            <ul class="capability-list">
-              <li><strong>Haiku path:</strong> set <code>model: "claude-haiku-4-5"</code> for shorter, faster responses.</li>
-              <li><strong>Opus path:</strong> set <code>model: "claude-opus-4-6"</code> when you want higher-capacity reasoning in the same frontend flow.</li>
-              <li><strong>Sonnet path:</strong> default the lab to <code>claude-sonnet-4-6</code> to match the tutorial’s mainline example.</li>
-            </ul>
-          </section>
-
-          <section class="tutorial-section">
-            <h3>Available Models</h3>
+            <h3>Available models</h3>
             <div class="model-catalog">
               <ul class="model-list">
                 <li><code>claude-sonnet-4-6</code></li>
@@ -579,121 +941,25 @@ for await (const part of response) {
         <aside class="claude-console">
           <div class="console-head">
             <div>
-              <span class="eyebrow">Environment</span>
-              <h3>Client execution notes</h3>
+              <span class="eyebrow">Operational notes</span>
+              <h3>Browser execution constraints</h3>
             </div>
-            <span id="runtimeStatus" class="status-pill warn">Puter runtime loading</span>
+            <span class="status-pill good">Client-side only</span>
           </div>
           <div class="claude-sidecard">
             <h3>How to use this page</h3>
             <ol>
-              <li>Pick a Claude model and whether to stream.</li>
-              <li>Run a preset or paste your own prompt.</li>
-              <li>If Puter requires auth in-browser, complete that flow and retry.</li>
-              <li>Copy the generated code sample if you want to move the request into your own HTML file.</li>
+              <li>Pick a Claude model and optional streaming.</li>
+              <li>Load reusable markdown context packs or import new ones from disk.</li>
+              <li>Drop files into the attachment lane if the request should cite local material.</li>
+              <li>Review the generated snippet and composed size, then run the request.</li>
             </ol>
           </div>
           <div class="disclaimer-card">
             <h3>Operational caveat</h3>
-            <p>This page reproduces the user-facing integration pattern from the provided tutorial. Actual availability, auth prompts, quotas, and runtime behavior are controlled by Puter’s service, not by this static site.</p>
+            <p>This site is still constrained by Puter’s runtime semantics, auth flow, quotas, and model availability. File uploads and context packs are composed into a prompt string in-browser; they are not transmitted as raw multipart uploads to a Claude-native API.</p>
           </div>
         </aside>
-      </section>
-
-      <section id="playground" class="section">
-        <div class="playground-head">
-          <div>
-            <span class="eyebrow">Interactive lab</span>
-            <h2>Run Claude directly from the page.</h2>
-            <p>Model selector, streaming toggle, transcript, and generated code all stay in sync with the active request profile.</p>
-          </div>
-          <div class="inline-actions">
-            <span class="kbd">⌘/Ctrl</span>
-            <span class="kbd">Enter</span>
-            <span class="tiny-pill">Submit prompt</span>
-          </div>
-        </div>
-
-        <div class="claude-playground">
-          <div class="playground-grid">
-            <div class="prompt-box">
-              <div class="control-grid">
-                <label>
-                  Claude model
-                  <select id="modelSelect">
-                    <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
-                    <option value="claude-opus-4-6">claude-opus-4-6</option>
-                    <option value="claude-opus-4-5">claude-opus-4-5</option>
-                    <option value="claude-haiku-4-5">claude-haiku-4-5</option>
-                    <option value="claude-sonnet-4-5">claude-sonnet-4-5</option>
-                    <option value="claude-opus-4-1">claude-opus-4-1</option>
-                    <option value="claude-opus-4">claude-opus-4</option>
-                    <option value="claude-sonnet-4">claude-sonnet-4</option>
-                    <option value="claude-3-7-sonnet">claude-3-7-sonnet</option>
-                    <option value="claude-3-5-sonnet">claude-3-5-sonnet</option>
-                    <option value="claude-3-haiku">claude-3-haiku</option>
-                  </select>
-                </label>
-
-                <label>
-                  Prompt template
-                  <select id="presetSelect">
-                    <option value="quantum">Explain quantum computing in simple terms</option>
-                    <option value="essay">Write a detailed essay on the impact of artificial intelligence on society</option>
-                    <option value="poem">Write a short poem about coding</option>
-                    <option value="security">Threat-model a cross-chain bridge relayer design with replay protections and liveness assumptions</option>
-                    <option value="custom">Custom prompt</option>
-                  </select>
-                </label>
-              </div>
-
-              <div class="toggle-row">
-                <label class="toggle">
-                  <input id="streamToggle" type="checkbox" />
-                  Stream tokens
-                </label>
-                <label class="toggle">
-                  <input id="clearOnSendToggle" type="checkbox" checked />
-                  Clear transcript on send
-                </label>
-              </div>
-
-              <label>
-                Prompt
-                <textarea id="promptInput" spellcheck="false">Explain quantum computing in simple terms</textarea>
-              </label>
-
-              <div class="quick-prompts">
-                <button class="mini-button prompt-chip" type="button" data-prompt="Explain quantum computing in simple terms">Quantum</button>
-                <button class="mini-button prompt-chip" type="button" data-prompt="Write a detailed essay on the impact of artificial intelligence on society">Essay</button>
-                <button class="mini-button prompt-chip" type="button" data-prompt="Write a short poem about coding">Poem</button>
-                <button class="mini-button prompt-chip" type="button" data-prompt="Threat-model a cross-chain bridge relayer design with replay protections and liveness assumptions">Bridge threat model</button>
-              </div>
-
-              <div class="inline-actions">
-                <button id="runPromptButton" class="button primary" type="button">Run Claude request</button>
-                <button id="resetTranscriptButton" class="button outline" type="button">Reset transcript</button>
-              </div>
-
-              <div class="code-shell">
-                <header>
-                  <span>Generated snippet</span>
-                  <button class="mini-button copy-button" type="button" data-copy-target="generatedSnippet">Copy</button>
-                </header>
-                <pre><code id="generatedSnippet"></code></pre>
-              </div>
-            </div>
-
-            <div class="transcript-panel">
-              <label>
-                Live transcript
-                <div id="transcript" class="transcript" aria-live="polite">
-                  <div class="empty-state">Run a prompt to populate the transcript.</div>
-                </div>
-              </label>
-            </div>
-          </div>
-        </div>
       </section>
     </main>
 
@@ -701,8 +967,8 @@ for await (const part of response) {
       <p>© 2026 Christopher Hirschauer. Browser-first tooling, systems thinking, and production-grade interfaces.</p>
       <div class="footer-links">
         <a href="../../#top">Home</a>
-        <a href="#tutorial">Tutorial</a>
-        <a href="#playground">Playground</a>
+        <a href="#workspace">Workspace</a>
+        <a href="#tutorial">Integration notes</a>
         <a href="../../books/">Books</a>
         <a href="../../#contact">Contact</a>
       </div>
@@ -716,36 +982,103 @@ for await (const part of response) {
       essay: 'Write a detailed essay on the impact of artificial intelligence on society',
       poem: 'Write a short poem about coding',
       security: 'Threat-model a cross-chain bridge relayer design with replay protections and liveness assumptions',
+      audit: 'Review the attached Solidity module for reentrancy, authorization, storage collision, and griefing risk',
       custom: ''
     };
+
+    const CONTEXT_STORAGE_KEY = 'claudeWorkspace:contextDocs';
+    const MAX_ATTACHMENT_CHARS = 6000;
+    const ATTACHMENT_PREVIEW_CHARS = 1200;
+    const TEXT_EXTENSIONS = new Set(['md', 'markdown', 'txt', 'text', 'json', 'js', 'mjs', 'cjs', 'ts', 'tsx', 'jsx', 'sol', 'html', 'css', 'csv', 'yaml', 'yml', 'xml', 'log', 'toml', 'ini', 'env', 'sh', 'py', 'rs']);
 
     const modelSelect = document.getElementById('modelSelect');
     const presetSelect = document.getElementById('presetSelect');
     const promptInput = document.getElementById('promptInput');
+    const systemPromptInput = document.getElementById('systemPromptInput');
+    const contextInput = document.getElementById('contextInput');
     const streamToggle = document.getElementById('streamToggle');
     const clearOnSendToggle = document.getElementById('clearOnSendToggle');
+    const includeContextToggle = document.getElementById('includeContextToggle');
+    const includeAttachmentToggle = document.getElementById('includeAttachmentToggle');
     const runPromptButton = document.getElementById('runPromptButton');
     const resetTranscriptButton = document.getElementById('resetTranscriptButton');
+    const clearComposerButton = document.getElementById('clearComposerButton');
+    const clearFilesButton = document.getElementById('clearFilesButton');
     const transcript = document.getElementById('transcript');
+    const transcriptExport = document.getElementById('transcriptExport');
     const generatedSnippet = document.getElementById('generatedSnippet');
     const runtimeStatus = document.getElementById('runtimeStatus');
+    const contextStatus = document.getElementById('contextStatus');
+    const attachmentStatus = document.getElementById('attachmentStatus');
+    const libraryMetric = document.getElementById('libraryMetric');
+    const attachmentMetric = document.getElementById('attachmentMetric');
+    const contextMetric = document.getElementById('contextMetric');
+    const payloadMetric = document.getElementById('payloadMetric');
+    const activeModelMetric = document.getElementById('activeModelMetric');
+    const compositionHint = document.getElementById('compositionHint');
+    const fileInput = document.getElementById('fileInput');
+    const contextFileInput = document.getElementById('contextFileInput');
+    const importContextButton = document.getElementById('importContextButton');
+    const exportContextButton = document.getElementById('exportContextButton');
+    const saveContextButton = document.getElementById('saveContextButton');
+    const contextNameInput = document.getElementById('contextNameInput');
+    const attachmentList = document.getElementById('attachmentList');
+    const contextList = document.getElementById('contextList');
+    const dropzone = document.getElementById('dropzone');
     const copyButtons = document.querySelectorAll('.copy-button');
     const promptChips = document.querySelectorAll('.prompt-chip');
 
     let requestCounter = 0;
+    let attachments = [];
+    let contextDocs = loadContextDocs();
 
-    const ensureTranscriptState = () => {
+    function loadContextDocs() {
+      try {
+        const raw = localStorage.getItem(CONTEXT_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed)
+          ? parsed.map((doc) => ({
+              id: String(doc.id || crypto.randomUUID()),
+              name: String(doc.name || 'context-pack.md'),
+              content: String(doc.content || ''),
+              active: Boolean(doc.active),
+              updatedAt: Number(doc.updatedAt || Date.now())
+            }))
+          : [];
+      } catch (error) {
+        console.warn('claude-workspace: failed to load context docs', error);
+        return [];
+      }
+    }
+
+    function persistContextDocs() {
+      try {
+        localStorage.setItem(CONTEXT_STORAGE_KEY, JSON.stringify(contextDocs));
+      } catch (error) {
+        console.warn('claude-workspace: failed to persist context docs', error);
+      }
+    }
+
+    function ensureTranscriptState() {
       const empty = transcript.querySelector('.empty-state');
       if (empty) {
         empty.remove();
       }
-    };
+    }
 
-    const clearTranscript = () => {
+    function clearTranscript() {
       transcript.innerHTML = '<div class="empty-state">Run a prompt to populate the transcript.</div>';
-    };
+      transcriptExport.value = '';
+    }
 
-    const createMessage = (role, title) => {
+    function appendTranscriptExport(role, title, content) {
+      const header = `[${new Date().toISOString()}] ${role.toUpperCase()} · ${title}`;
+      transcriptExport.value = transcriptExport.value
+        ? `${transcriptExport.value}\n\n${header}\n${content}`
+        : `${header}\n${content}`;
+    }
+
+    function createMessage(role, title) {
       ensureTranscriptState();
       const wrapper = document.createElement('article');
       wrapper.className = `message ${role}`;
@@ -763,10 +1096,17 @@ for await (const part of response) {
       wrapper.append(header, content);
       transcript.appendChild(wrapper);
       transcript.scrollTop = transcript.scrollHeight;
-      return content;
-    };
+      return {
+        wrapper,
+        content,
+        commit(text) {
+          content.textContent = text;
+          appendTranscriptExport(role, title, text);
+        }
+      };
+    }
 
-    const extractResponseText = (response) => {
+    function extractResponseText(response) {
       if (typeof response === 'string') return response;
       if (response?.message?.content?.[0]?.text) return response.message.content[0].text;
       if (response?.text) return response.text;
@@ -777,39 +1117,331 @@ for await (const part of response) {
           .join('\n');
       }
       return JSON.stringify(response, null, 2);
-    };
+    }
 
-    const syncSnippet = () => {
-      const prompt = promptInput.value.trim() || 'Explain quantum computing in simple terms';
+    function escapeSnippetValue(value) {
+      return JSON.stringify(value);
+    }
+
+    function estimatePayloadSize(value) {
+      return (value || '').length;
+    }
+
+    function fileExtension(name) {
+      const parts = String(name || '').split('.');
+      return parts.length > 1 ? parts.pop().toLowerCase() : '';
+    }
+
+    function canInlineFile(file) {
+      const ext = fileExtension(file.name);
+      return file.type.startsWith('text/')
+        || file.type === 'application/json'
+        || file.type.includes('javascript')
+        || file.type.includes('markdown')
+        || TEXT_EXTENSIONS.has(ext);
+    }
+
+    function clip(text, limit) {
+      if (!text) return '';
+      return text.length > limit ? `${text.slice(0, limit)}\n\n[truncated ${text.length - limit} chars]` : text;
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes) || bytes < 1024) return `${bytes || 0} B`;
+      const units = ['KB', 'MB', 'GB'];
+      let value = bytes / 1024;
+      let idx = 0;
+      while (value >= 1024 && idx < units.length - 1) {
+        value /= 1024;
+        idx += 1;
+      }
+      return `${value.toFixed(value >= 100 ? 0 : 1)} ${units[idx]}`;
+    }
+
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+        reader.onerror = () => reject(reader.error || new Error(`Unable to read ${file.name}`));
+        reader.readAsText(file);
+      });
+    }
+
+    function normalizeFile(file, textContent) {
+      const inline = typeof textContent === 'string';
+      return {
+        id: crypto.randomUUID(),
+        name: file.name,
+        type: file.type || 'unknown',
+        size: file.size || 0,
+        inline,
+        preview: inline ? clip(textContent, ATTACHMENT_PREVIEW_CHARS) : 'Binary or unsupported file type. Metadata only.',
+        payload: inline ? clip(textContent, MAX_ATTACHMENT_CHARS) : '',
+        truncated: inline && textContent.length > MAX_ATTACHMENT_CHARS
+      };
+    }
+
+    async function handleFiles(fileList) {
+      const incoming = Array.from(fileList || []);
+      if (!incoming.length) {
+        return;
+      }
+
+      attachmentStatus.textContent = 'Parsing…';
+      const parsed = await Promise.all(incoming.map(async (file) => {
+        try {
+          if (!canInlineFile(file)) {
+            return normalizeFile(file, null);
+          }
+          const text = await readFileAsText(file);
+          return normalizeFile(file, text);
+        } catch (error) {
+          console.warn('claude-workspace: failed to parse attachment', file.name, error);
+          return {
+            id: crypto.randomUUID(),
+            name: file.name,
+            type: file.type || 'unknown',
+            size: file.size || 0,
+            inline: false,
+            preview: `Unable to read file: ${error?.message || String(error)}`,
+            payload: '',
+            truncated: false,
+            error: true
+          };
+        }
+      }));
+
+      attachments = [...attachments, ...parsed];
+      fileInput.value = '';
+      renderAttachments();
+      syncComposerState();
+    }
+
+    function renderAttachments() {
+      if (!attachments.length) {
+        attachmentList.innerHTML = '<div class="empty-state">No attachments loaded.</div>';
+        attachmentStatus.textContent = '0 parsed';
+        attachmentMetric.textContent = '0 loaded';
+        return;
+      }
+
+      attachmentList.innerHTML = '';
+      attachments.forEach((attachment) => {
+        const item = document.createElement('article');
+        item.className = 'attachment-item';
+
+        const title = document.createElement('div');
+        title.className = 'attachment-title';
+
+        const titleCopy = document.createElement('div');
+        const attachmentName = document.createElement('strong');
+        attachmentName.textContent = attachment.name;
+        const attachmentMeta = document.createElement('div');
+        attachmentMeta.className = 'attachment-meta';
+        attachmentMeta.textContent = `${attachment.type || 'unknown'} · ${formatBytes(attachment.size)}`;
+        titleCopy.append(attachmentName, attachmentMeta);
+
+        const flags = document.createElement('div');
+        flags.className = 'attachment-flags';
+        const parsedPill = document.createElement('span');
+        parsedPill.className = 'tiny-pill';
+        parsedPill.textContent = attachment.inline ? (attachment.truncated ? 'Parsed · clipped' : 'Parsed inline') : 'Metadata only';
+        flags.appendChild(parsedPill);
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'ghost-button danger';
+        removeButton.textContent = 'Remove';
+        removeButton.addEventListener('click', () => {
+          attachments = attachments.filter((entry) => entry.id !== attachment.id);
+          renderAttachments();
+          syncComposerState();
+        });
+        flags.appendChild(removeButton);
+
+        title.append(titleCopy, flags);
+
+        const preview = document.createElement('div');
+        preview.className = 'attachment-preview';
+        preview.textContent = attachment.preview;
+
+        item.append(title, preview);
+        attachmentList.appendChild(item);
+      });
+
+      const parsedInlineCount = attachments.filter((attachment) => attachment.inline).length;
+      attachmentStatus.textContent = `${parsedInlineCount}/${attachments.length} inline`;
+      attachmentMetric.textContent = `${attachments.length} loaded`;
+    }
+
+    function renderContextDocs() {
+      if (!contextDocs.length) {
+        contextList.innerHTML = '<div class="empty-state">No saved context packs yet.</div>';
+        libraryMetric.textContent = '0 saved';
+        contextMetric.textContent = '0 active';
+        contextStatus.textContent = 'Context idle';
+        return;
+      }
+
+      contextList.innerHTML = '';
+      contextDocs
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .forEach((doc) => {
+          const item = document.createElement('article');
+          item.className = `context-item ${doc.active ? 'active' : ''}`;
+
+          const title = document.createElement('div');
+          title.className = 'context-title';
+
+          const titleCopy = document.createElement('div');
+          const docName = document.createElement('strong');
+          docName.textContent = doc.name;
+          const docMeta = document.createElement('div');
+          docMeta.className = 'context-meta';
+          docMeta.textContent = `Updated ${new Date(doc.updatedAt).toLocaleString()}`;
+          titleCopy.append(docName, docMeta);
+
+          const flags = document.createElement('div');
+          flags.className = 'context-flags';
+
+          const toggle = document.createElement('button');
+          toggle.type = 'button';
+          toggle.className = 'context-toggle';
+          toggle.textContent = doc.active ? 'Active' : 'Activate';
+          toggle.addEventListener('click', () => {
+            contextDocs = contextDocs.map((entry) => entry.id === doc.id ? { ...entry, active: !entry.active, updatedAt: Date.now() } : entry);
+            persistContextDocs();
+            renderContextDocs();
+            syncComposerState();
+          });
+
+          const loadButton = document.createElement('button');
+          loadButton.type = 'button';
+          loadButton.className = 'ghost-button';
+          loadButton.textContent = 'Load to editor';
+          loadButton.addEventListener('click', () => {
+            contextInput.value = doc.content;
+            contextNameInput.value = doc.name;
+            syncComposerState();
+          });
+
+          const deleteButton = document.createElement('button');
+          deleteButton.type = 'button';
+          deleteButton.className = 'ghost-button danger';
+          deleteButton.textContent = 'Delete';
+          deleteButton.addEventListener('click', () => {
+            contextDocs = contextDocs.filter((entry) => entry.id !== doc.id);
+            persistContextDocs();
+            renderContextDocs();
+            syncComposerState();
+          });
+
+          flags.append(toggle, loadButton, deleteButton);
+          title.append(titleCopy, flags);
+
+          const preview = document.createElement('div');
+          preview.className = 'context-preview';
+          preview.textContent = clip(doc.content || '', 700) || '[Empty context pack]';
+
+          item.append(title, preview);
+          contextList.appendChild(item);
+        });
+
+      const activeCount = contextDocs.filter((doc) => doc.active).length;
+      libraryMetric.textContent = `${contextDocs.length} saved`;
+      contextMetric.textContent = `${activeCount} active`;
+      contextStatus.textContent = activeCount ? `${activeCount} context pack${activeCount === 1 ? '' : 's'} active` : 'Context idle';
+    }
+
+    function getActiveContextDocs() {
+      return contextDocs.filter((doc) => doc.active);
+    }
+
+    function composePrompt() {
+      const sections = [];
+      const systemPrompt = systemPromptInput.value.trim();
+      const ephemeralContext = contextInput.value.trim();
+      const operatorPrompt = promptInput.value.trim();
+      const activeContextDocs = includeContextToggle.checked ? getActiveContextDocs() : [];
+      const activeAttachments = includeAttachmentToggle.checked ? attachments : [];
+
+      if (systemPrompt) {
+        sections.push(`SYSTEM INSTRUCTION\n${systemPrompt}`);
+      }
+
+      if (ephemeralContext) {
+        sections.push(`WORKING CONTEXT\n${ephemeralContext}`);
+      }
+
+      if (activeContextDocs.length) {
+        const contextBlock = activeContextDocs
+          .map((doc) => `FILE: ${doc.name}\n${doc.content.trim()}`)
+          .join('\n\n---\n\n');
+        sections.push(`ACTIVE MARKDOWN CONTEXT\n${contextBlock}`);
+      }
+
+      if (activeAttachments.length) {
+        const attachmentBlock = activeAttachments
+          .map((attachment) => {
+            const header = `FILE: ${attachment.name} (${attachment.type || 'unknown'}, ${formatBytes(attachment.size)})`;
+            return attachment.inline && attachment.payload
+              ? `${header}\n${attachment.payload}`
+              : `${header}\n[Binary or unsupported file. Metadata only.]`;
+          })
+          .join('\n\n---\n\n');
+        sections.push(`ATTACHMENTS\n${attachmentBlock}`);
+      }
+
+      if (operatorPrompt) {
+        sections.push(`USER REQUEST\n${operatorPrompt}`);
+      }
+
+      return sections.join('\n\n==============================\n\n');
+    }
+
+    function syncSnippet() {
+      const composedPrompt = composePrompt();
       const model = modelSelect.value;
       const stream = streamToggle.checked;
       generatedSnippet.textContent = stream
-        ? `const response = await puter.ai.chat(\n  ${JSON.stringify(prompt)},\n  { model: ${JSON.stringify(model)}, stream: true }\n);\n\nfor await (const part of response) {\n  puter.print(part?.text);\n}`
-        : `puter.ai.chat(${JSON.stringify(prompt)}, { model: ${JSON.stringify(model)} })\n  .then((response) => {\n    puter.print(response.message.content[0].text);\n  });`;
-    };
+        ? `const composedPrompt = ${escapeSnippetValue(composedPrompt)};\n\nconst response = await puter.ai.chat(composedPrompt, {\n  model: ${escapeSnippetValue(model)},\n  stream: true\n});\n\nfor await (const part of response) {\n  puter.print(part?.text);\n}`
+        : `const composedPrompt = ${escapeSnippetValue(composedPrompt)};\n\nputer.ai.chat(composedPrompt, { model: ${escapeSnippetValue(model)} })\n  .then((response) => {\n    puter.print(response.message.content[0].text);\n  });`;
+    }
 
-    const updateRuntimeStatus = () => {
+    function syncComposerState() {
+      const composedPrompt = composePrompt();
+      const payloadSize = estimatePayloadSize(composedPrompt);
+      activeModelMetric.textContent = modelSelect.value;
+      payloadMetric.textContent = `${payloadSize.toLocaleString()} chars`;
+      compositionHint.textContent = `Composed request size: ${payloadSize.toLocaleString()} characters.`;
+      syncSnippet();
+    }
+
+    function updateRuntimeStatus() {
       if (window.puter?.ai?.chat) {
         runtimeStatus.textContent = 'Puter runtime ready';
         runtimeStatus.classList.remove('warn');
+        runtimeStatus.classList.add('good');
       } else {
         runtimeStatus.textContent = 'Puter runtime loading';
         runtimeStatus.classList.add('warn');
+        runtimeStatus.classList.remove('good');
       }
-    };
+    }
 
-    const runPrompt = async () => {
-      const prompt = promptInput.value.trim();
-      if (!prompt) {
+    async function runPrompt() {
+      const operatorPrompt = promptInput.value.trim();
+      const composedPrompt = composePrompt();
+      if (!operatorPrompt) {
         const msg = createMessage('error', 'Validation error');
-        msg.textContent = 'Prompt is empty.';
+        msg.commit('Prompt is empty.');
         return;
       }
 
       if (!window.puter?.ai?.chat) {
         updateRuntimeStatus();
         const msg = createMessage('error', 'Runtime unavailable');
-        msg.textContent = 'Puter.js is not ready yet. Wait for the runtime to load, then retry.';
+        msg.commit('Puter.js is not ready yet. Wait for the runtime to load, then retry.');
         return;
       }
 
@@ -822,8 +1454,8 @@ for await (const part of response) {
       const model = modelSelect.value;
       const stream = streamToggle.checked;
 
-      const userMessage = createMessage('user', `Prompt ${requestId}`);
-      userMessage.textContent = prompt;
+      const userMessage = createMessage('user', `Request ${requestId}`);
+      userMessage.commit(composedPrompt);
 
       const assistantMessage = createMessage('assistant', `${model}${stream ? ' · stream' : ''}`);
       runPromptButton.disabled = true;
@@ -833,59 +1465,136 @@ for await (const part of response) {
 
       try {
         if (stream) {
-          const response = await window.puter.ai.chat(prompt, { model, stream: true });
+          const response = await window.puter.ai.chat(composedPrompt, { model, stream: true });
           let aggregate = '';
           for await (const part of response) {
             const chunk = part?.text || part?.message?.content?.[0]?.text || '';
             if (!chunk) continue;
             aggregate += chunk;
-            assistantMessage.textContent = aggregate;
+            assistantMessage.content.textContent = aggregate;
             transcript.scrollTop = transcript.scrollHeight;
           }
-          if (!aggregate) {
-            assistantMessage.textContent = '[Stream completed with no text payload.]';
-          }
+          assistantMessage.commit(aggregate || '[Stream completed with no text payload.]');
         } else {
-          const response = await window.puter.ai.chat(prompt, { model });
-          assistantMessage.textContent = extractResponseText(response);
+          const response = await window.puter.ai.chat(composedPrompt, { model });
+          assistantMessage.commit(extractResponseText(response));
         }
         runtimeStatus.textContent = 'Puter runtime ready';
+        runtimeStatus.classList.add('good');
       } catch (error) {
-        assistantMessage.parentElement.classList.add('error');
-        assistantMessage.textContent = error?.message || String(error);
+        assistantMessage.wrapper.classList.add('error');
+        assistantMessage.commit(error?.message || String(error));
         runtimeStatus.textContent = 'Request failed';
         runtimeStatus.classList.add('warn');
+        runtimeStatus.classList.remove('good');
       } finally {
         runPromptButton.disabled = false;
         runPromptButton.textContent = 'Run Claude request';
       }
-    };
+    }
+
+    function saveEditorContext() {
+      const name = (contextNameInput.value || 'context-pack.md').trim();
+      const normalizedName = name.endsWith('.md') ? name : `${name}.md`;
+      const content = contextInput.value.trim();
+      if (!content) {
+        const msg = createMessage('error', 'Context save error');
+        msg.commit('Working context is empty. Add markdown content before saving a context pack.');
+        return;
+      }
+
+      const existing = contextDocs.find((doc) => doc.name === normalizedName);
+      if (existing) {
+        contextDocs = contextDocs.map((doc) => doc.id === existing.id
+          ? { ...doc, content, active: true, updatedAt: Date.now() }
+          : doc);
+      } else {
+        contextDocs = [
+          {
+            id: crypto.randomUUID(),
+            name: normalizedName,
+            content,
+            active: true,
+            updatedAt: Date.now()
+          },
+          ...contextDocs
+        ];
+      }
+
+      persistContextDocs();
+      renderContextDocs();
+      syncComposerState();
+    }
+
+    function downloadText(filename, content) {
+      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function importContextFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (!files.length) {
+        return;
+      }
+
+      const imported = await Promise.all(files.map(async (file) => ({
+        name: file.name.endsWith('.md') ? file.name : `${file.name}.md`,
+        content: await readFileAsText(file)
+      })));
+
+      imported.forEach((entry) => {
+        const existing = contextDocs.find((doc) => doc.name === entry.name);
+        if (existing) {
+          existing.content = entry.content;
+          existing.active = true;
+          existing.updatedAt = Date.now();
+        } else {
+          contextDocs.unshift({
+            id: crypto.randomUUID(),
+            name: entry.name,
+            content: entry.content,
+            active: true,
+            updatedAt: Date.now()
+          });
+        }
+      });
+
+      persistContextDocs();
+      renderContextDocs();
+      syncComposerState();
+      contextFileInput.value = '';
+    }
 
     presetSelect.addEventListener('change', () => {
       const prompt = presetPrompts[presetSelect.value];
       if (prompt !== undefined) {
         promptInput.value = prompt;
       }
-      syncSnippet();
+      syncComposerState();
     });
 
     promptChips.forEach((button) => {
       button.addEventListener('click', () => {
         promptInput.value = button.dataset.prompt || '';
         presetSelect.value = 'custom';
-        syncSnippet();
+        syncComposerState();
       });
     });
 
-    [modelSelect, promptInput, streamToggle].forEach((element) => {
-      element.addEventListener('input', syncSnippet);
-      element.addEventListener('change', syncSnippet);
+    [modelSelect, promptInput, systemPromptInput, contextInput, streamToggle, includeContextToggle, includeAttachmentToggle].forEach((element) => {
+      element.addEventListener('input', syncComposerState);
+      element.addEventListener('change', syncComposerState);
     });
 
     copyButtons.forEach((button) => {
       button.addEventListener('click', async () => {
         const target = document.getElementById(button.dataset.copyTarget);
-        const text = target?.textContent || '';
+        const text = target?.value || target?.textContent || '';
         if (!text) return;
         await navigator.clipboard.writeText(text);
         const original = button.textContent;
@@ -896,8 +1605,49 @@ for await (const part of response) {
       });
     });
 
+    fileInput.addEventListener('change', (event) => handleFiles(event.target.files));
+    clearFilesButton.addEventListener('click', () => {
+      attachments = [];
+      renderAttachments();
+      syncComposerState();
+    });
+
+    ['dragenter', 'dragover'].forEach((eventName) => {
+      dropzone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'dragend', 'drop'].forEach((eventName) => {
+      dropzone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        if (eventName === 'drop') {
+          handleFiles(event.dataTransfer?.files || []);
+        }
+        dropzone.classList.remove('dragover');
+      });
+    });
+
+    saveContextButton.addEventListener('click', saveEditorContext);
+    exportContextButton.addEventListener('click', () => {
+      const name = (contextNameInput.value || 'context-pack.md').trim();
+      const normalizedName = name.endsWith('.md') ? name : `${name}.md`;
+      downloadText(normalizedName, contextInput.value || '');
+    });
+    importContextButton.addEventListener('click', () => contextFileInput.click());
+    contextFileInput.addEventListener('change', (event) => importContextFiles(event.target.files));
+
     runPromptButton.addEventListener('click', runPrompt);
     resetTranscriptButton.addEventListener('click', clearTranscript);
+    clearComposerButton.addEventListener('click', () => {
+      systemPromptInput.value = 'You are Claude operating inside a browser-native workspace. Use the active markdown context and attachments as first-class sources when they are relevant. Be explicit about uncertainty, preserve source distinctions, and avoid claiming you inspected data that is not included in the request.';
+      contextInput.value = '';
+      promptInput.value = '';
+      presetSelect.value = 'custom';
+      syncComposerState();
+    });
+
     promptInput.addEventListener('keydown', (event) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
         event.preventDefault();
@@ -905,7 +1655,9 @@ for await (const part of response) {
       }
     });
 
-    syncSnippet();
+    renderAttachments();
+    renderContextDocs();
+    syncComposerState();
     updateRuntimeStatus();
     window.addEventListener('load', updateRuntimeStatus);
     setTimeout(updateRuntimeStatus, 1200);
