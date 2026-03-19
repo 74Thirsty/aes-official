@@ -1193,7 +1193,7 @@ for await (const part of response) {
         : `${header}\n${content}`;
     }
 
-    function createMessage(role, title) {
+    function createMessage(role, title, meta = '') {
       ensureTranscriptState();
       const wrapper = document.createElement('article');
       wrapper.className = `message ${role}`;
@@ -1207,6 +1207,10 @@ for await (const part of response) {
 
       const bubble = document.createElement('div');
       bubble.className = 'message-bubble';
+
+      const content = document.createElement('div');
+      content.className = 'message-content';
+      bubble.appendChild(content);
 
       wrapper.append(header, bubble);
       transcript.appendChild(wrapper);
@@ -1542,83 +1546,6 @@ for await (const part of response) {
       }
     }
 
-    async function runPrompt() {
-      const operatorPrompt = promptInput.value.trim();
-      const composedPrompt = composePrompt();
-      if (!operatorPrompt) {
-        const msg = createMessage('error', 'Validation error');
-        msg.commit('Prompt is empty.');
-        return;
-      }
-
-      contextList.innerHTML = '';
-      contextDocs
-        .slice()
-        .sort((a, b) => b.updatedAt - a.updatedAt)
-        .forEach((doc) => {
-          const item = document.createElement('article');
-          item.className = `context-item ${doc.active ? 'active' : ''}`;
-
-          const head = document.createElement('div');
-          head.className = 'item-head';
-
-          const titleWrap = document.createElement('div');
-          const title = document.createElement('strong');
-          title.textContent = doc.name;
-          const meta = document.createElement('div');
-          meta.className = 'context-meta';
-          meta.textContent = `Updated ${new Date(doc.updatedAt).toLocaleString()}`;
-          titleWrap.append(title, meta);
-
-          const controls = document.createElement('div');
-          controls.className = 'message-files';
-
-          const toggle = document.createElement('button');
-          toggle.type = 'button';
-          toggle.className = 'mini-button';
-          toggle.textContent = doc.active ? 'Active' : 'Activate';
-          toggle.addEventListener('click', () => {
-            contextDocs = contextDocs.map((entry) => entry.id === doc.id
-              ? { ...entry, active: !entry.active, updatedAt: Date.now() }
-              : entry);
-            persistContextDocs();
-            renderContextDocs();
-          });
-
-          const loadButton = document.createElement('button');
-          loadButton.type = 'button';
-          loadButton.className = 'mini-button';
-          loadButton.textContent = 'Load';
-          loadButton.addEventListener('click', () => {
-            contextInput.value = doc.content;
-            contextNameInput.value = doc.name;
-            syncComposerState();
-          });
-
-          const deleteButton = document.createElement('button');
-          deleteButton.type = 'button';
-          deleteButton.className = 'ghost-button danger';
-          deleteButton.textContent = 'Delete';
-          deleteButton.addEventListener('click', () => {
-            contextDocs = contextDocs.filter((entry) => entry.id !== doc.id);
-            persistContextDocs();
-            renderContextDocs();
-          });
-
-          controls.append(toggle, loadButton, deleteButton);
-          head.append(titleWrap, controls);
-
-          const preview = document.createElement('div');
-          preview.className = 'context-preview';
-          preview.textContent = clip(doc.content || '', 700) || '[Empty context pack]';
-
-          item.append(head, preview);
-          contextList.appendChild(item);
-        });
-
-      syncComposerState();
-    }
-
     function saveEditorContext() {
       const content = contextInput.value.trim();
       if (!content) {
@@ -1716,8 +1643,8 @@ for await (const part of response) {
       userMessage.commit(prompt);
       const assistantMessage = createMessage('assistant', model, stream ? 'streaming' : 'buffered');
 
-      const userMessage = createMessage('user', `Request ${requestId}`);
-      userMessage.commit(composedPrompt);
+      const composedMessage = createMessage('user', `Composed request ${requestId}`, model);
+      composedMessage.commit(composedPrompt);
 
       runPromptButton.disabled = true;
       runPromptButton.textContent = '…';
