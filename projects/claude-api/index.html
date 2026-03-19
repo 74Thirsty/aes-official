@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free Claude API Lab | Christopher Hirschauer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <meta
+    name="description"
+    content="Interactive Puter.js Claude playground with model selection, streaming chat, and tutorial sections modeled after the original Free Unlimited Claude API guide."
+  />
+  <link rel="stylesheet" href="../../styles/global.css" />
+  <script src="https://js.puter.com/v2/" defer></script>
+  <style>
+    .claude-page .hero {
+      gap: 24px;
+    }
+
+    .claude-page .hero-summary {
+      max-width: 760px;
+    }
+
+    .claude-page .hero-list {
+      max-width: 760px;
+    }
+
+    .claude-page .hero-visual {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .claude-stack {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: minmax(0, 1.3fr) minmax(340px, 0.9fr);
+      align-items: start;
+    }
+
+    .claude-tutorial,
+    .claude-console,
+    .claude-sidecard,
+    .claude-playground,
+    .model-catalog,
+    .disclaimer-card {
+      background: linear-gradient(160deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.72));
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: clamp(22px, 3vw, 30px);
+    }
+
+    .claude-tutorial {
+      display: grid;
+      gap: 20px;
+    }
+
+    .tutorial-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px 24px;
+      align-items: end;
+    }
+
+    .tutorial-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    .tutorial-section {
+      display: grid;
+      gap: 14px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .tutorial-section:first-of-type {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .tutorial-section ol,
+    .tutorial-section ul,
+    .capability-list,
+    .model-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .tutorial-section li,
+    .capability-list li,
+    .model-list li {
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(15, 23, 42, 0.48);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      color: var(--text-dim);
+    }
+
+    .code-shell {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(2, 6, 23, 0.95);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .code-shell header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(15, 23, 42, 0.88);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+      gap: 12px;
+    }
+
+    .code-shell pre {
+      margin: 0;
+      padding: 18px;
+      overflow-x: auto;
+      color: #dbeafe;
+      font-size: 0.9rem;
+      line-height: 1.65;
+    }
+
+    .mini-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(15, 23, 42, 0.75);
+      color: var(--text);
+      cursor: pointer;
+      font: inherit;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .mini-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(30, 41, 59, 0.95);
+    }
+
+    .claude-console {
+      display: grid;
+      gap: 18px;
+      position: sticky;
+      top: calc(clamp(14px, 3vw, 28px) + 110px);
+    }
+
+    .console-head,
+    .playground-head,
+    .sidecard-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .status-pill,
+    .tiny-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      color: var(--primary);
+      font-size: 0.84rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .status-pill.warn {
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.12);
+      border-color: rgba(251, 191, 36, 0.24);
+    }
+
+    .playground-grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      align-items: start;
+    }
+
+    .control-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .control-grid label,
+    .prompt-box label,
+    .transcript-panel label {
+      display: grid;
+      gap: 8px;
+      color: var(--text-dim);
+      font-size: 0.92rem;
+    }
+
+    .claude-page select,
+    .claude-page textarea,
+    .claude-page input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .claude-page textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    .toggle-row,
+    .inline-actions,
+    .quick-prompts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      color: var(--text-dim);
+    }
+
+    .toggle input {
+      width: auto;
+      margin: 0;
+      accent-color: var(--primary);
+    }
+
+    .transcript-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .transcript {
+      min-height: 480px;
+      max-height: 720px;
+      overflow: auto;
+      padding: 18px;
+      border-radius: var(--radius-md);
+      background: rgba(2, 6, 23, 0.88);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      display: grid;
+      gap: 12px;
+    }
+
+    .message {
+      display: grid;
+      gap: 8px;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .message header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .message.user {
+      background: rgba(37, 99, 235, 0.18);
+      border-color: rgba(96, 165, 250, 0.28);
+    }
+
+    .message.assistant {
+      background: rgba(15, 23, 42, 0.88);
+    }
+
+    .message.system {
+      background: rgba(52, 211, 153, 0.12);
+      border-color: rgba(52, 211, 153, 0.22);
+    }
+
+    .message.error {
+      background: rgba(248, 113, 113, 0.12);
+      border-color: rgba(248, 113, 113, 0.28);
+    }
+
+    .message-content {
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      padding: 0 8px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      color: var(--text-dim);
+      font-size: 0.82rem;
+    }
+
+    .model-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .model-list code,
+    .capability-list code,
+    .inline-code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      color: #93c5fd;
+    }
+
+    .meta-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .meta-grid article {
+      padding: 18px;
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .meta-grid strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.05rem;
+    }
+
+    .empty-state {
+      color: var(--text-muted);
+      text-align: center;
+      padding: 18px;
+      border: 1px dashed rgba(148, 163, 184, 0.18);
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    @media (max-width: 1080px) {
+      .claude-stack,
+      .playground-grid,
+      .meta-grid,
+      .model-list {
+        grid-template-columns: 1fr;
+      }
+
+      .claude-console {
+        position: static;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .control-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tutorial-head,
+      .console-head,
+      .playground-head,
+      .sidecard-head {
+        align-items: start;
+      }
+
+      .transcript {
+        min-height: 360px;
+      }
+    }
+  </style>
+</head>
+<body class="claude-page">
+  <div class="page-shell">
+    <header id="top" class="site-header">
+      <nav class="top-nav">
+        <a class="brand" href="../../#top">
+          <span class="brand-mark">⌁</span>
+          Christopher Hirschauer
+        </a>
+        <div class="nav-links">
+          <a href="../../#top">Home</a>
+          <div class="nav-item">
+            <button class="nav-button" type="button" aria-expanded="false" aria-haspopup="true">
+              Projects <span class="caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="nav-dropdown" role="menu">
+              <a href="../../projects/aes/" role="menuitem">AES</a>
+              <a href="../../autogaap/" role="menuitem">Auto GAAP</a>
+              <a href="../../projects/claude-api/" role="menuitem">Claude API Lab</a>
+              <a href="../../projects/gnoman/" role="menuitem">GNOMAN</a>
+              <a href="../../projects/smart-contract-wizard/" role="menuitem">Smart Contract Wizard</a>
+            </div>
+          </div>
+          <a href="../../books/">Books</a>
+          <a href="../../#contact">Contact</a>
+        </div>
+        <a class="button primary nav-cta" href="#playground">Open playground</a>
+        <div class="scroll-progress" aria-hidden="true">
+          <span></span>
+        </div>
+      </nav>
+
+      <div class="hero">
+        <div class="hero-ribbon">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          Puter.js browser runtime for Claude
+          <span class="ribbon-pill">No backend</span>
+        </div>
+        <div class="hero-main">
+          <div class="hero-copy">
+            <span class="eyebrow">Free, Unlimited Claude API</span>
+            <h1><span class="hero-highlight">A browser-native Claude playground backed by Puter.js</span> with model switching, streaming output, and copy-ready examples.</h1>
+            <p class="hero-summary">This page mirrors the original tutorial structure: add <span class="inline-code">https://js.puter.com/v2/</span>, call <span class="inline-code">puter.ai.chat()</span>, choose a Claude model, and run requests directly in the client without provisioning your own server.</p>
+            <ul class="hero-list">
+              <li>Live chat surface wired to <span class="inline-code">puter.ai.chat()</span> for immediate testing</li>
+              <li>Preset prompts and code snippets matching the referenced tutorial flow</li>
+              <li>Model catalog covering Sonnet, Opus, and Haiku variants listed in the source copy</li>
+            </ul>
+            <div class="hero-actions">
+              <a class="button primary" href="#playground">Launch the lab</a>
+              <a class="button outline" href="#tutorial">Read the guide</a>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="card">
+              <div class="sidecard-head">
+                <h3>Runtime profile</h3>
+                <span class="tiny-pill">Puter.js v2</span>
+              </div>
+              <div class="meta-grid">
+                <article>
+                  <span class="eyebrow">Execution</span>
+                  <strong>Client-side only</strong>
+                  <p>No self-hosted relay, no custom backend path, no API key form on this page.</p>
+                </article>
+                <article>
+                  <span class="eyebrow">Interop</span>
+                  <strong>Claude model switcher</strong>
+                  <p>Sonnet, Opus, and Haiku options exposed directly via the <span class="inline-code">model</span> parameter.</p>
+                </article>
+                <article>
+                  <span class="eyebrow">Mode</span>
+                  <strong>Streaming or buffered</strong>
+                  <p>Flip streaming on for token-by-token output, or use standard completion semantics.</p>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <section id="tutorial" class="section claude-stack">
+        <article class="claude-tutorial">
+          <div class="tutorial-head">
+            <div>
+              <span class="eyebrow">Tutorial replica</span>
+              <h2>Structured like the original guide, but operational.</h2>
+            </div>
+            <div class="tutorial-meta">
+              <span>Nariman Jelveh</span>
+              <span>Updated February 18, 2026</span>
+            </div>
+          </div>
+
+          <section class="tutorial-section">
+            <h3>Getting Started</h3>
+            <p>Include the Puter runtime, then call Claude from the browser. The page below already loads the runtime and exposes a live console so you can verify the flow without scaffolding a separate app.</p>
+            <div class="code-shell">
+              <header>
+                <span>HTML bootstrap</span>
+                <button class="mini-button copy-button" type="button" data-copy-target="scriptBootstrap">Copy</button>
+              </header>
+              <pre><code id="scriptBootstrap">&lt;script src="https://js.puter.com/v2/"&gt;&lt;/script&gt;</code></pre>
+            </div>
+          </section>
+
+          <section class="tutorial-section">
+            <h3>Example 1: Basic Text Generation with Claude Sonnet 4.6</h3>
+            <p>Minimal call path: prompt plus explicit model selection. The playground uses the same API surface and normalizes the returned content into the transcript pane.</p>
+            <div class="code-shell">
+              <header>
+                <span>Basic completion</span>
+                <button class="mini-button copy-button" type="button" data-copy-target="basicExample">Copy</button>
+              </header>
+              <pre><code id="basicExample">puter.ai.chat("Explain quantum computing in simple terms", { model: "claude-sonnet-4-6" })
+  .then((response) =&gt; {
+    puter.print(response.message.content[0].text);
+  });</code></pre>
+            </div>
+          </section>
+
+          <section class="tutorial-section">
+            <h3>Example 2: Streaming Responses for Longer Queries</h3>
+            <p>Streaming is exposed through <span class="inline-code">stream: true</span>. When enabled in the lab, the assistant bubble is incrementally appended as chunks arrive.</p>
+            <div class="code-shell">
+              <header>
+                <span>Streaming completion</span>
+                <button class="mini-button copy-button" type="button" data-copy-target="streamingExample">Copy</button>
+              </header>
+              <pre><code id="streamingExample">const response = await puter.ai.chat(
+  "Write a detailed essay on the impact of artificial intelligence on society",
+  { model: "claude-sonnet-4-6", stream: true }
+);
+
+for await (const part of response) {
+  puter.print(part?.text);
+}</code></pre>
+            </div>
+          </section>
+
+          <section class="tutorial-section">
+            <h3>Example 3: Switching Claude Models</h3>
+            <ul class="capability-list">
+              <li><strong>Haiku path:</strong> set <code>model: "claude-haiku-4-5"</code> for shorter, faster responses.</li>
+              <li><strong>Opus path:</strong> set <code>model: "claude-opus-4-6"</code> when you want higher-capacity reasoning in the same frontend flow.</li>
+              <li><strong>Sonnet path:</strong> default the lab to <code>claude-sonnet-4-6</code> to match the tutorial’s mainline example.</li>
+            </ul>
+          </section>
+
+          <section class="tutorial-section">
+            <h3>Available Models</h3>
+            <div class="model-catalog">
+              <ul class="model-list">
+                <li><code>claude-sonnet-4-6</code></li>
+                <li><code>claude-opus-4-6</code></li>
+                <li><code>claude-opus-4-5</code></li>
+                <li><code>claude-haiku-4-5</code></li>
+                <li><code>claude-sonnet-4-5</code></li>
+                <li><code>claude-opus-4-1</code></li>
+                <li><code>claude-opus-4</code></li>
+                <li><code>claude-sonnet-4</code></li>
+                <li><code>claude-3-7-sonnet</code></li>
+                <li><code>claude-3-5-sonnet</code></li>
+                <li><code>claude-3-haiku</code></li>
+              </ul>
+            </div>
+          </section>
+        </article>
+
+        <aside class="claude-console">
+          <div class="console-head">
+            <div>
+              <span class="eyebrow">Environment</span>
+              <h3>Client execution notes</h3>
+            </div>
+            <span id="runtimeStatus" class="status-pill warn">Puter runtime loading</span>
+          </div>
+          <div class="claude-sidecard">
+            <h3>How to use this page</h3>
+            <ol>
+              <li>Pick a Claude model and whether to stream.</li>
+              <li>Run a preset or paste your own prompt.</li>
+              <li>If Puter requires auth in-browser, complete that flow and retry.</li>
+              <li>Copy the generated code sample if you want to move the request into your own HTML file.</li>
+            </ol>
+          </div>
+          <div class="disclaimer-card">
+            <h3>Operational caveat</h3>
+            <p>This page reproduces the user-facing integration pattern from the provided tutorial. Actual availability, auth prompts, quotas, and runtime behavior are controlled by Puter’s service, not by this static site.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section id="playground" class="section">
+        <div class="playground-head">
+          <div>
+            <span class="eyebrow">Interactive lab</span>
+            <h2>Run Claude directly from the page.</h2>
+            <p>Model selector, streaming toggle, transcript, and generated code all stay in sync with the active request profile.</p>
+          </div>
+          <div class="inline-actions">
+            <span class="kbd">⌘/Ctrl</span>
+            <span class="kbd">Enter</span>
+            <span class="tiny-pill">Submit prompt</span>
+          </div>
+        </div>
+
+        <div class="claude-playground">
+          <div class="playground-grid">
+            <div class="prompt-box">
+              <div class="control-grid">
+                <label>
+                  Claude model
+                  <select id="modelSelect">
+                    <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+                    <option value="claude-opus-4-6">claude-opus-4-6</option>
+                    <option value="claude-opus-4-5">claude-opus-4-5</option>
+                    <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+                    <option value="claude-sonnet-4-5">claude-sonnet-4-5</option>
+                    <option value="claude-opus-4-1">claude-opus-4-1</option>
+                    <option value="claude-opus-4">claude-opus-4</option>
+                    <option value="claude-sonnet-4">claude-sonnet-4</option>
+                    <option value="claude-3-7-sonnet">claude-3-7-sonnet</option>
+                    <option value="claude-3-5-sonnet">claude-3-5-sonnet</option>
+                    <option value="claude-3-haiku">claude-3-haiku</option>
+                  </select>
+                </label>
+
+                <label>
+                  Prompt template
+                  <select id="presetSelect">
+                    <option value="quantum">Explain quantum computing in simple terms</option>
+                    <option value="essay">Write a detailed essay on the impact of artificial intelligence on society</option>
+                    <option value="poem">Write a short poem about coding</option>
+                    <option value="security">Threat-model a cross-chain bridge relayer design with replay protections and liveness assumptions</option>
+                    <option value="custom">Custom prompt</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="toggle-row">
+                <label class="toggle">
+                  <input id="streamToggle" type="checkbox" />
+                  Stream tokens
+                </label>
+                <label class="toggle">
+                  <input id="clearOnSendToggle" type="checkbox" checked />
+                  Clear transcript on send
+                </label>
+              </div>
+
+              <label>
+                Prompt
+                <textarea id="promptInput" spellcheck="false">Explain quantum computing in simple terms</textarea>
+              </label>
+
+              <div class="quick-prompts">
+                <button class="mini-button prompt-chip" type="button" data-prompt="Explain quantum computing in simple terms">Quantum</button>
+                <button class="mini-button prompt-chip" type="button" data-prompt="Write a detailed essay on the impact of artificial intelligence on society">Essay</button>
+                <button class="mini-button prompt-chip" type="button" data-prompt="Write a short poem about coding">Poem</button>
+                <button class="mini-button prompt-chip" type="button" data-prompt="Threat-model a cross-chain bridge relayer design with replay protections and liveness assumptions">Bridge threat model</button>
+              </div>
+
+              <div class="inline-actions">
+                <button id="runPromptButton" class="button primary" type="button">Run Claude request</button>
+                <button id="resetTranscriptButton" class="button outline" type="button">Reset transcript</button>
+              </div>
+
+              <div class="code-shell">
+                <header>
+                  <span>Generated snippet</span>
+                  <button class="mini-button copy-button" type="button" data-copy-target="generatedSnippet">Copy</button>
+                </header>
+                <pre><code id="generatedSnippet"></code></pre>
+              </div>
+            </div>
+
+            <div class="transcript-panel">
+              <label>
+                Live transcript
+                <div id="transcript" class="transcript" aria-live="polite">
+                  <div class="empty-state">Run a prompt to populate the transcript.</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 Christopher Hirschauer. Browser-first tooling, systems thinking, and production-grade interfaces.</p>
+      <div class="footer-links">
+        <a href="../../#top">Home</a>
+        <a href="#tutorial">Tutorial</a>
+        <a href="#playground">Playground</a>
+        <a href="../../books/">Books</a>
+        <a href="../../#contact">Contact</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../../scripts/global.js" defer></script>
+  <script>
+    const presetPrompts = {
+      quantum: 'Explain quantum computing in simple terms',
+      essay: 'Write a detailed essay on the impact of artificial intelligence on society',
+      poem: 'Write a short poem about coding',
+      security: 'Threat-model a cross-chain bridge relayer design with replay protections and liveness assumptions',
+      custom: ''
+    };
+
+    const modelSelect = document.getElementById('modelSelect');
+    const presetSelect = document.getElementById('presetSelect');
+    const promptInput = document.getElementById('promptInput');
+    const streamToggle = document.getElementById('streamToggle');
+    const clearOnSendToggle = document.getElementById('clearOnSendToggle');
+    const runPromptButton = document.getElementById('runPromptButton');
+    const resetTranscriptButton = document.getElementById('resetTranscriptButton');
+    const transcript = document.getElementById('transcript');
+    const generatedSnippet = document.getElementById('generatedSnippet');
+    const runtimeStatus = document.getElementById('runtimeStatus');
+    const copyButtons = document.querySelectorAll('.copy-button');
+    const promptChips = document.querySelectorAll('.prompt-chip');
+
+    let requestCounter = 0;
+
+    const ensureTranscriptState = () => {
+      const empty = transcript.querySelector('.empty-state');
+      if (empty) {
+        empty.remove();
+      }
+    };
+
+    const clearTranscript = () => {
+      transcript.innerHTML = '<div class="empty-state">Run a prompt to populate the transcript.</div>';
+    };
+
+    const createMessage = (role, title) => {
+      ensureTranscriptState();
+      const wrapper = document.createElement('article');
+      wrapper.className = `message ${role}`;
+
+      const header = document.createElement('header');
+      const titleNode = document.createElement('strong');
+      titleNode.textContent = title;
+      const stamp = document.createElement('span');
+      stamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      header.append(titleNode, stamp);
+
+      const content = document.createElement('div');
+      content.className = 'message-content';
+
+      wrapper.append(header, content);
+      transcript.appendChild(wrapper);
+      transcript.scrollTop = transcript.scrollHeight;
+      return content;
+    };
+
+    const extractResponseText = (response) => {
+      if (typeof response === 'string') return response;
+      if (response?.message?.content?.[0]?.text) return response.message.content[0].text;
+      if (response?.text) return response.text;
+      if (Array.isArray(response?.message?.content)) {
+        return response.message.content
+          .map((part) => part?.text || '')
+          .filter(Boolean)
+          .join('\n');
+      }
+      return JSON.stringify(response, null, 2);
+    };
+
+    const syncSnippet = () => {
+      const prompt = promptInput.value.trim() || 'Explain quantum computing in simple terms';
+      const model = modelSelect.value;
+      const stream = streamToggle.checked;
+      generatedSnippet.textContent = stream
+        ? `const response = await puter.ai.chat(\n  ${JSON.stringify(prompt)},\n  { model: ${JSON.stringify(model)}, stream: true }\n);\n\nfor await (const part of response) {\n  puter.print(part?.text);\n}`
+        : `puter.ai.chat(${JSON.stringify(prompt)}, { model: ${JSON.stringify(model)} })\n  .then((response) => {\n    puter.print(response.message.content[0].text);\n  });`;
+    };
+
+    const updateRuntimeStatus = () => {
+      if (window.puter?.ai?.chat) {
+        runtimeStatus.textContent = 'Puter runtime ready';
+        runtimeStatus.classList.remove('warn');
+      } else {
+        runtimeStatus.textContent = 'Puter runtime loading';
+        runtimeStatus.classList.add('warn');
+      }
+    };
+
+    const runPrompt = async () => {
+      const prompt = promptInput.value.trim();
+      if (!prompt) {
+        const msg = createMessage('error', 'Validation error');
+        msg.textContent = 'Prompt is empty.';
+        return;
+      }
+
+      if (!window.puter?.ai?.chat) {
+        updateRuntimeStatus();
+        const msg = createMessage('error', 'Runtime unavailable');
+        msg.textContent = 'Puter.js is not ready yet. Wait for the runtime to load, then retry.';
+        return;
+      }
+
+      if (clearOnSendToggle.checked) {
+        clearTranscript();
+      }
+
+      requestCounter += 1;
+      const requestId = requestCounter;
+      const model = modelSelect.value;
+      const stream = streamToggle.checked;
+
+      const userMessage = createMessage('user', `Prompt ${requestId}`);
+      userMessage.textContent = prompt;
+
+      const assistantMessage = createMessage('assistant', `${model}${stream ? ' · stream' : ''}`);
+      runPromptButton.disabled = true;
+      runPromptButton.textContent = stream ? 'Streaming…' : 'Waiting…';
+      runtimeStatus.textContent = stream ? 'Streaming response' : 'Running request';
+      runtimeStatus.classList.remove('warn');
+
+      try {
+        if (stream) {
+          const response = await window.puter.ai.chat(prompt, { model, stream: true });
+          let aggregate = '';
+          for await (const part of response) {
+            const chunk = part?.text || part?.message?.content?.[0]?.text || '';
+            if (!chunk) continue;
+            aggregate += chunk;
+            assistantMessage.textContent = aggregate;
+            transcript.scrollTop = transcript.scrollHeight;
+          }
+          if (!aggregate) {
+            assistantMessage.textContent = '[Stream completed with no text payload.]';
+          }
+        } else {
+          const response = await window.puter.ai.chat(prompt, { model });
+          assistantMessage.textContent = extractResponseText(response);
+        }
+        runtimeStatus.textContent = 'Puter runtime ready';
+      } catch (error) {
+        assistantMessage.parentElement.classList.add('error');
+        assistantMessage.textContent = error?.message || String(error);
+        runtimeStatus.textContent = 'Request failed';
+        runtimeStatus.classList.add('warn');
+      } finally {
+        runPromptButton.disabled = false;
+        runPromptButton.textContent = 'Run Claude request';
+      }
+    };
+
+    presetSelect.addEventListener('change', () => {
+      const prompt = presetPrompts[presetSelect.value];
+      if (prompt !== undefined) {
+        promptInput.value = prompt;
+      }
+      syncSnippet();
+    });
+
+    promptChips.forEach((button) => {
+      button.addEventListener('click', () => {
+        promptInput.value = button.dataset.prompt || '';
+        presetSelect.value = 'custom';
+        syncSnippet();
+      });
+    });
+
+    [modelSelect, promptInput, streamToggle].forEach((element) => {
+      element.addEventListener('input', syncSnippet);
+      element.addEventListener('change', syncSnippet);
+    });
+
+    copyButtons.forEach((button) => {
+      button.addEventListener('click', async () => {
+        const target = document.getElementById(button.dataset.copyTarget);
+        const text = target?.textContent || '';
+        if (!text) return;
+        await navigator.clipboard.writeText(text);
+        const original = button.textContent;
+        button.textContent = 'Copied';
+        setTimeout(() => {
+          button.textContent = original;
+        }, 1200);
+      });
+    });
+
+    runPromptButton.addEventListener('click', runPrompt);
+    resetTranscriptButton.addEventListener('click', clearTranscript);
+    promptInput.addEventListener('keydown', (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+        event.preventDefault();
+        runPrompt();
+      }
+    });
+
+    syncSnippet();
+    updateRuntimeStatus();
+    window.addEventListener('load', updateRuntimeStatus);
+    setTimeout(updateRuntimeStatus, 1200);
+  </script>
+</body>
+</html>
