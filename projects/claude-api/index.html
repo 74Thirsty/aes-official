@@ -6,10 +6,7 @@
   <title>Claude Workspace | Christopher Hirschauer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <meta
     name="description"
     content="Production-grade Claude workspace with Puter.js chat, attachment ingestion, persistent markdown context packs, and a stronger browser-native operator UI."
@@ -31,7 +28,8 @@
       gap: 18px;
     }
 
-    .claude-stack {
+    .claude-app {
+      height: 100vh;
       display: grid;
       gap: 24px;
       grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
@@ -157,6 +155,20 @@
       list-style: none;
       padding: 0;
       margin: 0;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .muted,
+    .helper,
+    .attachment-meta,
+    .context-meta {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .field {
       display: grid;
       grid-template-rows: auto 1fr;
       min-height: 0;
@@ -207,12 +219,16 @@
     .context-toggle {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.24);
-      background: rgba(15, 23, 42, 0.75);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .control-button,
+    .ghost-button,
+    .send-button,
+    .upload-button {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
       color: var(--text);
       border-radius: 16px;
       padding: 12px 14px;
@@ -254,6 +270,10 @@
       font-size: 0.77rem;
       letter-spacing: 0.05em;
       text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: rgba(138, 180, 248, 0.12);
+      border: 1px solid rgba(138, 180, 248, 0.18);
+      color: var(--accent);
     }
 
     .status-pill.warn {
@@ -542,13 +562,15 @@
       box-shadow: 0 14px 32px rgba(2, 6, 23, 0.24);
     }
 
-    .empty-state {
-      color: var(--text-muted);
-      text-align: center;
-      padding: 18px;
-      border: 1px dashed rgba(148, 163, 184, 0.18);
-      border-radius: var(--radius-md);
-      background: rgba(15, 23, 42, 0.3);
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
     }
 
     .inline-code,
@@ -1030,7 +1052,7 @@ for await (const part of response) {
         <a href="../../books/">Books</a>
         <a href="../../#contact">Contact</a>
       </div>
-    </footer>
+    </main>
   </div>
 
   <textarea id="transcriptExport" class="sr-only" aria-hidden="true"></textarea>
@@ -1479,7 +1501,7 @@ for await (const part of response) {
         runtimeStatus.classList.remove('warn');
         runtimeStatus.classList.add('good');
       } else {
-        runtimeStatus.textContent = 'Puter runtime loading';
+        runtimeStatus.textContent = 'Puter loading';
         runtimeStatus.classList.add('warn');
         runtimeStatus.classList.remove('good');
       }
@@ -1655,10 +1677,9 @@ for await (const part of response) {
         clearTranscript();
       }
 
-      requestCounter += 1;
-      const requestId = requestCounter;
-      const model = modelSelect.value;
-      const stream = streamToggle.checked;
+      const userMessage = createMessage('user', `Request ${requestId}`, model);
+      userMessage.commit(prompt);
+      const assistantMessage = createMessage('assistant', model, stream ? 'streaming' : 'buffered');
 
       const userMessage = createMessage('user', `Request ${requestId}`);
       userMessage.commit(composedPrompt);
