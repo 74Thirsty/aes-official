@@ -974,8 +974,36 @@ await puter.ai.chat(prompt, {
       elements.runtimeStatus.textContent = text;
     }
 
-    function setRequestStatus(text) {
-      elements.requestStatusText.textContent = text;
+    function createMessage(role, title, meta = '') {
+      ensureTranscriptState();
+      const wrapper = document.createElement('article');
+      wrapper.className = `message ${role}`;
+
+      const header = document.createElement('header');
+      const titleNode = document.createElement('strong');
+      titleNode.textContent = title;
+      const metaNode = document.createElement('span');
+      metaNode.textContent = meta;
+      header.append(titleNode, metaNode);
+
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+
+      const content = document.createElement('div');
+      content.className = 'message-content';
+      bubble.appendChild(content);
+
+      wrapper.append(header, bubble);
+      transcript.appendChild(wrapper);
+      transcript.scrollTop = transcript.scrollHeight;
+      return {
+        wrapper,
+        content,
+        commit(text) {
+          content.textContent = text;
+          appendTranscriptExport(role, title, text);
+        }
+      };
     }
 
     function saveState() {
@@ -1170,17 +1198,11 @@ await puter.ai.chat(prompt, {
       elements.snippetPreview.textContent = `const prompt = ${JSON.stringify(composedPrompt || '')};\nawait puter.ai.chat(prompt, {\n  model: ${JSON.stringify(model)},\n  stream: ${stream}\n});`;
     }
 
-    function renderAll() {
-      renderTranscript();
-      renderAttachments();
-      updateMetrics();
-      updateInspector();
-    }
-
-    async function copyPreview() {
-      const text = elements.requestPreview.textContent;
-      if (!navigator.clipboard?.writeText) {
-        setRequestStatus('Clipboard unavailable in this browser');
+    function saveEditorContext() {
+      const content = contextInput.value.trim();
+      if (!content) {
+        const msg = createMessage('error', 'Context error', 'missing content');
+        msg.commit('Working context is empty. Add markdown before saving a context pack.');
         return;
       }
 
@@ -1235,11 +1257,8 @@ await puter.ai.chat(prompt, {
       const model = elements.modelSelect.value;
       const stream = elements.streamToggle.checked;
 
-      state.isRunning = true;
-      elements.sendButton.disabled = true;
-      elements.sendButton.textContent = 'Running...';
-      setRuntimeStatus('loading', 'Claude request running');
-      setRequestStatus(stream ? 'Streaming response' : 'Waiting for response');
+      const composedMessage = createMessage('user', `Composed request ${requestId}`, model);
+      composedMessage.commit(composedPrompt);
 
       addMessage('user', userPrompt, `${model} · ${stream ? 'stream' : 'buffered'}`);
       const assistantMessage = createMessage('assistant', '', `${model} · ${stream ? 'stream' : 'buffered'}`);
