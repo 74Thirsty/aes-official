@@ -1189,6 +1189,10 @@
       transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     }
 
+    .icon-btn--light {
+      filter: brightness(0) invert(1);
+    }
+
     .icon-link:hover {
       background: linear-gradient(145deg, rgba(30, 41, 59, 1), rgba(14, 165, 233, 0.48));
       box-shadow: 0 20px 34px rgba(8, 47, 73, 0.55);
