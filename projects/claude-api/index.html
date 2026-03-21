@@ -82,7 +82,6 @@
       gap: 24px;
     }
 
-    .claude-topbar,
     .hero-panel,
     .control-panel,
     .transcript-panel,
@@ -94,20 +93,6 @@
       border-radius: var(--claude-radius-lg);
     }
 
-    .claude-topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 18px 22px;
-      position: sticky;
-      top: 16px;
-      z-index: 30;
-      backdrop-filter: blur(18px);
-    }
-
-    .brand-lockup,
-    .nav-links,
     .hero-actions,
     .button-row,
     .toggle-row,
@@ -120,77 +105,6 @@
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
-    }
-
-    .brand-lockup {
-      gap: 14px;
-      text-decoration: none;
-      min-width: 0;
-    }
-
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      display: grid;
-      place-items: center;
-      position: relative;
-      overflow: hidden;
-      border-radius: 14px;
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(129, 140, 248, 0.24));
-      border: 1px solid rgba(96, 165, 250, 0.24);
-      color: #dbeafe;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-    }
-
-    .brand-mark-image {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-      position: relative;
-      z-index: 1;
-      padding: 4px;
-    }
-
-    .brand-copy {
-      display: grid;
-      gap: 2px;
-      min-width: 0;
-    }
-
-    .brand-copy strong {
-      font-family: "Space Grotesk", "Inter", sans-serif;
-      font-size: 1.02rem;
-    }
-
-    .brand-copy span,
-    .muted,
-    .meta-text,
-    .field small,
-    .message-meta,
-    .attachment-meta,
-    .empty-state,
-    .kbd,
-    .inspector-label,
-    .inspector-panel p,
-    .status-indicator {
-      color: var(--claude-muted);
-    }
-
-    .nav-links {
-      justify-content: flex-end;
-    }
-
-    .nav-links a {
-      text-decoration: none;
-      color: var(--claude-muted);
-      transition: color 0.18s ease;
-    }
-
-    .nav-links a:hover,
-    .nav-links a:focus-visible {
-      color: var(--claude-text);
     }
 
     .hero-panel {
@@ -706,11 +620,6 @@
         padding: 14px;
       }
 
-      .claude-topbar {
-        position: static;
-        padding: 16px;
-      }
-
       .hero-panel,
       .control-panel,
       .transcript-panel,
@@ -728,22 +637,35 @@
 </head>
 <body class="claude-page">
   <div class="claude-shell">
-    <header class="claude-topbar">
-      <a class="brand-lockup" href="../../#top">
-        <span class="brand-mark">
-          <img src="../../assets/aiclaude.png" alt="Claude icon" class="brand-mark-image" onerror="this.style.display='none'" />
-          <span class="brand-mark-fallback" aria-hidden="true">AI</span>
-        </span>
-        <span class="brand-copy">
-          <strong>Claude API Lab</strong>
-          <span>Complete rebuild · browser-native workspace</span>
-        </span>
-      </a>
-      <nav class="nav-links" aria-label="Primary">
-        <a href="../../#top">Home</a>
-        <a href="../../#projects">Projects</a>
-        <a href="../../books/">Books</a>
-        <a href="../../#contact">Contact</a>
+    <header id="top" class="site-header">
+      <nav class="top-nav">
+        <a class="brand" href="../../index.html#top">
+          <span class="brand-mark">
+            <img src="../../assets/GSlogo01.png" alt="Brand logo" class="brand-logo" />
+          </span>
+          C.E. Hirschauer
+        </a>
+        <div class="nav-links">
+          <a href="../../index.html#top">Home</a>
+          <div class="nav-item">
+            <button class="nav-button" type="button" aria-expanded="false" aria-haspopup="true">
+              Projects <span class="caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="nav-dropdown" role="menu">
+              <a href="https://github.com/74Thirsty/VANTAGE" target="_blank" rel="noopener noreferrer" role="menuitem">VANTAGE</a>
+              <a href="../../autogaap/" role="menuitem">Auto GAAP</a>
+              <a href="../../projects/claude-api/" role="menuitem">Claude API Lab</a>
+              <a href="https://github.com/74Thirsty/TarotTeller" target="_blank" rel="noopener noreferrer" role="menuitem">EasyBay</a>
+              <a href="../../projects/smart-contract-wizard/" role="menuitem">Smart Contract Wizard</a>
+            </div>
+          </div>
+          <a href="../../books/">Books</a>
+          <a href="../../index.html#contact">Contact</a>
+        </div>
+        <a class="button primary nav-cta" href="../../index.html#contact">Collaborate</a>
+        <div class="scroll-progress" aria-hidden="true">
+          <span></span>
+        </div>
       </nav>
     </header>
 
@@ -1524,5 +1446,6 @@ await puter.ai.chat(prompt, {
     renderAll();
     bootstrapRuntimePolling();
   </script>
+  <script src="../../scripts/global.js"></script>
 </body>
 </html>
