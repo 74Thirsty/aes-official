@@ -17,61 +17,66 @@
   <link rel="stylesheet" href="../../styles/global.css" />
   <link rel="icon" type="image/png" href="../../assets/GSlogo01.png" />
   <style>
-    .wizard-page {
-      display: block;
-      padding-bottom: clamp(28px, 5vw, 64px);
+    :root {
+      color-scheme: dark;
+      --wizard-bg: #020617;
+      --wizard-surface: rgba(15, 23, 42, 0.92);
+      --wizard-border: rgba(148, 163, 184, 0.2);
+      --wizard-text: #e2e8f0;
+      --wizard-muted: #94a3b8;
+      --wizard-link: #38bdf8;
     }
 
-    .wizard-page .page-shell {
-      gap: clamp(24px, 4vw, 40px);
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      background: var(--wizard-bg);
+      color: var(--wizard-text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body.wizard-page {
+      min-height: 100dvh;
     }
 
     .wizard-shell {
-      display: grid;
-      gap: 24px;
-    }
-
-    .wizard-intro {
-      display: grid;
-      gap: 16px;
-      padding: clamp(24px, 4vw, 36px);
-    }
-
-    .wizard-intro p {
-      max-width: 68ch;
-    }
-
-    .wizard-frame-card {
-      padding: clamp(16px, 2vw, 24px);
-      overflow: hidden;
+      width: min(1280px, 100%);
     }
 
     .wizard-frame {
       width: 100%;
-      min-height: 1200px;
-      height: calc(100vh - 260px);
-      border: 0;
-      border-radius: 20px;
-      background: rgba(15, 23, 42, 0.9);
-      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
+      min-height: min(1280px, calc(100dvh - 220px));
+      padding: 0;
+      border: 1px solid var(--wizard-border);
+      border-radius: 24px;
+      background: var(--wizard-surface);
+      box-shadow: 0 24px 56px rgba(2, 6, 23, 0.4);
+      overflow: hidden;
     }
 
-    .wizard-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
+    oz-wizard {
+      display: block;
+      width: 100%;
+      height: min(1280px, calc(100dvh - 220px));
     }
 
-    @media (max-width: 900px) {
-      .wizard-frame {
-        min-height: 1350px;
-        height: 75vh;
+    @media (max-width: 720px) {
+      .wizard-frame,
+      oz-wizard {
+        min-height: calc(100dvh - 190px);
+        height: calc(100dvh - 190px);
       }
     }
   </style>
 </head>
 <body class="wizard-page">
-  <div class="page-shell">
+  <div class="page-shell wizard-shell">
     <header id="top" class="site-header">
       <nav class="top-nav">
         <a class="brand" href="../../index.html#top">
@@ -104,30 +109,13 @@
       </nav>
     </header>
 
-    <main class="site-main wizard-shell">
-      <section class="card wizard-intro">
-        <span class="eyebrow">OpenZeppelin embedded builder</span>
-        <h1>Smart Contract Wizard</h1>
-        <p>The wizard now sits below the shared site navigation so the embedded builder is fully visible without the top controls occluding the interface.</p>
-        <div class="wizard-meta">
-          <span class="tag">Solidity</span>
-          <span class="tag">OpenZeppelin</span>
-          <span class="tag">Embedded UI</span>
-        </div>
-      </section>
-
-      <section class="card wizard-frame-card" aria-label="Embedded Smart Contract Wizard">
-        <iframe
-          class="wizard-frame"
-          src="https://wizard.openzeppelin.com/"
-          title="OpenZeppelin Smart Contract Wizard"
-          loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"
-        ></iframe>
+    <main class="site-main">
+      <section class="wizard-frame" aria-label="Smart Contract Wizard workspace">
+        <script async src="https://wizard.openzeppelin.com/build/embed.js"></script>
+        <oz-wizard data-lang="solidity"></oz-wizard>
       </section>
     </main>
   </div>
-
-  <script src="../../scripts/global.js" defer></script>
+  <script src="../../scripts/global.js"></script>
 </body>
 </html>
