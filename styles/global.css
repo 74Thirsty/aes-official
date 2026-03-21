@@ -1163,6 +1163,16 @@
       margin-top: 8px;
     }
 
+    .service-card .card-actions {
+      margin-top: auto;
+      justify-content: flex-start;
+      align-items: flex-end;
+    }
+
+    .service-card .card-actions .button {
+      align-self: flex-start;
+    }
+
     .icon-link {
       padding: 0;
       width: 64px;
