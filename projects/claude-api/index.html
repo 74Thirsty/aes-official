@@ -602,6 +602,43 @@
       color: #cbd5e1;
     }
 
+    .history-block {
+      display: grid;
+      gap: 12px;
+      max-height: 440px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .history-block .empty-state {
+      min-height: 180px;
+    }
+
+    .last-chat-body {
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #e2e8f0;
+    }
+
+    .last-chat-body.collapsed {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 7;
+      overflow: hidden;
+    }
+
+    .last-chat-body.expanded {
+      max-height: 180px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .last-chat-controls {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
     .attachment-list {
       padding-left: 0;
       list-style: none;
