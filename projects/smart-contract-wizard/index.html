@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Contract Wizard | Christopher Hirschauer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
   <meta
     name="description"
     content="Open the Smart Contract Wizard: an embedded OpenZeppelin-based contract builder inside Christopher Hirschauer's site shell."
@@ -11,133 +17,117 @@
   <link rel="stylesheet" href="../../styles/global.css" />
   <link rel="icon" type="image/png" href="../../assets/GSlogo01.png" />
   <style>
-    :root {
-      color-scheme: dark;
-      --wizard-bg: #020617;
-      --wizard-surface: rgba(15, 23, 42, 0.92);
-      --wizard-border: rgba(148, 163, 184, 0.2);
-      --wizard-text: #e2e8f0;
-      --wizard-muted: #94a3b8;
-      --wizard-link: #38bdf8;
+    .wizard-page {
+      display: block;
+      padding-bottom: clamp(28px, 5vw, 64px);
     }
 
-    * {
-      box-sizing: border-box;
+    .wizard-page .page-shell {
+      gap: clamp(24px, 4vw, 40px);
     }
 
-    html,
-    body {
-      margin: 0;
-      width: 100%;
-      min-height: 100%;
-      background: var(--wizard-bg);
-      color: var(--wizard-text);
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    .wizard-shell {
+      display: grid;
+      gap: 24px;
+    }
+
+    .wizard-intro {
+      display: grid;
+      gap: 16px;
+      padding: clamp(24px, 4vw, 36px);
+    }
+
+    .wizard-intro p {
+      max-width: 68ch;
+    }
+
+    .wizard-frame-card {
+      padding: clamp(16px, 2vw, 24px);
       overflow: hidden;
     }
 
-    body {
-      min-height: 100dvh;
-    }
-
-    .wizard-topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 14px 18px;
-      background: var(--wizard-surface);
-      border: 1px solid var(--wizard-border);
-      border-radius: 18px;
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      right: 16px;
-      z-index: 10;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 18px 40px rgba(2, 6, 23, 0.35);
-      pointer-events: none;
-    }
-
-    .wizard-brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-      pointer-events: auto;
-    }
-
-    .wizard-brand img {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      object-fit: contain;
-      background: rgba(255, 255, 255, 0.04);
-      padding: 4px;
-    }
-
-    .wizard-brand-copy {
-      display: grid;
-      gap: 2px;
-    }
-
-    .wizard-brand-copy strong {
-      font-size: 0.98rem;
-    }
-
-    .wizard-brand-copy span {
-      font-size: 0.84rem;
-      color: var(--wizard-muted);
-    }
-
-    .wizard-back {
-      color: var(--wizard-link);
-      text-decoration: none;
-      font-weight: 600;
-      white-space: nowrap;
-      pointer-events: auto;
-    }
-
     .wizard-frame {
-      width: 100vw;
-      height: 100dvh;
-    }
-
-    oz-wizard {
-      display: block;
       width: 100%;
-      height: 100%;
+      min-height: 1200px;
+      height: calc(100vh - 260px);
+      border: 0;
+      border-radius: 20px;
+      background: rgba(15, 23, 42, 0.9);
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
     }
 
-    @media (max-width: 720px) {
-      .wizard-topbar {
-        top: 12px;
-        left: 12px;
-        right: 12px;
-        padding: 12px 14px;
-      }
+    .wizard-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
 
-      .wizard-brand-copy span {
-        display: none;
+    @media (max-width: 900px) {
+      .wizard-frame {
+        min-height: 1350px;
+        height: 75vh;
       }
     }
   </style>
 </head>
-<body>
-  <header class="wizard-topbar">
-    <div class="wizard-brand">
-      <img src="../../assets/GSlogo01.png" alt="Christopher Hirschauer logo" />
-      <div class="wizard-brand-copy">
-        <strong>Smart Contract Wizard</strong>
-        <span>Embedded OpenZeppelin contract builder</span>
-      </div>
-    </div>
-    <a class="wizard-back" href="../../#projects">Back to site</a>
-  </header>
+<body class="wizard-page">
+  <div class="page-shell">
+    <header id="top" class="site-header">
+      <nav class="top-nav">
+        <a class="brand" href="../../index.html#top">
+          <span class="brand-mark">
+            <img src="../../assets/GSlogo01.png" alt="Brand logo" class="brand-logo" />
+          </span>
+          C.E. Hirschauer
+        </a>
+        <div class="nav-links">
+          <a href="../../index.html#top">Home</a>
+          <div class="nav-item">
+            <button class="nav-button" type="button" aria-expanded="false" aria-haspopup="true">
+              Projects <span class="caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="nav-dropdown" role="menu">
+              <a href="https://github.com/74Thirsty/VANTAGE" target="_blank" rel="noopener noreferrer" role="menuitem">VANTAGE</a>
+              <a href="../../autogaap/" role="menuitem">Auto GAAP</a>
+              <a href="../../projects/claude-api/" role="menuitem">Claude API Lab</a>
+              <a href="https://github.com/74Thirsty/TarotTeller" target="_blank" rel="noopener noreferrer" role="menuitem">EasyBay</a>
+              <a href="../../projects/smart-contract-wizard/" role="menuitem">Smart Contract Wizard</a>
+            </div>
+          </div>
+          <a href="../../books/">Books</a>
+          <a href="../../index.html#contact">Contact</a>
+        </div>
+        <a class="button primary nav-cta" href="../../index.html#contact">Collaborate</a>
+        <div class="scroll-progress" aria-hidden="true">
+          <span></span>
+        </div>
+      </nav>
+    </header>
 
-  <main class="wizard-frame">
-    <script async src="https://wizard.openzeppelin.com/build/embed.js"></script>
-    <oz-wizard data-lang="solidity"></oz-wizard>
-  </main>
+    <main class="site-main wizard-shell">
+      <section class="card wizard-intro">
+        <span class="eyebrow">OpenZeppelin embedded builder</span>
+        <h1>Smart Contract Wizard</h1>
+        <p>The wizard now sits below the shared site navigation so the embedded builder is fully visible without the top controls occluding the interface.</p>
+        <div class="wizard-meta">
+          <span class="tag">Solidity</span>
+          <span class="tag">OpenZeppelin</span>
+          <span class="tag">Embedded UI</span>
+        </div>
+      </section>
+
+      <section class="card wizard-frame-card" aria-label="Embedded Smart Contract Wizard">
+        <iframe
+          class="wizard-frame"
+          src="https://wizard.openzeppelin.com/"
+          title="OpenZeppelin Smart Contract Wizard"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../scripts/global.js" defer></script>
 </body>
 </html>
