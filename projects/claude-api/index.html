@@ -146,18 +146,11 @@
     .brand-mark-image {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
       position: relative;
       z-index: 1;
-    }
-
-    .brand-mark-fallback {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      z-index: 0;
+      padding: 4px;
     }
 
     .brand-copy {
@@ -982,13 +975,15 @@ await puter.ai.chat(prompt, {
     const STORAGE_KEY = 'claude-api-lab-v2';
     const LAST_CHAT_KEY = 'claude-api-lab-v2:last-chat';
     const MAX_ATTACHMENT_CHARS = 8000;
+    const LAST_CHAT_PREVIEW_CHARS = 320;
     const DEFAULT_SYSTEM_PROMPT = 'You are Claude in a browser-native engineering workspace. Prefer concise, source-aware answers. Distinguish user-provided attachments from model inference. State uncertainty precisely.';
 
     const state = {
       transcript: [],
       attachments: [],
       isRunning: false,
-      lastChat: []
+      lastChat: [],
+      lastChatExpanded: {}
     };
 
     const elements = {
@@ -1085,6 +1080,7 @@ await puter.ai.chat(prompt, {
         try {
           const payload = JSON.parse(rawLastChat);
           state.lastChat = Array.isArray(payload) ? payload : [];
+          state.lastChatExpanded = {};
         } catch (_error) {
           localStorage.removeItem(LAST_CHAT_KEY);
         }
@@ -1113,6 +1109,7 @@ await puter.ai.chat(prompt, {
       state.transcript = [];
       state.attachments = [];
       state.lastChat = [];
+      state.lastChatExpanded = {};
       state.isRunning = false;
       elements.modelSelect.value = 'claude-sonnet-4-6';
       elements.systemPromptInput.value = DEFAULT_SYSTEM_PROMPT;
@@ -1186,9 +1183,27 @@ await puter.ai.chat(prompt, {
             <span class="message-meta">${escapeHtml(message.timestamp || '')}</span>
           </div>
           ${message.meta ? `<div class="message-meta">${escapeHtml(message.meta)}</div>` : ''}
-          <div class="message-body">${escapeHtml(message.content)}</div>
+          <div class="last-chat-body ${state.lastChatExpanded[index] ? 'expanded' : 'collapsed'}">${escapeHtml(message.content)}</div>
+          ${message.content.length > LAST_CHAT_PREVIEW_CHARS ? `
+            <div class="last-chat-controls">
+              <button class="tiny-button last-chat-toggle" type="button" data-index="${index}">
+                ${state.lastChatExpanded[index] ? 'Less' : 'More'}
+              </button>
+            </div>
+          ` : ''}
         </article>
       `).join('');
+
+      Array.from(document.querySelectorAll('.last-chat-toggle')).forEach((button) => {
+        button.addEventListener('click', () => {
+          const index = Number(button.dataset.index);
+          if (!Number.isInteger(index)) {
+            return;
+          }
+          state.lastChatExpanded[index] = !state.lastChatExpanded[index];
+          renderLastChat();
+        });
+      });
     }
 
     function renderAttachments() {
@@ -1337,6 +1352,7 @@ await puter.ai.chat(prompt, {
 
     function persistLastCompletedChat(userMessage, assistantMessage) {
       state.lastChat = [userMessage, assistantMessage].map((message) => ({ ...message }));
+      state.lastChatExpanded = {};
       saveLastChat();
       renderLastChat();
     }
