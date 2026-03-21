@@ -133,12 +133,31 @@
       height: 42px;
       display: grid;
       place-items: center;
+      position: relative;
+      overflow: hidden;
       border-radius: 14px;
       background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(129, 140, 248, 0.24));
       border: 1px solid rgba(96, 165, 250, 0.24);
       color: #dbeafe;
       font-weight: 700;
       letter-spacing: 0.08em;
+    }
+
+    .brand-mark-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-mark-fallback {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      z-index: 0;
     }
 
     .brand-copy {
@@ -586,7 +605,8 @@
     }
 
     .code-block,
-    .preview-block {
+    .preview-block,
+    .history-block {
       margin: 0;
       border-radius: var(--claude-radius-sm);
       border: 1px solid var(--claude-border);
@@ -599,6 +619,43 @@
       white-space: pre-wrap;
       word-break: break-word;
       color: #cbd5e1;
+    }
+
+    .history-block {
+      display: grid;
+      gap: 12px;
+      max-height: 440px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .history-block .empty-state {
+      min-height: 180px;
+    }
+
+    .last-chat-body {
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #e2e8f0;
+    }
+
+    .last-chat-body.collapsed {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 7;
+      overflow: hidden;
+    }
+
+    .last-chat-body.expanded {
+      max-height: 180px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .last-chat-controls {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
     }
 
     .attachment-list {
@@ -674,12 +731,16 @@
       }
     }
   </style>
+  <link rel="icon" type="image/png" href="../../assets/GSlogo01.png" />
 </head>
 <body class="claude-page">
   <div class="claude-shell">
     <header class="claude-topbar">
       <a class="brand-lockup" href="../../#top">
-        <span class="brand-mark">AI</span>
+        <span class="brand-mark">
+          <img src="../../assets/claude.png" alt="Claude icon" class="brand-mark-image" onerror="this.style.display='none'" />
+          <span class="brand-mark-fallback" aria-hidden="true">AI</span>
+        </span>
         <span class="brand-copy">
           <strong>Claude API Lab</strong>
           <span>Complete rebuild · browser-native workspace</span>
@@ -848,7 +909,7 @@
             <div>
               <span class="eyebrow">Composer</span>
               <h3>One prompt lane</h3>
-              <p>The request preview below updates as you type or add attachments.</p>
+              <p>The runtime snippet and persisted last-chat pane update as you type or complete an exchange.</p>
             </div>
             <div class="chip-row">
               <button class="tiny-button prompt-chip" type="button" data-prompt="Threat-model a bridge relayer with replay protection, nonce invalidation, and liveness assumptions.">Bridge TM</button>
@@ -876,18 +937,20 @@
         <div class="section-head">
           <div>
             <span class="eyebrow">Inspector</span>
-            <h2>Request payload</h2>
-            <p>What Claude actually receives is visible here before execution.</p>
+            <h2>Last chat</h2>
+            <p>Persisted handoff of the most recent completed exchange.</p>
           </div>
           <div class="inspector-toolbar">
-            <button id="copyPreviewButton" class="icon-button" type="button">Copy preview</button>
+            <button id="copyPreviewButton" class="icon-button" type="button">Copy last chat</button>
           </div>
         </div>
 
         <div class="inspector-grid">
           <article class="inspector-card">
-            <span class="inspector-label">Preview</span>
-            <pre id="requestPreview" class="preview-block">No prompt composed yet.</pre>
+            <span class="inspector-label">History</span>
+            <div id="lastChatHistory" class="history-block">
+              <div class="empty-state">No completed chat stored yet.</div>
+            </div>
           </article>
 
           <article class="inspector-card">
@@ -917,12 +980,17 @@ await puter.ai.chat(prompt, {
 
   <script>
     const STORAGE_KEY = 'claude-api-lab-v2';
+    const LAST_CHAT_KEY = 'claude-api-lab-v2:last-chat';
     const MAX_ATTACHMENT_CHARS = 8000;
+    const LAST_CHAT_PREVIEW_CHARS = 320;
+    const DEFAULT_SYSTEM_PROMPT = 'You are Claude in a browser-native engineering workspace. Prefer concise, source-aware answers. Distinguish user-provided attachments from model inference. State uncertainty precisely.';
 
     const state = {
       transcript: [],
       attachments: [],
-      isRunning: false
+      isRunning: false,
+      lastChat: [],
+      lastChatExpanded: {}
     };
 
     const elements = {
@@ -939,7 +1007,7 @@ await puter.ai.chat(prompt, {
       attachmentCountMetric: document.getElementById('attachmentCountMetric'),
       promptSizeMetric: document.getElementById('promptSizeMetric'),
       activeModelMetric: document.getElementById('activeModelMetric'),
-      requestPreview: document.getElementById('requestPreview'),
+      lastChatHistory: document.getElementById('lastChatHistory'),
       snippetPreview: document.getElementById('snippetPreview'),
       attachmentList: document.getElementById('attachmentList'),
       attachmentInput: document.getElementById('attachmentInput'),
@@ -974,36 +1042,22 @@ await puter.ai.chat(prompt, {
       elements.runtimeStatus.textContent = text;
     }
 
-    function createMessage(role, title, meta = '') {
-      ensureTranscriptState();
-      const wrapper = document.createElement('article');
-      wrapper.className = `message ${role}`;
+    function setRequestStatus(text) {
+      elements.requestStatusText.textContent = text;
+    }
 
-      const header = document.createElement('header');
-      const titleNode = document.createElement('strong');
-      titleNode.textContent = title;
-      const metaNode = document.createElement('span');
-      metaNode.textContent = meta;
-      header.append(titleNode, metaNode);
-
-      const bubble = document.createElement('div');
-      bubble.className = 'message-bubble';
-
-      const content = document.createElement('div');
-      content.className = 'message-content';
-      bubble.appendChild(content);
-
-      wrapper.append(header, bubble);
-      transcript.appendChild(wrapper);
-      transcript.scrollTop = transcript.scrollHeight;
+    function createTranscriptMessage(role, content, meta = '') {
       return {
-        wrapper,
+        id: `${role}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        role,
         content,
-        commit(text) {
-          content.textContent = text;
-          appendTranscriptExport(role, title, text);
-        }
+        meta,
+        timestamp: nowLabel()
       };
+    }
+
+    function saveLastChat() {
+      localStorage.setItem(LAST_CHAT_KEY, JSON.stringify(state.lastChat));
     }
 
     function saveState() {
@@ -1027,6 +1081,18 @@ await puter.ai.chat(prompt, {
 
     function loadState() {
       const raw = localStorage.getItem(STORAGE_KEY);
+      const rawLastChat = localStorage.getItem(LAST_CHAT_KEY);
+
+      if (rawLastChat) {
+        try {
+          const payload = JSON.parse(rawLastChat);
+          state.lastChat = Array.isArray(payload) ? payload : [];
+          state.lastChatExpanded = {};
+        } catch (_error) {
+          localStorage.removeItem(LAST_CHAT_KEY);
+        }
+      }
+
       if (!raw) {
         return;
       }
@@ -1036,7 +1102,7 @@ await puter.ai.chat(prompt, {
         state.transcript = Array.isArray(payload.transcript) ? payload.transcript : [];
         state.attachments = Array.isArray(payload.attachments) ? payload.attachments : [];
         elements.modelSelect.value = payload.model || elements.modelSelect.value;
-        elements.systemPromptInput.value = payload.systemPrompt || elements.systemPromptInput.value;
+        elements.systemPromptInput.value = payload.systemPrompt || DEFAULT_SYSTEM_PROMPT;
         elements.sessionNotesInput.value = payload.sessionNotes || '';
         elements.promptInput.value = payload.prompt || '';
         elements.streamToggle.checked = payload.stream !== false;
@@ -1049,34 +1115,30 @@ await puter.ai.chat(prompt, {
     function resetWorkspace() {
       state.transcript = [];
       state.attachments = [];
+      state.lastChat = [];
+      state.lastChatExpanded = {};
+      state.isRunning = false;
       elements.modelSelect.value = 'claude-sonnet-4-6';
-      elements.systemPromptInput.value = 'You are Claude in a browser-native engineering workspace. Prefer concise, source-aware answers. Distinguish user-provided attachments from model inference. State uncertainty precisely.';
+      elements.systemPromptInput.value = DEFAULT_SYSTEM_PROMPT;
       elements.sessionNotesInput.value = '';
       elements.promptInput.value = '';
       elements.streamToggle.checked = true;
+      elements.persistToggle.checked = true;
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LAST_CHAT_KEY);
+      setRequestStatus('Workspace reset');
       renderAll();
     }
 
     function clearTranscript() {
       state.transcript = [];
       saveState();
-      renderTranscript();
-      updateMetrics();
-    }
-
-    function createMessage(role, content, meta = '') {
-      return {
-        id: `${role}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        role,
-        content,
-        meta,
-        timestamp: nowLabel()
-      };
+      setRequestStatus('Transcript cleared');
+      renderAll();
     }
 
     function addMessage(role, content, meta = '') {
-      const message = createMessage(role, content, meta);
+      const message = createTranscriptMessage(role, content, meta);
       state.transcript.push(message);
       renderTranscript();
       updateMetrics();
@@ -1104,7 +1166,7 @@ await puter.ai.chat(prompt, {
           <article class="message ${roleClass}">
             <div class="message-head">
               <span class="message-role">${escapeHtml(message.role)}</span>
-              <span class="message-meta">${escapeHtml(message.timestamp)}</span>
+              <span class="message-meta">${escapeHtml(message.timestamp || '')}</span>
             </div>
             ${meta}
             <div class="message-body">${escapeHtml(message.content)}</div>
@@ -1113,6 +1175,42 @@ await puter.ai.chat(prompt, {
       }).join('');
 
       elements.transcript.scrollTop = elements.transcript.scrollHeight;
+    }
+
+    function renderLastChat() {
+      if (!state.lastChat.length) {
+        elements.lastChatHistory.innerHTML = '<div class="empty-state">No completed chat stored yet.</div>';
+        return;
+      }
+
+      elements.lastChatHistory.innerHTML = state.lastChat.map((message, index) => `
+        <article class="message ${escapeHtml(message.role)}">
+          <div class="message-head">
+            <span class="message-role">${escapeHtml(message.role)}</span>
+            <span class="message-meta">${escapeHtml(message.timestamp || '')}</span>
+          </div>
+          ${message.meta ? `<div class="message-meta">${escapeHtml(message.meta)}</div>` : ''}
+          <div class="last-chat-body ${state.lastChatExpanded[index] ? 'expanded' : 'collapsed'}">${escapeHtml(message.content)}</div>
+          ${message.content.length > LAST_CHAT_PREVIEW_CHARS ? `
+            <div class="last-chat-controls">
+              <button class="tiny-button last-chat-toggle" type="button" data-index="${index}">
+                ${state.lastChatExpanded[index] ? 'Less' : 'More'}
+              </button>
+            </div>
+          ` : ''}
+        </article>
+      `).join('');
+
+      Array.from(document.querySelectorAll('.last-chat-toggle')).forEach((button) => {
+        button.addEventListener('click', () => {
+          const index = Number(button.dataset.index);
+          if (!Number.isInteger(index)) {
+            return;
+          }
+          state.lastChatExpanded[index] = !state.lastChatExpanded[index];
+          renderLastChat();
+        });
+      });
     }
 
     function renderAttachments() {
@@ -1135,9 +1233,13 @@ await puter.ai.chat(prompt, {
       Array.from(document.querySelectorAll('.remove-attachment-button')).forEach((button) => {
         button.addEventListener('click', () => {
           const index = Number(button.dataset.index);
+          if (!Number.isInteger(index)) {
+            return;
+          }
           state.attachments.splice(index, 1);
           saveState();
           renderAll();
+          setRequestStatus('Attachment removed');
         });
       });
     }
@@ -1148,7 +1250,8 @@ await puter.ai.chat(prompt, {
       }
 
       return state.attachments.map((attachment, index) => {
-        return [`Attachment ${index + 1}: ${attachment.name}`,
+        return [
+          `Attachment ${index + 1}: ${attachment.name}`,
           `Type: ${attachment.type || 'text/plain'}`,
           'Content:',
           attachment.content
@@ -1194,20 +1297,39 @@ await puter.ai.chat(prompt, {
       const composedPrompt = buildComposedPrompt();
       const model = elements.modelSelect.value;
       const stream = elements.streamToggle.checked;
-      elements.requestPreview.textContent = composedPrompt || 'No prompt composed yet.';
-      elements.snippetPreview.textContent = `const prompt = ${JSON.stringify(composedPrompt || '')};\nawait puter.ai.chat(prompt, {\n  model: ${JSON.stringify(model)},\n  stream: ${stream}\n});`;
+      elements.snippetPreview.textContent = `const prompt = ${JSON.stringify(composedPrompt || '')};
+await puter.ai.chat(prompt, {
+  model: ${JSON.stringify(model)},
+  stream: ${stream}
+});`;
+      renderLastChat();
     }
 
-    function saveEditorContext() {
-      const content = contextInput.value.trim();
-      if (!content) {
-        const msg = createMessage('error', 'Context error', 'missing content');
-        msg.commit('Working context is empty. Add markdown before saving a context pack.');
-        return;
-      }
+    function renderAll() {
+      renderTranscript();
+      renderAttachments();
+      updateMetrics();
+      updateInspector();
+    }
 
-      await navigator.clipboard.writeText(text);
-      setRequestStatus('Request preview copied');
+    async function copyPreview() {
+      const history = state.lastChat.length
+        ? state.lastChat.map((message) => {
+            const lines = [`[${message.role}] ${message.timestamp || ''}`.trim()];
+            if (message.meta) {
+              lines.push(`meta: ${message.meta}`);
+            }
+            lines.push(message.content);
+            return lines.join('\n');
+          }).join('\n\n')
+        : 'No completed chat stored yet.';
+
+      try {
+        await navigator.clipboard.writeText(history);
+        setRequestStatus('Last chat copied');
+      } catch (_error) {
+        setRequestStatus('Clipboard copy failed');
+      }
     }
 
     async function readAttachment(file) {
@@ -1235,6 +1357,13 @@ await puter.ai.chat(prompt, {
       setRequestStatus(`${parsed.length} attachment${parsed.length === 1 ? '' : 's'} loaded`);
     }
 
+    function persistLastCompletedChat(userMessage, assistantMessage) {
+      state.lastChat = [userMessage, assistantMessage].map((message) => ({ ...message }));
+      state.lastChatExpanded = {};
+      saveLastChat();
+      renderLastChat();
+    }
+
     async function sendPrompt() {
       if (state.isRunning) {
         return;
@@ -1256,12 +1385,15 @@ await puter.ai.chat(prompt, {
       const composedPrompt = buildComposedPrompt();
       const model = elements.modelSelect.value;
       const stream = elements.streamToggle.checked;
+      const requestMeta = `${model} · ${stream ? 'stream' : 'buffered'}`;
 
-      const composedMessage = createMessage('user', `Composed request ${requestId}`, model);
-      composedMessage.commit(composedPrompt);
+      state.isRunning = true;
+      elements.sendButton.disabled = true;
+      elements.sendButton.textContent = 'Running…';
+      setRequestStatus('Sending request');
 
-      addMessage('user', userPrompt, `${model} · ${stream ? 'stream' : 'buffered'}`);
-      const assistantMessage = createMessage('assistant', '', `${model} · ${stream ? 'stream' : 'buffered'}`);
+      const userMessage = addMessage('user', userPrompt, requestMeta);
+      const assistantMessage = createTranscriptMessage('assistant', '', requestMeta);
       state.transcript.push(assistantMessage);
       renderTranscript();
       updateMetrics();
@@ -1271,21 +1403,26 @@ await puter.ai.chat(prompt, {
           const response = await window.puter.ai.chat(composedPrompt, { model, stream: true });
           for await (const part of response) {
             const chunk = part?.text || '';
+            if (!chunk) {
+              continue;
+            }
             assistantMessage.content += chunk;
             renderTranscript();
           }
         } else {
           const response = await window.puter.ai.chat(composedPrompt, { model });
-          const content = response?.message?.content?.[0]?.text || 'No response payload returned.';
-          assistantMessage.content = content;
+          assistantMessage.content = response?.message?.content?.[0]?.text || 'No response payload returned.';
           renderTranscript();
         }
 
+        persistLastCompletedChat(userMessage, assistantMessage);
         setRuntimeStatus('ready', 'Runtime ready');
         setRequestStatus('Response complete');
+        elements.promptInput.value = '';
       } catch (error) {
         assistantMessage.role = 'error';
         assistantMessage.content = error?.message || 'Claude request failed.';
+        persistLastCompletedChat(userMessage, assistantMessage);
         setRuntimeStatus('error', 'Request failed');
         setRequestStatus('Claude request failed');
         renderTranscript();
@@ -1293,7 +1430,7 @@ await puter.ai.chat(prompt, {
         state.isRunning = false;
         elements.sendButton.disabled = false;
         elements.sendButton.textContent = 'Run Claude request';
-        updateMetrics();
+        renderAll();
         saveState();
       }
     }
@@ -1340,8 +1477,10 @@ await puter.ai.chat(prompt, {
     elements.persistToggle.addEventListener('change', () => {
       if (!elements.persistToggle.checked) {
         localStorage.removeItem(STORAGE_KEY);
+        setRequestStatus('Persistence disabled');
       } else {
         saveState();
+        setRequestStatus('Persistence enabled');
       }
     });
 
@@ -1368,6 +1507,7 @@ await puter.ai.chat(prompt, {
       renderAll();
       saveState();
       elements.promptInput.focus();
+      setRequestStatus('Security prompt loaded');
     });
 
     promptChipButtons.forEach((button) => {
@@ -1376,6 +1516,7 @@ await puter.ai.chat(prompt, {
         renderAll();
         saveState();
         elements.promptInput.focus();
+        setRequestStatus('Prompt template loaded');
       });
     });
 
