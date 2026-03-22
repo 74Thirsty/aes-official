@@ -1163,6 +1163,15 @@
       margin-top: 8px;
     }
 
+    .card-actions .button {
+      flex: 1 1 180px;
+      min-width: 0;
+    }
+
+    .card-actions .icon-link {
+      flex: 0 0 auto;
+    }
+
     .icon-link {
       padding: 0;
       width: 64px;
