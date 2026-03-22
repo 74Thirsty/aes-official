@@ -616,8 +616,7 @@
             </div>
             <div class="request-preview" aria-hidden="true"></div>
           </section>
-        </div>
-      </aside>
+        </article>
 
         <aside class="claude-console">
           <div class="console-head">
@@ -782,12 +781,15 @@
       titleNode.textContent = title;
       const metaNode = document.createElement('span');
       metaNode.textContent = meta;
-      header.append(titleNode, metaNode);
+      header.append(titleNode);
+      if (meta) {
+        header.appendChild(metaNode);
+      }
 
-      const bubble = document.createElement('div');
-      bubble.className = 'message-bubble';
+      const content = document.createElement('div');
+      content.className = 'message-bubble';
 
-      wrapper.append(header, bubble);
+      wrapper.append(header, content);
       transcript.appendChild(wrapper);
       transcript.scrollTop = transcript.scrollHeight;
       return {
