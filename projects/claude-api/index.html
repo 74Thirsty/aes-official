@@ -339,6 +339,82 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     }
 
+    .context-summary-card {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: linear-gradient(180deg, rgba(8, 15, 32, 0.92), rgba(15, 23, 42, 0.72));
+    }
+
+    .context-summary-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .context-summary-text {
+      min-height: 88px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      background: rgba(2, 6, 23, 0.66);
+      color: #dbeafe;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.55;
+    }
+
+    .context-summary-text.is-empty {
+      color: var(--text-muted);
+    }
+
+    .context-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding: clamp(16px, 4vw, 32px);
+      background: rgba(2, 6, 23, 0.72);
+      backdrop-filter: blur(10px);
+    }
+
+    .context-modal-backdrop[hidden] {
+      display: none;
+    }
+
+    .context-modal {
+      width: min(960px, 100%);
+      max-height: min(88vh, 960px);
+      display: grid;
+      gap: 16px;
+      padding: clamp(20px, 3vw, 28px);
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: linear-gradient(180deg, rgba(8, 15, 32, 0.98), rgba(15, 23, 42, 0.96));
+      box-shadow: 0 28px 70px rgba(2, 6, 23, 0.5);
+    }
+
+    .context-modal textarea {
+      min-height: min(54vh, 560px);
+      resize: vertical;
+    }
+
+    .context-modal-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .context-modal-actions > div {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
      .workspace-list {
       display: grid;
       gap: 8px;
@@ -719,6 +795,15 @@
     const sidebarContextMetric = document.getElementById('sidebarContextMetric');
     const sidebarAttachmentMetric = document.getElementById('sidebarAttachmentMetric');
     const dropzone = document.getElementById('dropzone');
+    const contextModal = document.getElementById('contextModal');
+    const openContextModalButton = document.getElementById('openContextModalButton');
+    const closeContextModalButton = document.getElementById('closeContextModalButton');
+    const closeContextModalFooterButton = document.getElementById('closeContextModalFooterButton');
+    const saveContextModalButton = document.getElementById('saveContextModalButton');
+    const clearContextModalButton = document.getElementById('clearContextModalButton');
+    const clearContextButton = document.getElementById('clearContextButton');
+    const contextPreviewText = document.getElementById('contextPreviewText');
+    const contextDraftMetric = document.getElementById('contextDraftMetric');
     const copyButtons = document.querySelectorAll('.copy-button');
 
     let requestCounter = 0;
@@ -989,6 +1074,32 @@
         return response.message.content.map((part) => part?.text || '').filter(Boolean).join('\n');
       }
       return JSON.stringify(response, null, 2);
+    }
+
+    function syncContextPreview() {
+      const value = contextInput.value.trim();
+      if (!value) {
+        contextPreviewText.textContent = 'No working context loaded. Use the pop-out editor for repo notes, reviewer constraints, or protocol assumptions.';
+        contextPreviewText.classList.add('is-empty');
+        contextDraftMetric.textContent = 'empty';
+        return;
+      }
+
+      contextPreviewText.textContent = clip(value, 420);
+      contextPreviewText.classList.remove('is-empty');
+      contextDraftMetric.textContent = `${value.length.toLocaleString()} chars`;
+    }
+
+    function openContextModal() {
+      contextModal.hidden = false;
+      document.body.classList.add('context-modal-open');
+      requestAnimationFrame(() => contextInput.focus());
+    }
+
+    function closeContextModal() {
+      contextModal.hidden = true;
+      document.body.classList.remove('context-modal-open');
+      syncComposerState();
     }
 
     function updateRuntimeStatus() {
@@ -1313,6 +1424,24 @@
       downloadText(normalizedName, contextInput.value || '');
     });
     contextFileInput.addEventListener('change', (event) => importContextFiles(event.target.files));
+    openContextModalButton.addEventListener('click', openContextModal);
+    closeContextModalButton.addEventListener('click', closeContextModal);
+    closeContextModalFooterButton.addEventListener('click', closeContextModal);
+    saveContextModalButton.addEventListener('click', closeContextModal);
+    clearContextModalButton.addEventListener('click', () => {
+      contextInput.value = '';
+      syncComposerState();
+      contextInput.focus();
+    });
+    clearContextButton.addEventListener('click', () => {
+      contextInput.value = '';
+      syncComposerState();
+    });
+    contextModal.addEventListener('click', (event) => {
+      if (event.target === contextModal) {
+        closeContextModal();
+      }
+    });
 
     runPromptButton.addEventListener('click', runPrompt);
     resetTranscriptButton.addEventListener('click', clearTranscript);
