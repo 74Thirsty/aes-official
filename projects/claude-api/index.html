@@ -11,32 +11,16 @@
   <link rel="stylesheet" href="../../styles/global.css" />
   <script src="https://js.puter.com/v2/" defer></script>
   <style>
-    :root {
-      --bg: #0f1115;
-      --sidebar: #17191f;
-      --panel: #1e2128;
-      --panel-2: #232733;
-      --border: rgba(255, 255, 255, 0.08);
-      --border-strong: rgba(255, 255, 255, 0.14);
-      --text: #eceef3;
-      --muted: #98a2b3;
-      --accent: #8ab4f8;
-      --success: #7dd3a0;
-      --warn: #f2c66d;
-      --danger: #f28b82;
+    .claude-page {
+      --chat-border: rgba(148, 163, 184, 0.24);
+      --chat-muted: rgba(148, 163, 184, 0.88);
+      --muted: rgba(148, 163, 184, 0.88);
+      --sidebar-width: 320px;
+      --surface-2: rgba(15, 23, 42, 0.62);
     }
 
-    html, body {
-      height: 100%;
-    }
-
-    body.claude-page {
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: "Inter", system-ui, sans-serif;
-      overflow: hidden;
+    .claude-page .hero {
+      gap: 28px;
     }
 
     body.claude-page::before,
@@ -76,7 +60,30 @@
       overflow: auto;
       padding: 12px;
       display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
+    }
+
+    .tutorial-section li,
+    .capability-list li,
+    .model-list li,
+    .workspace-list li {
+      padding: 14px 16px;
+      color: var(--text-dim);
+    }
+
+    .model-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
+    }
+
+    .code-shell {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(2, 6, 23, 0.95);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
 
     .brand {
@@ -607,28 +614,16 @@
             <div id="contextList" class="context-list">
               <div class="muted">No saved context packs.</div>
             </div>
-          </div>
-        </details>
+            <div class="request-preview" aria-hidden="true"></div>
+          </section>
+        </div>
+      </aside>
 
-        <details class="toolbox">
-          <summary>
-            <span>Files</span>
-            <span class="helper" id="attachmentStatus">0 loaded</span>
-          </summary>
-          <div class="toolbox-body">
-            <label id="dropzone" class="dropzone">
-              <strong>Drop files here</strong>
-              <span class="helper">Text/code/markdown parses inline. Binary stays metadata-only.</span>
-            </label>
-            <div class="button-row">
-              <label class="upload-button">
-                Upload
-                <input id="fileInput" type="file" multiple />
-              </label>
-              <button id="clearFilesButton" class="ghost-button danger" type="button">Clear</button>
-            </div>
-            <div id="attachmentList" class="attachment-list">
-              <div class="muted">No attachments loaded.</div>
+        <aside class="claude-console">
+          <div class="console-head">
+            <div>
+              <span class="eyebrow">Operational notes</span>
+              <h3>Browser execution constraints</h3>
             </div>
           </div>
         </details>
@@ -679,10 +674,9 @@
           </div>
         </div>
       </div>
-    </main>
+    </footer>
   </div>
 
-  <textarea id="transcriptExport" class="sr-only" aria-hidden="true"></textarea>
   <script src="../../scripts/global.js" defer></script>
   <script>
     const CONTEXT_STORAGE_KEY = 'claudeWorkspace:contextDocs';
@@ -757,6 +751,71 @@
       } catch (error) {
         console.warn('claude-workspace: failed to persist context docs', error);
       }
+    }
+
+    function ensureTranscriptState() {
+      const empty = transcript.querySelector('.empty-state');
+      if (empty) {
+        empty.remove();
+      }
+    }
+
+    function clearTranscript() {
+      transcript.innerHTML = '<div class="empty-state">Run a prompt to populate the transcript.</div>';
+      transcriptExport.value = '';
+    }
+
+    function appendTranscriptExport(role, title, content) {
+      const header = `[${new Date().toISOString()}] ${role.toUpperCase()} · ${title}`;
+      transcriptExport.value = transcriptExport.value
+        ? `${transcriptExport.value}\n\n${header}\n${content}`
+        : `${header}\n${content}`;
+    }
+
+    function createMessage(role, title, meta = '') {
+      ensureTranscriptState();
+      const wrapper = document.createElement('article');
+      wrapper.className = `message ${role}`;
+
+      const header = document.createElement('header');
+      const titleNode = document.createElement('strong');
+      titleNode.textContent = title;
+      const metaNode = document.createElement('span');
+      metaNode.textContent = meta;
+      header.append(titleNode, metaNode);
+
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+
+      wrapper.append(header, bubble);
+      transcript.appendChild(wrapper);
+      transcript.scrollTop = transcript.scrollHeight;
+      return {
+        wrapper,
+        bubble,
+        commit(text) {
+          bubble.textContent = text;
+          appendTranscriptExport(role, title, text);
+        }
+      };
+    }
+
+    function extractResponseText(response) {
+      if (typeof response === 'string') return response;
+      if (response?.message?.content?.[0]?.text) return response.message.content[0].text;
+      if (response?.text) return response.text;
+      if (Array.isArray(response?.message?.content)) {
+        return response.message.content.map((part) => part?.text || '').filter(Boolean).join('\n');
+      }
+      return JSON.stringify(response, null, 2);
+    }
+
+    function escapeSnippetValue(value) {
+      return JSON.stringify(value);
+    }
+
+    function estimatePayloadSize(value) {
+      return (value || '').length;
     }
 
     function fileExtension(name) {
@@ -1169,8 +1228,12 @@
         clearTranscript();
       }
 
-      const userMessage = createMessage('user', `Request ${requestId}`, model);
-      userMessage.commit(prompt);
+      const userMessage = createMessage(
+        'user',
+        `Request ${requestId}`,
+        `${model} · ${attachmentSummary} · ${contextSummary}`
+      );
+      userMessage.commit(composedPrompt);
       const assistantMessage = createMessage('assistant', model, stream ? 'streaming' : 'buffered');
 
       runPromptButton.disabled = true;
