@@ -11,35 +11,16 @@
   <link rel="stylesheet" href="../../styles/global.css" />
   <script src="https://js.puter.com/v2/" defer></script>
   <style>
-    :root {
-      --bg: #0f1115;
-      --sidebar: #17191f;
-      --panel: #1e2128;
-      --panel-2: #232733;
-      --border: rgba(255, 255, 255, 0.08);
-      --border-strong: rgba(255, 255, 255, 0.14);
-      --text: #eceef3;
-      --muted: #98a2b3;
-      --accent: #8ab4f8;
-      --success: #7dd3a0;
-      --warn: #f2c66d;
-      --danger: #f28b82;
+    .claude-page {
+      --chat-border: rgba(148, 163, 184, 0.24);
+      --chat-muted: rgba(148, 163, 184, 0.88);
+      --muted: rgba(148, 163, 184, 0.88);
+      --sidebar-width: 320px;
+      --surface-2: rgba(15, 23, 42, 0.62);
     }
 
-    html, body {
-      height: 100%;
-    }
-
-    body.claude-page {
-      margin: 0;
-      padding: 14px;
-      background:
-        radial-gradient(circle at top left, rgba(15, 58, 95, 0.38), transparent 42%),
-        radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.08), transparent 30%),
-        linear-gradient(180deg, #090d18 0%, #15111b 100%);
-      color: var(--text);
-      font-family: "Inter", system-ui, sans-serif;
-      overflow: hidden;
+    .claude-page .hero {
+      gap: 28px;
     }
 
     body.claude-page::before,
@@ -48,35 +29,53 @@
     }
 
     .app {
-      height: calc(100vh - 28px);
+      height: 100vh;
       display: grid;
-      grid-template-columns: 320px minmax(0, 1fr);
-      gap: 18px;
-      background: transparent;
+      grid-template-columns: 260px minmax(0, 1fr);
+      background: var(--bg);
     }
 
     .sidebar {
-      background: linear-gradient(180deg, rgba(11, 20, 34, 0.96), rgba(10, 18, 30, 0.94));
-      border: 1px solid rgba(91, 124, 160, 0.28);
-      border-radius: 20px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
       display: grid;
       grid-template-rows: auto 1fr auto;
       min-height: 0;
-      box-shadow: 0 24px 60px rgba(3, 8, 20, 0.42);
-      overflow: hidden;
     }
 
     .sidebar-top,
     .sidebar-bottom {
-      padding: 16px;
-      border-bottom: 1px solid rgba(91, 124, 160, 0.18);
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
     }
 
     .sidebar-bottom {
       border-bottom: none;
-      border-top: 1px solid rgba(91, 124, 160, 0.18);
+      border-top: 1px solid var(--border);
       display: grid;
       gap: 8px;
+    }
+
+    .sidebar-scroll {
+      overflow: auto;
+      padding: 12px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
+    }
+
+    .tutorial-section li,
+    .capability-list li,
+    .model-list li,
+    .workspace-list li {
+      padding: 14px 16px;
+      color: var(--text-dim);
+    }
+
+    .model-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
     }
 
     .sidebar-scroll {
@@ -109,10 +108,10 @@
     .ghost-button,
     .upload-button,
     .send-button {
-      border: 1px solid rgba(91, 124, 160, 0.24);
-      background: rgba(17, 32, 50, 0.72);
+      border: 1px solid var(--border);
+      background: var(--panel);
       color: var(--text);
-      border-radius: 14px;
+      border-radius: 12px;
       font: inherit;
       cursor: pointer;
     }
@@ -204,11 +203,10 @@
     }
 
     details.toolbox {
-      border: 1px solid rgba(91, 124, 160, 0.2);
-      border-radius: 18px;
-      background: rgba(10, 22, 38, 0.72);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel);
       overflow: hidden;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
     }
 
     details.toolbox summary {
@@ -351,10 +349,10 @@
       justify-content: space-between;
       align-items: center;
       gap: 10px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(91, 124, 160, 0.22);
-      background: rgba(17, 32, 50, 0.68);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel);
       font-size: 0.82rem;
     }
 
@@ -367,30 +365,22 @@
       display: grid;
       grid-template-rows: minmax(0, 1fr) auto;
       min-height: 0;
-      background: transparent;
-      gap: 18px;
+      background: var(--bg);
     }
 
     .transcript {
       overflow: auto;
-      padding: 28px;
+      padding: 40px 24px 140px;
       display: grid;
       gap: 20px;
       align-content: start;
-      border-radius: 36px;
-      border: 1px solid rgba(91, 124, 160, 0.24);
-      background: linear-gradient(180deg, rgba(13, 36, 58, 0.96), rgba(9, 20, 34, 0.98));
-      box-shadow: 0 30px 80px rgba(2, 8, 20, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-      min-height: 0;
     }
 
     .thread {
-      width: 100%;
-      min-height: 100%;
-      margin: 0;
+      width: min(860px, 100%);
+      margin: 0 auto;
       display: grid;
       gap: 20px;
-      align-content: start;
     }
 
     .message {
@@ -435,42 +425,24 @@
     }
 
     .empty-state {
-      width: min(1120px, 100%);
-      min-height: 100%;
-      margin: 0 auto;
+      width: min(860px, 100%);
+      margin: auto;
       text-align: center;
-      color: rgba(203, 214, 228, 0.86);
+      color: var(--muted);
       display: grid;
-      place-content: start center;
-      gap: 18px;
-      padding: clamp(56px, 8vh, 92px) 24px 24px;
-    }
-
-    .empty-state strong {
-      font-size: clamp(3.4rem, 7vw, 5.6rem);
-      line-height: 0.92;
-      font-weight: 600;
-      letter-spacing: -0.04em;
-      color: rgba(238, 243, 250, 0.9);
-    }
-
-    .empty-state span {
-      max-width: 920px;
-      font-size: clamp(2rem, 4.3vw, 3.8rem);
-      line-height: 1.08;
-      letter-spacing: -0.04em;
-      color: rgba(189, 202, 219, 0.78);
+      gap: 8px;
+      padding: 24px;
     }
 
     .composer-dock {
-      padding: 0 12px 12px;
-      border-top: none;
-      background: transparent;
+      padding: 16px 24px 20px;
+      border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(15, 17, 21, 0.72), rgba(15, 17, 21, 1));
     }
 
     .composer-shell {
-      width: 100%;
-      margin: 0;
+      width: min(860px, 100%);
+      margin: 0 auto;
       display: grid;
       gap: 8px;
     }
@@ -480,11 +452,10 @@
       grid-template-columns: auto minmax(0, 1fr) auto;
       gap: 10px;
       align-items: center;
-      border: 1px solid rgba(91, 124, 160, 0.24);
-      background: rgba(18, 18, 26, 0.94);
-      border-radius: 22px;
-      padding: 12px;
-      box-shadow: 0 18px 40px rgba(2, 8, 20, 0.32);
+      border: 1px solid var(--border-strong);
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 10px;
     }
 
     .prompt-input {
@@ -494,19 +465,17 @@
       border-radius: 0 !important;
       min-width: 0;
       outline: none;
-      font-size: 1.12rem;
     }
 
     .send-button {
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       padding: 0;
-      border-radius: 14px;
+      border-radius: 10px;
       border: none;
-      background: linear-gradient(180deg, #ff9b2f, #ff7f1f);
+      background: var(--accent);
       color: #0b1220;
-      font-weight: 800;
-      box-shadow: 0 14px 30px rgba(249, 115, 22, 0.24);
+      font-weight: 700;
     }
 
     .sr-only {
@@ -526,12 +495,10 @@
         height: auto;
       }
 
-      body.claude-page {
-        overflow: auto;
-      }
-
       .sidebar {
-        max-height: none;
+        max-height: 42vh;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
       }
     }
 
@@ -552,13 +519,11 @@
         width: 100%;
       }
 
-      .transcript {
-        padding: 18px;
-        border-radius: 24px;
-      }
-
-      .composer-dock {
-        padding: 0;
+      .transcript,
+      .composer-dock,
+      .main-head {
+        padding-left: 16px;
+        padding-right: 16px;
       }
     }
   </style>
@@ -649,28 +614,16 @@
             <div id="contextList" class="context-list">
               <div class="muted">No saved context packs.</div>
             </div>
-          </div>
-        </details>
+            <div class="request-preview" aria-hidden="true"></div>
+          </section>
+        </div>
+      </aside>
 
-        <details class="toolbox">
-          <summary>
-            <span>Files</span>
-            <span class="helper" id="attachmentStatus">0 loaded</span>
-          </summary>
-          <div class="toolbox-body">
-            <label id="dropzone" class="dropzone">
-              <strong>Drop files here</strong>
-              <span class="helper">Text/code/markdown parses inline. Binary stays metadata-only.</span>
-            </label>
-            <div class="button-row">
-              <label class="upload-button">
-                Upload
-                <input id="fileInput" type="file" multiple />
-              </label>
-              <button id="clearFilesButton" class="ghost-button danger" type="button">Clear</button>
-            </div>
-            <div id="attachmentList" class="attachment-list">
-              <div class="muted">No attachments loaded.</div>
+        <aside class="claude-console">
+          <div class="console-head">
+            <div>
+              <span class="eyebrow">Operational notes</span>
+              <h3>Browser execution constraints</h3>
             </div>
           </div>
         </details>
@@ -721,10 +674,9 @@
           </div>
         </div>
       </div>
-    </main>
+    </footer>
   </div>
 
-  <textarea id="transcriptExport" class="sr-only" aria-hidden="true"></textarea>
   <script src="../../scripts/global.js" defer></script>
   <script>
     const CONTEXT_STORAGE_KEY = 'claudeWorkspace:contextDocs';
@@ -799,6 +751,71 @@
       } catch (error) {
         console.warn('claude-workspace: failed to persist context docs', error);
       }
+    }
+
+    function ensureTranscriptState() {
+      const empty = transcript.querySelector('.empty-state');
+      if (empty) {
+        empty.remove();
+      }
+    }
+
+    function clearTranscript() {
+      transcript.innerHTML = '<div class="empty-state">Run a prompt to populate the transcript.</div>';
+      transcriptExport.value = '';
+    }
+
+    function appendTranscriptExport(role, title, content) {
+      const header = `[${new Date().toISOString()}] ${role.toUpperCase()} · ${title}`;
+      transcriptExport.value = transcriptExport.value
+        ? `${transcriptExport.value}\n\n${header}\n${content}`
+        : `${header}\n${content}`;
+    }
+
+    function createMessage(role, title, meta = '') {
+      ensureTranscriptState();
+      const wrapper = document.createElement('article');
+      wrapper.className = `message ${role}`;
+
+      const header = document.createElement('header');
+      const titleNode = document.createElement('strong');
+      titleNode.textContent = title;
+      const metaNode = document.createElement('span');
+      metaNode.textContent = meta;
+      header.append(titleNode, metaNode);
+
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+
+      wrapper.append(header, bubble);
+      transcript.appendChild(wrapper);
+      transcript.scrollTop = transcript.scrollHeight;
+      return {
+        wrapper,
+        bubble,
+        commit(text) {
+          bubble.textContent = text;
+          appendTranscriptExport(role, title, text);
+        }
+      };
+    }
+
+    function extractResponseText(response) {
+      if (typeof response === 'string') return response;
+      if (response?.message?.content?.[0]?.text) return response.message.content[0].text;
+      if (response?.text) return response.text;
+      if (Array.isArray(response?.message?.content)) {
+        return response.message.content.map((part) => part?.text || '').filter(Boolean).join('\n');
+      }
+      return JSON.stringify(response, null, 2);
+    }
+
+    function escapeSnippetValue(value) {
+      return JSON.stringify(value);
+    }
+
+    function estimatePayloadSize(value) {
+      return (value || '').length;
     }
 
     function fileExtension(name) {
@@ -1211,8 +1228,12 @@
         clearTranscript();
       }
 
-      const userMessage = createMessage('user', `Request ${requestId}`, model);
-      userMessage.commit(prompt);
+      const userMessage = createMessage(
+        'user',
+        `Request ${requestId}`,
+        `${model} · ${attachmentSummary} · ${contextSummary}`
+      );
+      userMessage.commit(composedPrompt);
       const assistantMessage = createMessage('assistant', model, stream ? 'streaming' : 'buffered');
 
       runPromptButton.disabled = true;
