@@ -78,12 +78,11 @@
       gap: 10px;
     }
 
-    .code-shell {
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      background: rgba(2, 6, 23, 0.95);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    .sidebar-scroll {
+      overflow: auto;
+      padding: 0 12px 12px;
+      display: grid;
+      gap: 10px;
     }
 
     .brand {
@@ -493,6 +492,7 @@
     @media (max-width: 920px) {
       .app {
         grid-template-columns: 1fr;
+        height: auto;
       }
 
       .sidebar {
