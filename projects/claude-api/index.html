@@ -14,6 +14,10 @@
   <link rel="stylesheet" href="../../styles/global.css" />
   <script src="https://js.puter.com/v2/" defer></script>
   <style>
+    body.context-modal-open {
+      overflow: hidden;
+    }
+
     .claude-page .hero {
       gap: 28px;
     }
@@ -384,6 +388,17 @@
       line-height: 1.6;
     }
 
+    .stack-actions {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+
+    .stack-actions > * {
+      width: 100%;
+      justify-content: center;
+    }
+
     .dropzone {
       position: relative;
       border: 1px dashed rgba(56, 189, 248, 0.34);
@@ -520,6 +535,82 @@
       max-height: 120px;
       overflow: auto;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .context-summary-card {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: linear-gradient(180deg, rgba(8, 15, 32, 0.92), rgba(15, 23, 42, 0.72));
+    }
+
+    .context-summary-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .context-summary-text {
+      min-height: 88px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      background: rgba(2, 6, 23, 0.66);
+      color: #dbeafe;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.55;
+    }
+
+    .context-summary-text.is-empty {
+      color: var(--text-muted);
+    }
+
+    .context-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding: clamp(16px, 4vw, 32px);
+      background: rgba(2, 6, 23, 0.72);
+      backdrop-filter: blur(10px);
+    }
+
+    .context-modal-backdrop[hidden] {
+      display: none;
+    }
+
+    .context-modal {
+      width: min(960px, 100%);
+      max-height: min(88vh, 960px);
+      display: grid;
+      gap: 16px;
+      padding: clamp(20px, 3vw, 28px);
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: linear-gradient(180deg, rgba(8, 15, 32, 0.98), rgba(15, 23, 42, 0.96));
+      box-shadow: 0 28px 70px rgba(2, 6, 23, 0.5);
+    }
+
+    .context-modal textarea {
+      min-height: min(54vh, 560px);
+      resize: vertical;
+    }
+
+    .context-modal-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .context-modal-actions > div {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
      .workspace-list {
@@ -673,7 +764,9 @@
     <header class="claude-topbar">
       <div class="brand-row">
         <a class="brand" href="../../#top">
-          <span class="brand-mark">⌁</span>
+          <span class="brand-mark">
+            <img src="../../assets/GSlogo01.png" alt="Christopher Hirschauer logo" class="brand-logo">
+          </span>
           Christopher Hirschauer
         </a>
         <div class="nav-links">
@@ -867,11 +960,21 @@
                     <small>Prepended ahead of active context packs, attachment excerpts, and the operator prompt.</small>
                   </label>
 
-                  <label class="field">
-                    Working context
-                    <textarea id="contextInput" spellcheck="false" placeholder="Add ephemeral context here. Example: repository notes, reviewer constraints, protocol-specific assumptions, acceptance criteria."></textarea>
-                    <small>Ad hoc context for the current session. Use the library panel to persist reusable markdown packs.</small>
-                  </label>
+                  <div class="field">
+                    <span>Working context</span>
+                    <div class="context-summary-card">
+                      <div class="context-summary-head">
+                        <strong>Pop-out context editor</strong>
+                        <span id="contextDraftMetric" class="tiny-pill">empty</span>
+                      </div>
+                      <div id="contextPreviewText" class="context-summary-text is-empty">No working context loaded. Use the pop-out editor for repo notes, reviewer constraints, or protocol assumptions.</div>
+                      <small>Ad hoc context stays in-page, but editing now happens in a larger pop-out instead of the cramped inline textarea.</small>
+                    </div>
+                    <div class="stack-actions">
+                      <button id="openContextModalButton" class="mini-button" type="button">Open context window</button>
+                      <button id="clearContextButton" class="ghost-button danger" type="button">Clear context</button>
+                    </div>
+                  </div>
 
                   <label class="field">
                     Prompt
@@ -908,7 +1011,7 @@
                     <input id="contextNameInput" type="text" placeholder="bridge-audit-playbook.md" />
                   </label>
 
-                  <div class="helper-row">
+                  <div class="stack-actions">
                     <button id="saveContextButton" class="mini-button" type="button">Save editor as pack</button>
                     <button id="importContextButton" class="mini-button" type="button">Import .md</button>
                     <button id="exportContextButton" class="mini-button" type="button">Export editor .md</button>
@@ -936,7 +1039,7 @@
                   <span class="support-copy">Text, markdown, JSON, JS/TS, HTML, CSS, Solidity, logs, and other readable files are parsed inline. Binary assets are retained as metadata-only attachments.</span>
                 </label>
 
-                <div class="helper-row">
+                <div class="stack-actions">
                   <button id="clearFilesButton" class="ghost-button danger" type="button">Clear attachments</button>
                 </div>
 
@@ -989,8 +1092,6 @@
             </div>
           </div>
           <p>Model, context, and attachments live here. Chat stays in the main pane.</p>
-        </div>
-
           <section class="tutorial-section">
             <h3>Bootstrap</h3>
             <p>Runtime setup is still one script tag. The material change is request composition in the client, not backend infrastructure.</p>
@@ -1048,10 +1149,8 @@ for await (const part of response) {
                 <li><code>claude-3-haiku</code></li>
               </ul>
             </div>
-            <div id="generatedSnippet" class="request-preview"></div>
           </section>
-        </div>
-      </aside>
+        </article>
 
         <aside class="claude-console">
           <div class="console-head">
@@ -1087,10 +1186,35 @@ for await (const part of response) {
         <a href="../../books/">Books</a>
         <a href="../../#contact">Contact</a>
       </div>
-    </main>
+    </footer>
   </div>
 
-  <textarea id="transcriptExport" class="sr-only" aria-hidden="true"></textarea>
+  <div id="contextModal" class="context-modal-backdrop" hidden>
+    <div class="context-modal">
+      <div class="panel-head">
+        <div>
+          <span class="eyebrow">Working context</span>
+          <h3>Pop-out editor</h3>
+        </div>
+        <button id="closeContextModalButton" class="ghost-button" type="button">Close</button>
+      </div>
+      <label class="field">
+        Context editor
+        <textarea id="contextInput" spellcheck="false" placeholder="Add ephemeral context here. Example: repository notes, reviewer constraints, protocol-specific assumptions, acceptance criteria."></textarea>
+        <small>Used only for the current request flow unless you explicitly save it as a context pack.</small>
+      </label>
+      <div class="context-modal-actions">
+        <div>
+          <button id="saveContextModalButton" class="button primary" type="button">Apply context</button>
+          <button id="clearContextModalButton" class="button outline" type="button">Clear draft</button>
+        </div>
+        <div>
+          <button id="closeContextModalFooterButton" class="ghost-button" type="button">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="../../scripts/global.js" defer></script>
   <script>
     const presetPrompts = {
@@ -1141,6 +1265,15 @@ for await (const part of response) {
     const attachmentList = document.getElementById('attachmentList');
     const contextList = document.getElementById('contextList');
     const dropzone = document.getElementById('dropzone');
+    const contextModal = document.getElementById('contextModal');
+    const openContextModalButton = document.getElementById('openContextModalButton');
+    const closeContextModalButton = document.getElementById('closeContextModalButton');
+    const closeContextModalFooterButton = document.getElementById('closeContextModalFooterButton');
+    const saveContextModalButton = document.getElementById('saveContextModalButton');
+    const clearContextModalButton = document.getElementById('clearContextModalButton');
+    const clearContextButton = document.getElementById('clearContextButton');
+    const contextPreviewText = document.getElementById('contextPreviewText');
+    const contextDraftMetric = document.getElementById('contextDraftMetric');
     const copyButtons = document.querySelectorAll('.copy-button');
 
     let requestCounter = 0;
@@ -1193,7 +1326,7 @@ for await (const part of response) {
         : `${header}\n${content}`;
     }
 
-    function createMessage(role, title) {
+    function createMessage(role, title, meta = '') {
       ensureTranscriptState();
       const wrapper = document.createElement('article');
       wrapper.className = `message ${role}`;
@@ -1203,12 +1336,15 @@ for await (const part of response) {
       titleNode.textContent = title;
       const metaNode = document.createElement('span');
       metaNode.textContent = meta;
-      header.append(titleNode, metaNode);
+      header.append(titleNode);
+      if (meta) {
+        header.appendChild(metaNode);
+      }
 
-      const bubble = document.createElement('div');
-      bubble.className = 'message-bubble';
+      const content = document.createElement('div');
+      content.className = 'message-bubble';
 
-      wrapper.append(header, bubble);
+      wrapper.append(header, content);
       transcript.appendChild(wrapper);
       transcript.scrollTop = transcript.scrollHeight;
       return {
@@ -1435,6 +1571,7 @@ for await (const part of response) {
             contextInput.value = doc.content;
             contextNameInput.value = doc.name;
             syncComposerState();
+            openContextModal();
           });
 
           const deleteButton = document.createElement('button');
@@ -1526,7 +1663,34 @@ for await (const part of response) {
       activeModelMetric.textContent = modelSelect.value;
       payloadMetric.textContent = `${payloadSize.toLocaleString()} chars`;
       compositionHint.textContent = `Composed request size: ${payloadSize.toLocaleString()} characters.`;
+      syncContextPreview();
       syncSnippet();
+    }
+
+    function syncContextPreview() {
+      const value = contextInput.value.trim();
+      if (!value) {
+        contextPreviewText.textContent = 'No working context loaded. Use the pop-out editor for repo notes, reviewer constraints, or protocol assumptions.';
+        contextPreviewText.classList.add('is-empty');
+        contextDraftMetric.textContent = 'empty';
+        return;
+      }
+
+      contextPreviewText.textContent = clip(value, 420);
+      contextPreviewText.classList.remove('is-empty');
+      contextDraftMetric.textContent = `${value.length.toLocaleString()} chars`;
+    }
+
+    function openContextModal() {
+      contextModal.hidden = false;
+      document.body.classList.add('context-modal-open');
+      requestAnimationFrame(() => contextInput.focus());
+    }
+
+    function closeContextModal() {
+      contextModal.hidden = true;
+      document.body.classList.remove('context-modal-open');
+      syncComposerState();
     }
 
     function updateRuntimeStatus() {
@@ -1540,154 +1704,6 @@ for await (const part of response) {
         runtimeStatus.classList.add('warn');
         runtimeStatus.classList.remove('good');
       }
-    }
-
-    async function runPrompt() {
-      const operatorPrompt = promptInput.value.trim();
-      const composedPrompt = composePrompt();
-      if (!operatorPrompt) {
-        const msg = createMessage('error', 'Validation error');
-        msg.commit('Prompt is empty.');
-        return;
-      }
-
-      contextList.innerHTML = '';
-      contextDocs
-        .slice()
-        .sort((a, b) => b.updatedAt - a.updatedAt)
-        .forEach((doc) => {
-          const item = document.createElement('article');
-          item.className = `context-item ${doc.active ? 'active' : ''}`;
-
-          const head = document.createElement('div');
-          head.className = 'item-head';
-
-          const titleWrap = document.createElement('div');
-          const title = document.createElement('strong');
-          title.textContent = doc.name;
-          const meta = document.createElement('div');
-          meta.className = 'context-meta';
-          meta.textContent = `Updated ${new Date(doc.updatedAt).toLocaleString()}`;
-          titleWrap.append(title, meta);
-
-          const controls = document.createElement('div');
-          controls.className = 'message-files';
-
-          const toggle = document.createElement('button');
-          toggle.type = 'button';
-          toggle.className = 'mini-button';
-          toggle.textContent = doc.active ? 'Active' : 'Activate';
-          toggle.addEventListener('click', () => {
-            contextDocs = contextDocs.map((entry) => entry.id === doc.id
-              ? { ...entry, active: !entry.active, updatedAt: Date.now() }
-              : entry);
-            persistContextDocs();
-            renderContextDocs();
-          });
-
-          const loadButton = document.createElement('button');
-          loadButton.type = 'button';
-          loadButton.className = 'mini-button';
-          loadButton.textContent = 'Load';
-          loadButton.addEventListener('click', () => {
-            contextInput.value = doc.content;
-            contextNameInput.value = doc.name;
-            syncComposerState();
-          });
-
-          const deleteButton = document.createElement('button');
-          deleteButton.type = 'button';
-          deleteButton.className = 'ghost-button danger';
-          deleteButton.textContent = 'Delete';
-          deleteButton.addEventListener('click', () => {
-            contextDocs = contextDocs.filter((entry) => entry.id !== doc.id);
-            persistContextDocs();
-            renderContextDocs();
-          });
-
-          controls.append(toggle, loadButton, deleteButton);
-          head.append(titleWrap, controls);
-
-          const preview = document.createElement('div');
-          preview.className = 'context-preview';
-          preview.textContent = clip(doc.content || '', 700) || '[Empty context pack]';
-
-          item.append(head, preview);
-          contextList.appendChild(item);
-        });
-
-      syncComposerState();
-    }
-
-    function saveEditorContext() {
-      const content = contextInput.value.trim();
-      if (!content) {
-        const msg = createMessage('error', 'Context error', 'missing content');
-        msg.commit('Working context is empty. Add markdown before saving a context pack.');
-        return;
-      }
-
-      const name = (contextNameInput.value || 'context-pack.md').trim();
-      const normalizedName = name.endsWith('.md') ? name : `${name}.md`;
-      const existing = contextDocs.find((doc) => doc.name === normalizedName);
-
-      if (existing) {
-        contextDocs = contextDocs.map((doc) => doc.id === existing.id
-          ? { ...doc, content, active: true, updatedAt: Date.now() }
-          : doc);
-      } else {
-        contextDocs.unshift({
-          id: crypto.randomUUID(),
-          name: normalizedName,
-          content,
-          active: true,
-          updatedAt: Date.now()
-        });
-      }
-
-      persistContextDocs();
-      renderContextDocs();
-    }
-
-    function downloadText(filename, content) {
-      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = filename;
-      anchor.click();
-      URL.revokeObjectURL(url);
-    }
-
-    async function importContextFiles(fileList) {
-      const files = Array.from(fileList || []);
-      if (!files.length) return;
-
-      const imported = await Promise.all(files.map(async (file) => ({
-        name: file.name.endsWith('.md') ? file.name : `${file.name}.md`,
-        content: await readFileAsText(file)
-      })));
-
-      imported.forEach((entry) => {
-        const existing = contextDocs.find((doc) => doc.name === entry.name);
-        if (existing) {
-          existing.content = entry.content;
-          existing.active = true;
-          existing.updatedAt = Date.now();
-        } else {
-          contextDocs.unshift({
-            id: crypto.randomUUID(),
-            name: entry.name,
-            content: entry.content,
-            active: true,
-            updatedAt: Date.now()
-          });
-        }
-      });
-
-      persistContextDocs();
-      renderContextDocs();
-      contextFileInput.value = '';
     }
 
     async function runPrompt() {
@@ -1715,9 +1731,6 @@ for await (const part of response) {
       const userMessage = createMessage('user', `Request ${requestId}`, model);
       userMessage.commit(prompt);
       const assistantMessage = createMessage('assistant', model, stream ? 'streaming' : 'buffered');
-
-      const userMessage = createMessage('user', `Request ${requestId}`);
-      userMessage.commit(composedPrompt);
 
       runPromptButton.disabled = true;
       runPromptButton.textContent = '…';
@@ -1901,6 +1914,24 @@ for await (const part of response) {
     });
     importContextButton.addEventListener('click', () => contextFileInput.click());
     contextFileInput.addEventListener('change', (event) => importContextFiles(event.target.files));
+    openContextModalButton.addEventListener('click', openContextModal);
+    closeContextModalButton.addEventListener('click', closeContextModal);
+    closeContextModalFooterButton.addEventListener('click', closeContextModal);
+    saveContextModalButton.addEventListener('click', closeContextModal);
+    clearContextModalButton.addEventListener('click', () => {
+      contextInput.value = '';
+      syncComposerState();
+      contextInput.focus();
+    });
+    clearContextButton.addEventListener('click', () => {
+      contextInput.value = '';
+      syncComposerState();
+    });
+    contextModal.addEventListener('click', (event) => {
+      if (event.target === contextModal) {
+        closeContextModal();
+      }
+    });
 
     runPromptButton.addEventListener('click', runPrompt);
     resetTranscriptButton.addEventListener('click', clearTranscript);
@@ -1916,6 +1947,12 @@ for await (const part of response) {
       if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
         event.preventDefault();
         runPrompt();
+      }
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !contextModal.hidden) {
+        closeContextModal();
       }
     });
 
