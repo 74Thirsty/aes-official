@@ -28,8 +28,42 @@
       display: none;
     }
 
+    .claude-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 15, 32, 0.88);
+      backdrop-filter: blur(10px);
+    }
+
+    .claude-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .claude-nav-link {
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+    }
+
+    .claude-nav-link:hover {
+      color: var(--text);
+      border-color: var(--border);
+      background: var(--panel);
+    }
+
     .app {
-      height: 100vh;
+      min-height: calc(100vh - 62px);
       display: grid;
       grid-template-columns: 260px minmax(0, 1fr);
       background: var(--bg);
@@ -605,6 +639,19 @@
   </style>
 </head>
 <body class="claude-page">
+  <header class="claude-nav">
+    <a class="brand" href="../../#top">
+      <span class="brand-dot" aria-hidden="true"></span>
+      <span>Christopher Hirschauer</span>
+    </a>
+    <nav class="claude-nav-links" aria-label="Primary">
+      <a class="claude-nav-link" href="../../#top">Home</a>
+      <a class="claude-nav-link" href="../index.html">Projects</a>
+      <a class="claude-nav-link" href="../../books/index.html">Books</a>
+      <a class="claude-nav-link" href="../../resume/resume.html">Resume</a>
+    </nav>
+  </header>
+
   <div class="app">
     <aside class="sidebar">
       <div class="sidebar-top">
@@ -691,15 +738,23 @@
               <div class="muted">No saved context packs.</div>
             </div>
             <div class="request-preview" aria-hidden="true"></div>
-          </section>
-        </article>
+          </div>
+        </details>
 
-        <aside class="claude-console">
-          <div class="console-head">
-            <div>
-              <span class="eyebrow">Operational notes</span>
-              <h3>Browser execution constraints</h3>
+        <details class="toolbox">
+          <summary>
+            <span>Attachments</span>
+            <span id="attachmentStatus" class="helper">0 loaded</span>
+          </summary>
+          <div class="toolbox-body">
+            <div id="dropzone" class="dropzone">
+              <strong>Drop files here</strong>
+              <span class="helper">Text files are inlined; binary files are metadata-only.</span>
             </div>
+            <div id="attachmentList" class="attachment-list">
+              <div class="muted">No attachments loaded.</div>
+            </div>
+            <button id="clearFilesButton" class="ghost-button danger" type="button">Clear files</button>
           </div>
         </details>
 
@@ -711,8 +766,10 @@
           <div class="toolbox-body">
             <div class="button-row">
               <button class="control-button copy-button" type="button" data-copy-target="generatedSnippet">Copy</button>
+              <button class="control-button copy-button" type="button" data-copy-target="transcriptExport">Copy transcript</button>
             </div>
             <div id="generatedSnippet" class="request-preview">Prompt body will render here.</div>
+            <textarea id="transcriptExport" class="sr-only" aria-hidden="true"></textarea>
           </div>
         </details>
       </div>
@@ -749,7 +806,7 @@
           </div>
         </div>
       </div>
-    </footer>
+    </main>
   </div>
 
   <script src="../../scripts/global.js" defer></script>
@@ -772,7 +829,7 @@
     const exportContextButton = document.getElementById('exportContextButton');
     const contextFileInput = document.getElementById('contextFileInput');
     const contextList = document.getElementById('contextList');
-    const fileInput = document.getElementById('fileInput');
+    const fileInput = document.getElementById('fileInput') || document.getElementById('composerFileInput');
     const composerFileInput = document.getElementById('composerFileInput');
     const clearFilesButton = document.getElementById('clearFilesButton');
     const attachmentList = document.getElementById('attachmentList');
@@ -1077,6 +1134,7 @@
     }
 
     function syncContextPreview() {
+      if (!contextPreviewText || !contextDraftMetric) return;
       const value = contextInput.value.trim();
       if (!value) {
         contextPreviewText.textContent = 'No working context loaded. Use the pop-out editor for repo notes, reviewer constraints, or protocol assumptions.';
@@ -1091,12 +1149,14 @@
     }
 
     function openContextModal() {
+      if (!contextModal) return;
       contextModal.hidden = false;
       document.body.classList.add('context-modal-open');
       requestAnimationFrame(() => contextInput.focus());
     }
 
     function closeContextModal() {
+      if (!contextModal) return;
       contextModal.hidden = true;
       document.body.classList.remove('context-modal-open');
       syncComposerState();
@@ -1335,6 +1395,8 @@
       const composedPrompt = composePrompt();
       const model = modelSelect.value;
       const stream = streamToggle.checked;
+      const attachmentSummary = `${attachments.length} files`;
+      const contextSummary = `${getActiveContextDocs().length} context docs`;
       const requestId = ++requestCounter;
 
       if (clearOnSendToggle.checked) {
@@ -1392,52 +1454,54 @@
       element.addEventListener('change', syncComposerState);
     });
 
-    fileInput.addEventListener('change', (event) => handleFiles(event.target.files));
-    composerFileInput.addEventListener('change', (event) => handleFiles(event.target.files));
-    clearFilesButton.addEventListener('click', () => {
+    fileInput?.addEventListener('change', (event) => handleFiles(event.target.files));
+    composerFileInput?.addEventListener('change', (event) => handleFiles(event.target.files));
+    clearFilesButton?.addEventListener('click', () => {
       attachments = [];
       renderAttachments();
     });
 
-    ['dragenter', 'dragover'].forEach((eventName) => {
-      dropzone.addEventListener(eventName, (event) => {
-        event.preventDefault();
-        dropzone.classList.add('dragover');
+    if (dropzone) {
+      ['dragenter', 'dragover'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropzone.classList.add('dragover');
+        });
       });
-    });
 
-    ['dragleave', 'dragend', 'drop'].forEach((eventName) => {
-      dropzone.addEventListener(eventName, (event) => {
-        event.preventDefault();
-        if (eventName === 'drop') {
-          handleFiles(event.dataTransfer?.files || []);
-        }
-        dropzone.classList.remove('dragover');
+      ['dragleave', 'dragend', 'drop'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          if (eventName === 'drop') {
+            handleFiles(event.dataTransfer?.files || []);
+          }
+          dropzone.classList.remove('dragover');
+        });
       });
-    });
+    }
 
-    saveContextButton.addEventListener('click', saveEditorContext);
-    importContextButton.addEventListener('click', () => contextFileInput.click());
-    exportContextButton.addEventListener('click', () => {
+    saveContextButton?.addEventListener('click', saveEditorContext);
+    importContextButton?.addEventListener('click', () => contextFileInput.click());
+    exportContextButton?.addEventListener('click', () => {
       const name = (contextNameInput.value || 'context-pack.md').trim();
       const normalizedName = name.endsWith('.md') ? name : `${name}.md`;
       downloadText(normalizedName, contextInput.value || '');
     });
-    contextFileInput.addEventListener('change', (event) => importContextFiles(event.target.files));
-    openContextModalButton.addEventListener('click', openContextModal);
-    closeContextModalButton.addEventListener('click', closeContextModal);
-    closeContextModalFooterButton.addEventListener('click', closeContextModal);
-    saveContextModalButton.addEventListener('click', closeContextModal);
-    clearContextModalButton.addEventListener('click', () => {
+    contextFileInput?.addEventListener('change', (event) => importContextFiles(event.target.files));
+    openContextModalButton?.addEventListener('click', openContextModal);
+    closeContextModalButton?.addEventListener('click', closeContextModal);
+    closeContextModalFooterButton?.addEventListener('click', closeContextModal);
+    saveContextModalButton?.addEventListener('click', closeContextModal);
+    clearContextModalButton?.addEventListener('click', () => {
       contextInput.value = '';
       syncComposerState();
       contextInput.focus();
     });
-    clearContextButton.addEventListener('click', () => {
+    clearContextButton?.addEventListener('click', () => {
       contextInput.value = '';
       syncComposerState();
     });
-    contextModal.addEventListener('click', (event) => {
+    contextModal?.addEventListener('click', (event) => {
       if (event.target === contextModal) {
         closeContextModal();
       }
