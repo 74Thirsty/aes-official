@@ -680,6 +680,10 @@
               <span>Files</span>
               <strong id="sidebarAttachmentMetric">0 loaded</strong>
             </div>
+            <div class="workspace-chip">
+              <span>Account</span>
+              <strong id="sidebarAccountMetric">Unknown</strong>
+            </div>
           </div>
         </div>
       </div>
@@ -713,6 +717,15 @@
               <label class="toggle"><input id="includeContextToggle" type="checkbox" checked /> Use context packs</label>
               <label class="toggle"><input id="includeAttachmentToggle" type="checkbox" checked /> Use file excerpts</label>
             </div>
+            <div class="field">
+              <label>Account session</label>
+              <span id="accountStatus" class="helper">Checking Puter auth…</span>
+              <div class="button-row">
+                <button id="signInButton" class="control-button" type="button">Sign in</button>
+                <button id="switchAccountButton" class="control-button" type="button">Switch account</button>
+                <button id="signOutButton" class="ghost-button danger" type="button">Sign out</button>
+              </div>
+            </div>
           </div>
         </details>
 
@@ -724,7 +737,7 @@
           <div class="toolbox-body">
             <div class="field">
               <label for="systemPromptInput">System instruction</label>
-              <textarea id="systemPromptInput" spellcheck="false">You are Claude operating inside a browser-native chat workspace. Use active markdown context packs and uploaded files as explicit sources when relevant. Separate sourced claims from inference, and do not imply access to data outside the composed request.</textarea>
+              <textarea id="systemPromptInput" spellcheck="false" placeholder="Optional. Leave blank to avoid preloading behavior."></textarea>
             </div>
             <div class="field">
               <label for="contextInput">Working context</label>
@@ -867,6 +880,11 @@
     const clearContextButton = document.getElementById('clearContextButton');
     const contextPreviewText = document.getElementById('contextPreviewText');
     const contextDraftMetric = document.getElementById('contextDraftMetric');
+    const accountStatus = document.getElementById('accountStatus');
+    const sidebarAccountMetric = document.getElementById('sidebarAccountMetric');
+    const signInButton = document.getElementById('signInButton');
+    const switchAccountButton = document.getElementById('switchAccountButton');
+    const signOutButton = document.getElementById('signOutButton');
     const copyButtons = document.querySelectorAll('.copy-button');
 
     let requestCounter = 0;
@@ -1177,6 +1195,56 @@
         runtimeStatus.textContent = 'Puter loading';
         runtimeStatus.classList.add('warn');
         runtimeStatus.classList.remove('good');
+      }
+    }
+
+    async function getCurrentPuterUser() {
+      const auth = window.puter?.auth;
+      if (!auth) return null;
+      if (typeof auth.getUser === 'function') return auth.getUser();
+      if (typeof auth.whoami === 'function') return auth.whoami();
+      if (auth.user) return auth.user;
+      return null;
+    }
+
+    function getUserLabel(user) {
+      if (!user) return 'Signed out';
+      return String(user.username || user.email || user.name || user.id || 'Signed in');
+    }
+
+    async function refreshAccountStatus() {
+      if (!accountStatus || !sidebarAccountMetric) return;
+      if (!window.puter) {
+        accountStatus.textContent = 'Puter runtime loading…';
+        sidebarAccountMetric.textContent = 'Loading';
+        return;
+      }
+      try {
+        const user = await getCurrentPuterUser();
+        const label = getUserLabel(user);
+        accountStatus.textContent = user ? `Active: ${label}` : 'Signed out';
+        sidebarAccountMetric.textContent = label;
+      } catch (error) {
+        accountStatus.textContent = `Auth lookup failed: ${error?.message || String(error)}`;
+        sidebarAccountMetric.textContent = 'Unknown';
+      }
+    }
+
+    async function runAuthAction(action) {
+      const auth = window.puter?.auth;
+      if (!auth || typeof auth[action] !== 'function') {
+        const msg = createMessage('error', 'Auth unavailable', `missing method: ${action}`);
+        msg.commit('Puter auth API is unavailable in this runtime.');
+        await refreshAccountStatus();
+        return;
+      }
+      try {
+        await auth[action]();
+        await refreshAccountStatus();
+      } catch (error) {
+        const msg = createMessage('error', 'Auth action failed', action);
+        msg.commit(error?.message || String(error));
+        await refreshAccountStatus();
       }
     }
 
@@ -1516,12 +1584,36 @@
     runPromptButton.addEventListener('click', runPrompt);
     resetTranscriptButton.addEventListener('click', clearTranscript);
     clearComposerButton.addEventListener('click', () => {
-      systemPromptInput.value = 'You are Claude operating inside a browser-native chat workspace. Use active markdown context packs and uploaded files as explicit sources when relevant. Separate sourced claims from inference, and do not imply access to data outside the composed request.';
+      systemPromptInput.value = '';
       contextInput.value = '';
       contextNameInput.value = '';
       promptInput.value = '';
       syncComposerState();
       promptInput.focus();
+    });
+
+    signInButton?.addEventListener('click', async () => {
+      await runAuthAction('signIn');
+    });
+
+    switchAccountButton?.addEventListener('click', async () => {
+      const auth = window.puter?.auth;
+      if (!auth) {
+        await refreshAccountStatus();
+        return;
+      }
+      if (typeof auth.signOut === 'function') {
+        try {
+          await auth.signOut();
+        } catch (error) {
+          console.warn('claude-workspace: signOut during switch failed', error);
+        }
+      }
+      await runAuthAction('signIn');
+    });
+
+    signOutButton?.addEventListener('click', async () => {
+      await runAuthAction('signOut');
     });
 
     promptInput.addEventListener('keydown', (event) => {
@@ -1549,8 +1641,11 @@
     renderContextDocs();
     syncComposerState();
     updateRuntimeStatus();
+    refreshAccountStatus();
     window.addEventListener('load', updateRuntimeStatus);
+    window.addEventListener('load', refreshAccountStatus);
     setTimeout(updateRuntimeStatus, 1200);
+    setTimeout(refreshAccountStatus, 1200);
   </script>
 </body>
 </html>
