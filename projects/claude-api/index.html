@@ -751,6 +751,7 @@
               <button id="saveContextButton" class="control-button" type="button">Save</button>
               <button id="importContextButton" class="control-button" type="button">Import</button>
               <button id="exportContextButton" class="control-button" type="button">Export</button>
+              <button id="clearContextButton" class="ghost-button danger" type="button">Clear</button>
             </div>
             <input id="contextFileInput" class="sr-only" type="file" accept=".md,text/markdown,text/plain" multiple />
             <div id="contextList" class="context-list">
@@ -777,20 +778,7 @@
           </div>
         </details>
 
-        <details class="toolbox">
-          <summary>
-            <span>Composed request</span>
-            <span id="payloadMetric" class="status-pill">0 chars</span>
-          </summary>
-          <div class="toolbox-body">
-            <div class="button-row">
-              <button class="control-button copy-button" type="button" data-copy-target="generatedSnippet">Copy</button>
-              <button class="control-button copy-button" type="button" data-copy-target="transcriptExport">Copy transcript</button>
-            </div>
-            <div id="generatedSnippet" class="request-preview">Prompt body will render here.</div>
-            <textarea id="transcriptExport" class="sr-only" aria-hidden="true"></textarea>
-          </div>
-        </details>
+
       </div>
 
       <div class="sidebar-bottom">
@@ -820,8 +808,8 @@
             <button id="runPromptButton" class="send-button" type="button" aria-label="Send">↑</button>
           </div>
           <div class="composer-meta">
-            <span id="compositionHint" class="helper">Composed request size: 0 characters.</span>
-            <button id="clearComposerButton" class="ghost-button" type="button">Reset context</button>
+            <span id="compositionHint" class="helper">Ready.</span>
+            <button id="clearComposerButton" class="ghost-button" type="button">Clear inputs</button>
           </div>
         </div>
       </div>
@@ -860,9 +848,7 @@
     const transcript = document.getElementById('transcript');
     const threadRoot = document.getElementById('threadRoot');
     const transcriptExport = document.getElementById('transcriptExport');
-    const generatedSnippet = document.getElementById('generatedSnippet');
     const runtimeStatus = document.getElementById('runtimeStatus');
-    const payloadMetric = document.getElementById('payloadMetric');
     const activeModelMetric = document.getElementById('activeModelMetric');
     const contextStatus = document.getElementById('contextStatus');
     const libraryMetric = document.getElementById('libraryMetric');
@@ -939,11 +925,12 @@
 
     function clearTranscript() {
       transcript.innerHTML = '<div class="empty-state">Run a prompt to populate the transcript.</div>';
-      transcriptExport.value = '';
+      if (transcriptExport) transcriptExport.value = '';
     }
 
     function appendTranscriptExport(role, title, content) {
       const header = `[${new Date().toISOString()}] ${role.toUpperCase()} · ${title}`;
+      if (!transcriptExport) return;
       transcriptExport.value = transcriptExport.value
         ? `${transcriptExport.value}\n\n${header}\n${content}`
         : `${header}\n${content}`;
@@ -1121,11 +1108,12 @@
 
     function clearTranscript() {
       threadRoot.innerHTML = '<div class="empty-state"><strong>Claude</strong><span>Huge chat surface, one-line composer, utilities tucked into the sidebar.</span></div>';
-      transcriptExport.value = '';
+      if (transcriptExport) transcriptExport.value = '';
     }
 
     function appendTranscriptExport(role, title, content) {
       const header = `[${new Date().toISOString()}] ${role.toUpperCase()} · ${title}`;
+      if (!transcriptExport) return;
       transcriptExport.value = transcriptExport.value
         ? `${transcriptExport.value}\n\n${header}\n${content}`
         : `${header}\n${content}`;
@@ -1261,9 +1249,9 @@
     }
 
     function syncComposerState() {
-      const composedPrompt = composePrompt();
+      const prompt = promptInput.value.trim();
       const activeContextCount = getActiveContextDocs().length;
-      const payloadSize = composedPrompt.length;
+      const payloadSize = prompt.length;
       activeModelMetric.textContent = modelSelect.value;
       sidebarModelMetric.textContent = modelSelect.value;
       libraryMetric.textContent = `${contextDocs.length} saved`;
@@ -1271,9 +1259,7 @@
       sidebarContextMetric.textContent = `${activeContextCount} active`;
       attachmentStatus.textContent = `${attachments.length} loaded`;
       sidebarAttachmentMetric.textContent = `${attachments.length} loaded`;
-      payloadMetric.textContent = `${payloadSize.toLocaleString()} chars`;
-      compositionHint.textContent = `Composed request size: ${payloadSize.toLocaleString()} characters.`;
-      generatedSnippet.textContent = composedPrompt || 'Prompt body will render here.';
+      compositionHint.textContent = payloadSize ? `Message length: ${payloadSize.toLocaleString()} characters.` : 'Ready.';
     }
 
     function renderAttachments() {
@@ -1480,7 +1466,6 @@
         return;
       }
 
-      const composedPrompt = composePrompt();
       const model = modelSelect.value;
       const stream = streamToggle.checked;
       const attachmentSummary = `${attachments.length} files`;
@@ -1496,7 +1481,7 @@
         `Request ${requestId}`,
         `${model} · ${attachmentSummary} · ${contextSummary}`
       );
-      userMessage.commit(composedPrompt);
+      userMessage.commit(prompt);
       const assistantMessage = createMessage('assistant', model, stream ? 'streaming' : 'buffered');
 
       runPromptButton.disabled = true;
@@ -1506,7 +1491,7 @@
 
       try {
         if (stream) {
-          const response = await window.puter.ai.chat(composedPrompt, { model, stream: true });
+          const response = await window.puter.ai.chat(prompt, { model, stream: true });
           let aggregate = '';
           for await (const part of response) {
             const chunk = part?.text || part?.message?.content?.[0]?.text || '';
@@ -1517,7 +1502,7 @@
           }
           assistantMessage.commit(aggregate || '[Stream completed with no text payload.]');
         } else {
-          const response = await window.puter.ai.chat(composedPrompt, { model });
+          const response = await window.puter.ai.chat(prompt, { model });
           assistantMessage.commit(extractResponseText(response));
         }
         runtimeStatus.textContent = 'Puter ready';
