@@ -69,10 +69,11 @@
     }
 
     .app {
-      min-height: calc(100vh - 62px);
+      height: calc(100vh - 62px);
       display: grid;
       grid-template-columns: 260px minmax(0, 1fr);
       background: var(--bg);
+      overflow: hidden;
     }
 
     .sidebar {
@@ -486,17 +487,19 @@
 
     .transcript {
       overflow: auto;
-      padding: 40px 24px 140px;
+      padding: clamp(18px, 3vw, 32px) clamp(14px, 3vw, 24px) 110px;
       display: grid;
       gap: 20px;
       align-content: start;
+      min-height: 0;
     }
 
     .thread {
-      width: min(860px, 100%);
+      width: min(760px, 100%);
       margin: 0 auto;
       display: grid;
       gap: 20px;
+      min-height: calc(100vh - 255px);
     }
 
     .message {
@@ -541,13 +544,25 @@
     }
 
     .empty-state {
-      width: min(860px, 100%);
+      width: min(760px, 100%);
+      min-height: clamp(260px, 55vh, 620px);
       margin: auto;
       text-align: center;
       color: var(--muted);
       display: grid;
-      gap: 8px;
-      padding: 24px;
+      place-items: center;
+      padding: clamp(12px, 2.5vw, 24px);
+      border: 1px solid var(--chat-border);
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.42);
+    }
+
+    .empty-state-logo {
+      width: min(100%, 620px);
+      height: min(100%, 320px);
+      object-fit: contain;
+      object-position: center;
+      opacity: 0.96;
     }
 
     .composer-dock {
@@ -557,7 +572,7 @@
     }
 
     .composer-shell {
-      width: min(860px, 100%);
+      width: min(760px, 100%);
       margin: 0 auto;
       display: grid;
       gap: 8px;
@@ -609,6 +624,8 @@
       .app {
         grid-template-columns: 1fr;
         height: auto;
+        min-height: calc(100vh - 62px);
+        overflow: visible;
       }
 
       .sidebar {
@@ -791,8 +808,7 @@
       <section id="transcript" class="transcript" aria-live="polite">
         <div class="thread" id="threadRoot">
           <div class="empty-state">
-            <strong>Claude</strong>
-            <span>Huge chat surface, one-line composer, utilities tucked into the sidebar.</span>
+            <img class="empty-state-logo" src="../../assets/GSlogo01.png" alt="Claude AI logo" />
           </div>
         </div>
       </section>
@@ -1107,7 +1123,7 @@
     }
 
     function clearTranscript() {
-      threadRoot.innerHTML = '<div class="empty-state"><strong>Claude</strong><span>Huge chat surface, one-line composer, utilities tucked into the sidebar.</span></div>';
+      threadRoot.innerHTML = '<div class="empty-state"><img class="empty-state-logo" src="../../assets/GSlogo01.png" alt="Claude AI logo" /></div>';
       if (transcriptExport) transcriptExport.value = '';
     }
 
