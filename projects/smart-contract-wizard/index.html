@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Contract Wizard | Christopher Hirschauer</title>
+  <link rel="stylesheet" href="../../styles/global.css" />
   <meta
     name="description"
     content="Smart Contract Wizard workspace with OpenZeppelin embed for rapid ERC contract scaffolding and export."
@@ -22,7 +23,8 @@
 
     html, body {
       margin: 0;
-      min-height: 100%;
+      width: 100%;
+      height: 100%;
       background: radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 40%), var(--bg);
       color: var(--text);
       font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -30,9 +32,24 @@
 
     body {
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto 1fr;
       gap: 12px;
-      padding: 12px;
+      min-height: 100vh;
+      width: 100%;
+      padding: 0;
+    }
+
+    .wizard-shell-nav {
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 15, 32, 0.88);
+      backdrop-filter: blur(10px);
+      padding: 8px 12px;
+    }
+
+    .wizard-shell-nav .top-nav {
+      margin: 0;
     }
 
     header {
@@ -41,9 +58,9 @@
       align-items: center;
       gap: 16px;
       padding: 12px 16px;
-      border-radius: 14px;
       background: var(--surface);
       border: 1px solid var(--border);
+      margin: 0 12px;
     }
 
     h1 {
@@ -66,21 +83,42 @@
 
     main {
       min-height: 0;
-      border-radius: 14px;
       overflow: hidden;
       border: 1px solid var(--border);
       background: var(--surface);
+      width: 100%;
     }
 
     oz-wizard {
       width: 100%;
       height: 100%;
       display: block;
-      min-height: calc(100vh - 108px);
+      min-height: 0;
     }
   </style>
 </head>
 <body>
+  <div class="wizard-shell-nav">
+    <nav class="top-nav">
+      <a class="brand" href="../../index.html#top">
+        <span class="brand-mark">
+          <img src="../../assets/GSlogo01.png" alt="Brand logo" class="brand-logo">
+        </span>
+        C.E. Hirschauer
+      </a>
+      <div class="nav-links">
+        <a href="../../index.html#top">Home</a>
+        <a href="../index.html">Projects</a>
+        <a href="../../books/index.html">Books</a>
+        <a href="../../index.html#contact">Contact</a>
+      </div>
+      <a class="button primary nav-cta" href="../../index.html#contact">Collaborate</a>
+      <div class="scroll-progress" aria-hidden="true">
+        <span></span>
+      </div>
+    </nav>
+  </div>
+
   <header>
     <div>
       <h1>Smart Contract Wizard</h1>

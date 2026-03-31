@@ -38,34 +38,14 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 18px;
       border-bottom: 1px solid var(--border);
       background: rgba(8, 15, 32, 0.88);
       backdrop-filter: blur(10px);
+      padding: 8px 12px;
     }
 
-    .claude-nav-links {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .claude-nav-link {
-      color: var(--text-dim);
-      text-decoration: none;
-      padding: 8px 10px;
-      border-radius: 10px;
-      border: 1px solid transparent;
-    }
-
-    .claude-nav-link:hover {
-      color: var(--text);
-      border-color: var(--border);
-      background: var(--panel);
+    .claude-nav .top-nav {
+      margin: 0;
     }
 
     .app {
@@ -126,7 +106,7 @@
       gap: 10px;
     }
 
-    .brand {
+    .claude-brand {
       display: inline-flex;
       align-items: center;
       gap: 10px;
@@ -663,15 +643,23 @@
 </head>
 <body class="claude-page">
   <header class="claude-nav">
-    <a class="brand" href="../../#top">
-      <span class="brand-dot" aria-hidden="true"></span>
-      <span>Christopher Hirschauer</span>
-    </a>
-    <nav class="claude-nav-links" aria-label="Primary">
-      <a class="claude-nav-link" href="../../#top">Home</a>
-      <a class="claude-nav-link" href="../index.html">Projects</a>
-      <a class="claude-nav-link" href="../../books/index.html">Books</a>
-      <a class="claude-nav-link" href="../../resume/resume.html">Resume</a>
+    <nav class="top-nav" aria-label="Primary">
+      <a class="brand" href="../../index.html#top">
+        <span class="brand-mark">
+          <img src="../../assets/GSlogo01.png" alt="Brand logo" class="brand-logo">
+        </span>
+        C.E. Hirschauer
+      </a>
+      <div class="nav-links">
+        <a href="../../index.html#top">Home</a>
+        <a href="../index.html">Projects</a>
+        <a href="../../books/index.html">Books</a>
+        <a href="../../resume/resume.html">Resume</a>
+      </div>
+      <a class="button primary nav-cta" href="../../index.html#contact">Collaborate</a>
+      <div class="scroll-progress" aria-hidden="true">
+        <span></span>
+      </div>
     </nav>
   </header>
 
@@ -679,7 +667,7 @@
     <aside class="sidebar">
       <div class="sidebar-top">
         <div class="sidebar-summary">
-          <a class="brand" href="../../#top">
+          <a class="claude-brand" href="../../#top">
             <span class="brand-dot" aria-hidden="true"></span>
             <span>Claude Chat</span>
           </a>
