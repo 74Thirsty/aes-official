@@ -932,67 +932,6 @@
       renderContextDocs();
     }
 
-    function ensureTranscriptState() {
-      const empty = transcript.querySelector('.empty-state');
-      if (empty) {
-        empty.remove();
-      }
-    }
-
-    function clearTranscript() {
-      transcript.innerHTML = '<div class="empty-state">Run a prompt to populate the transcript.</div>';
-      if (transcriptExport) transcriptExport.value = '';
-    }
-
-    function appendTranscriptExport(role, title, content) {
-      const header = `[${new Date().toISOString()}] ${role.toUpperCase()} · ${title}`;
-      if (!transcriptExport) return;
-      transcriptExport.value = transcriptExport.value
-        ? `${transcriptExport.value}\n\n${header}\n${content}`
-        : `${header}\n${content}`;
-    }
-
-    function createMessage(role, title, meta = '') {
-      ensureTranscriptState();
-      const wrapper = document.createElement('article');
-      wrapper.className = `message ${role}`;
-
-      const header = document.createElement('header');
-      const titleNode = document.createElement('strong');
-      titleNode.textContent = title;
-      const metaNode = document.createElement('span');
-      metaNode.textContent = meta;
-      header.append(titleNode);
-      if (meta) {
-        header.appendChild(metaNode);
-      }
-
-      const content = document.createElement('div');
-      content.className = 'message-bubble';
-
-      wrapper.append(header, content);
-      transcript.appendChild(wrapper);
-      transcript.scrollTop = transcript.scrollHeight;
-      return {
-        wrapper,
-        bubble,
-        commit(text) {
-          bubble.textContent = text;
-          appendTranscriptExport(role, title, text);
-        }
-      };
-    }
-
-    function extractResponseText(response) {
-      if (typeof response === 'string') return response;
-      if (response?.message?.content?.[0]?.text) return response.message.content[0].text;
-      if (response?.text) return response.text;
-      if (Array.isArray(response?.message?.content)) {
-        return response.message.content.map((part) => part?.text || '').filter(Boolean).join('\n');
-      }
-      return JSON.stringify(response, null, 2);
-    }
-
     function escapeSnippetValue(value) {
       return JSON.stringify(value);
     }
