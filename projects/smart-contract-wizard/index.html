@@ -34,14 +34,14 @@
       display: grid;
       grid-template-rows: auto auto 1fr;
       gap: 12px;
-      min-height: 100vh;
-      width: 100%;
-      padding: 0;
+      padding: 0 12px 12px;
     }
 
     .wizard-shell-nav {
-      position: relative;
-      z-index: 10;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      margin: 0 -12px;
       border-bottom: 1px solid var(--border);
       background: rgba(8, 15, 32, 0.88);
       backdrop-filter: blur(10px);
@@ -93,7 +93,7 @@
       width: 100%;
       height: 100%;
       display: block;
-      min-height: 0;
+      min-height: calc(100vh - 180px);
     }
   </style>
 </head>
