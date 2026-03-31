@@ -38,34 +38,14 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 18px;
       border-bottom: 1px solid var(--border);
       background: rgba(8, 15, 32, 0.88);
       backdrop-filter: blur(10px);
+      padding: 8px 12px;
     }
 
-    .claude-nav-links {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .claude-nav-link {
-      color: var(--text-dim);
-      text-decoration: none;
-      padding: 8px 10px;
-      border-radius: 10px;
-      border: 1px solid transparent;
-    }
-
-    .claude-nav-link:hover {
-      color: var(--text);
-      border-color: var(--border);
-      background: var(--panel);
+    .claude-nav .top-nav {
+      margin: 0;
     }
 
     .app {
@@ -126,7 +106,7 @@
       gap: 10px;
     }
 
-    .brand {
+    .claude-brand {
       display: inline-flex;
       align-items: center;
       gap: 10px;
@@ -663,15 +643,23 @@
 </head>
 <body class="claude-page">
   <header class="claude-nav">
-    <a class="brand" href="../../#top">
-      <span class="brand-dot" aria-hidden="true"></span>
-      <span>Christopher Hirschauer</span>
-    </a>
-    <nav class="claude-nav-links" aria-label="Primary">
-      <a class="claude-nav-link" href="../../#top">Home</a>
-      <a class="claude-nav-link" href="../index.html">Projects</a>
-      <a class="claude-nav-link" href="../../books/index.html">Books</a>
-      <a class="claude-nav-link" href="../../resume/resume.html">Resume</a>
+    <nav class="top-nav" aria-label="Primary">
+      <a class="brand" href="../../index.html#top">
+        <span class="brand-mark">
+          <img src="../../assets/GSlogo01.png" alt="Brand logo" class="brand-logo">
+        </span>
+        C.E. Hirschauer
+      </a>
+      <div class="nav-links">
+        <a href="../../index.html#top">Home</a>
+        <a href="../index.html">Projects</a>
+        <a href="../../books/index.html">Books</a>
+        <a href="../../resume/resume.html">Resume</a>
+      </div>
+      <a class="button primary nav-cta" href="../../index.html#contact">Collaborate</a>
+      <div class="scroll-progress" aria-hidden="true">
+        <span></span>
+      </div>
     </nav>
   </header>
 
@@ -679,7 +667,7 @@
     <aside class="sidebar">
       <div class="sidebar-top">
         <div class="sidebar-summary">
-          <a class="brand" href="../../#top">
+          <a class="claude-brand" href="../../#top">
             <span class="brand-dot" aria-hidden="true"></span>
             <span>Claude Chat</span>
           </a>
@@ -778,6 +766,30 @@
           </div>
         </details>
 
+        <details class="toolbox" open>
+          <summary>
+            <span>Contract Wizard Ops</span>
+            <span class="helper">OpenZeppelin + threat model presets</span>
+          </summary>
+          <div class="toolbox-body">
+            <div class="button-row">
+              <a class="control-button" href="../smart-contract-wizard/index.html">Open Smart Contract Wizard</a>
+            </div>
+            <div class="field">
+              <label for="contractPresetSelect">Contract archetype</label>
+              <select id="contractPresetSelect">
+                <option value="erc20">ERC20 + permit + roles</option>
+                <option value="erc721">ERC721 + allowlist + royalties</option>
+                <option value="vault">Vault + strategy adaptor</option>
+              </select>
+            </div>
+            <div class="button-row">
+              <button id="applyContractPresetButton" class="control-button" type="button">Inject preset context</button>
+            </div>
+            <span class="helper">Injects hardened prompts for OpenZeppelin scaffolding, threat-model coverage, and deployment checks.</span>
+          </div>
+        </details>
+
         <details class="toolbox">
           <summary>
             <span>Attachments</span>
@@ -861,6 +873,8 @@
     const runPromptButton = document.getElementById('runPromptButton');
     const resetTranscriptButton = document.getElementById('resetTranscriptButton');
     const clearComposerButton = document.getElementById('clearComposerButton');
+    const contractPresetSelect = document.getElementById('contractPresetSelect');
+    const applyContractPresetButton = document.getElementById('applyContractPresetButton');
     const transcript = document.getElementById('transcript');
     const threadRoot = document.getElementById('threadRoot');
     const transcriptExport = document.getElementById('transcriptExport');
@@ -893,6 +907,20 @@
     let attachments = [];
     let contextDocs = loadContextDocs();
     let loadedContextDocId = null;
+    const CONTRACT_PRESET_PACKS = {
+      erc20: {
+        system: 'You are a senior Solidity reviewer. Generate production-grade ERC20 implementations with EIP-2612 permit, role-gated mint/burn flows, and deterministic upgrade posture. Default to custom errors, events, NatSpec, and explicit access-control surfaces.',
+        context: `Objective: design ERC20 + permit with hardened transfer hooks.\n\nRequirements:\n- Use OpenZeppelin Wizard output as base and refactor to custom errors + event-rich state transitions.\n- Validate allowance, permit nonce handling, and signature domain separator assumptions.\n- Include threat model for reentrancy via callbacks, fee-on-transfer and rebasing token edge cases.\n- Add invariants for totalSupply conservation and role boundary checks.\n- Include deployment checklist: proxy/non-proxy choice, initializer locking, and admin rotation policy.`
+      },
+      erc721: {
+        system: 'You are a smart-contract security engineer. Design ERC721 systems with explicit mint policies, royalties, replay-safe signatures, and guardrails against supply griefing.',
+        context: `Objective: design ERC721 + allowlist + royalty flow for production.\n\nRequirements:\n- Start from OpenZeppelin Wizard ERC721 scaffold.\n- Add EIP-712 typed permit/allowlist claims with replay protection and expiry.\n- Cover DoS and griefing vectors around batch mint, metadata updates, and operator approvals.\n- Define storage slots for config to avoid collisions in upgrade paths.\n- Add fuzz targets for token ID uniqueness, cap enforcement, and withdrawal authorization.`
+      },
+      vault: {
+        system: 'You are a protocol architect. Produce vault contracts with strict accounting, share-price safety, and MEV-aware execution constraints.',
+        context: `Objective: design tokenized vault with adapter strategy hooks.\n\nRequirements:\n- Use OpenZeppelin modules where relevant and document why each is included.\n- Enforce checks-effects-interactions ordering and nonReentrant on external state transitions.\n- Model flash-loan manipulation against share price / oracle reads.\n- Add emergency controls: pausable flows, guardian role, and delayed strategy migration.\n- Provide invariant set for totalAssets >= liabilities and bounded slippage on strategy exits.`
+      }
+    };
 
     function loadContextDocs() {
       try {
@@ -957,6 +985,17 @@
     function clip(text, limit) {
       if (!text) return '';
       return text.length > limit ? `${text.slice(0, limit)}\n\n[truncated ${text.length - limit} chars]` : text;
+    }
+
+    function applyContractPreset() {
+      const selected = CONTRACT_PRESET_PACKS[contractPresetSelect.value] || CONTRACT_PRESET_PACKS.erc20;
+      systemPromptInput.value = selected.system;
+      contextInput.value = selected.context;
+      if (!contextNameInput.value.trim()) {
+        contextNameInput.value = `preset-${contractPresetSelect.value}.md`;
+      }
+      compositionHint.textContent = `Applied ${contractPresetSelect.value.toUpperCase()} preset from Smart Contract Wizard workflow.`;
+      syncComposerState();
     }
 
     function formatBytes(bytes) {
@@ -1550,6 +1589,7 @@
       syncComposerState();
       promptInput.focus();
     });
+    applyContractPresetButton?.addEventListener('click', applyContractPreset);
 
     signInButton?.addEventListener('click', async () => {
       await runAuthAction('signIn');
