@@ -1,184 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chris Hirschauer — Web3 Resume</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    /* Base Styles */
-    body {
-      margin: 0;
-      font-family: 'JetBrains Mono', monospace;
-      background: linear-gradient(135deg, #0d0d13, #1a1a27);
-      color: #00fff0;
-      overflow-x: hidden;
-    }
-    h1, h2, h3, h4 { color: #ff008c; margin: 0.3em 0; }
-    a { color: #ff66cc; text-decoration: none; }
-    a:hover { color: #00fff0; }
-    section { padding: 80px 10%; }
-    .container { max-width: 1200px; margin: 0 auto; }
-
-    /* Header */
-    header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 60px 0;
-      text-align: center;
-      background: linear-gradient(90deg, #0f0f14, #1a1a27);
-      border-bottom: 2px solid #ff008c44;
-    }
-    header h1 { font-size: 3em; text-shadow: 0 0 20px #ff008c; }
-    header p { font-size: 1.2em; color: #00fff0cc; margin-top: 10px; }
-
-    /* Sections */
-    .section-title { margin-bottom: 40px; text-align: center; text-shadow: 0 0 15px #ff008c44; }
-
-    /* Cards */
-    .card {
-      background: #12121c;
-      border: 1px solid #ff008c44;
-      border-radius: 15px;
-      padding: 25px;
-      margin: 20px 0;
-      transition: transform 0.25s, box-shadow 0.25s;
-      box-shadow: 0 0 10px #ff008c22;
-    }
-    .card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 30px #ff008c55;
-    }
-
-    /* Grid for skills / projects */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    /* Interactive counter style */
-    .counter {
-      font-size: 2em;
-      font-weight: bold;
-      color: #ff66cc;
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-block;
-      padding: 12px 28px;
-      margin-top: 15px;
-      border: 1px solid #ff008c;
-      border-radius: 8px;
-      color: #ff008c;
-      transition: all 0.3s;
-    }
-    .btn:hover {
-      background: #ff008c;
-      color: #0f0f14;
-    }
-
-    /* Footer */
-    footer { text-align: center; padding: 40px 0; color: #00fff0aa; }
-
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Christopher Hirschauer — Resume</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
+  <main class="page">
 
-<header>
-  <h1>Chris Hirschauer</h1>
-  <p>Self-Taught Web3 / DeFi Architect — Lead Developer of VANTAGE</p>
-</header>
+    <!-- HEADER -->
+    <header class="header">
+      <h1>Christopher Hirschauer</h1>
+      <p class="subtitle">
+        Fort Dodge, IA • c.hirschauer@gmail.com • 712.333.5551 • Facebook.com/ch0608
+      </p>
+    </header>
 
-<section id="summary">
-  <div class="container">
-    <h2 class="section-title">Professional Summary</h2>
-    <div class="card">
-      <p>Self-taught blockchain and DeFi systems architect. Built <strong>VANTAGE</strong>, 50+ GitHub repos, 130+ Gists, multiple Docker containers, and PyPI packages — all in under 1 year — while publishing a book on DeFi security.</p>
-    </div>
-  </div>
-</section>
+    <!-- SUMMARY -->
+    <section class="section">
+      <h2>Summary</h2>
+      <p>
+        Customer service specialist with strong communication skills, sales experience,
+        and a high aptitude for learning. Proven ability to adapt quickly, work well
+        with teams, and deliver consistent results across customer-facing and operational roles.
+      </p>
+    </section>
 
-<section id="skills">
-  <div class="container">
-    <h2 class="section-title">Core Skills</h2>
-    <div class="grid">
-      <div class="card"><h3>Blockchain & Web3</h3><p>Ethereum, Solana, EVM, Solidity, Gnosis Safe, Flashbots</p></div>
-      <div class="card"><h3>Programming & ML</h3><p>Python 3.11, Web3.py, PyTorch, TensorFlow, ML optimization</p></div>
-      <div class="card"><h3>DeFi & Arbitrage</h3><p>Multi-DEX integration, Flash-loan execution, RPZE algorithm</p></div>
-      <div class="card"><h3>Architecture & Security</h3><p>Stateless proxies, forensic logs, adaptive gas calibration</p></div>
-    </div>
-  </div>
-</section>
+    <!-- SKILLS -->
+    <section class="section">
+      <h2>Skills</h2>
+      <ul class="grid-list">
+        <li>Customer Service</li>
+        <li>Sales</li>
+        <li>Communication</li>
+        <li>Team Collaboration</li>
+        <li>Technical Troubleshooting</li>
+      </ul>
+    </section>
 
-<section id="projects">
-  <div class="container">
-    <h2 class="section-title">Projects & Open Source</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>VANTAGE</h3>
-        <p>Autonomous DeFi engine with ephemeral execution layer and self-learning ML arbitrage.</p>
-        <span class="counter" data-count="50">0</span>+ GitHub Repos<br>
-        <span class="counter" data-count="130">0</span>+ Gists
+    <!-- EXPERIENCE -->
+    <section class="section">
+      <h2>Experience</h2>
+
+      <div class="item">
+        <div class="item-header">
+          <h3>Sales Representative — Today Publications</h3>
+          <span>Dec 2019 – Jan 2020</span>
+        </div>
+        <p class="item-subtitle">Fort Dodge, IA</p>
+        <ul>
+          <li>Performed direct sales outreach and customer engagement.</li>
+          <li>Supported publication distribution and client communication.</li>
+        </ul>
       </div>
-      <div class="card">
-        <h3>PyPI Packages</h3>
-        <p>vantage-utils, ephemeral-wallet, gas-calibrator</p>
-      </div>
-      <div class="card">
-        <h3>Docker Containers</h3>
-        <p>Official containers for VANTAGE modules and ephemeral execution services.</p>
-      </div>
-      <div class="card">
-        <h3>Book</h3>
-        <p><em>Uncovering the Dark Side of Cash App</em> — DeFi security & regulatory gaps</p>
-      </div>
-      <div class="card">
-        <h3>aes-official</h3>
-        <p>Automated financial document system with live charts, PDF export, and transaction automation. 150+ commits showcasing sustained development.</p>
-      </div>
-    </div>
-  </div>
-</section>
 
-<section id="contact">
-  <div class="container">
-    <h2 class="section-title">Contact</h2>
-    <div class="card">
-      <p>Email: <a href="mailto:chris@yourdomain.com">chris@yourdomain.com</a></p>
-      <p>GitHub: <a href="https://github.com/74Thirsty" target="_blank">github.com/74Thirsty</a></p>
-      <p>Portfolio: <a href="https://christopherhirschauer.bio" target="_blank">christopherhirschauer.bio</a></p>
-      <p>Twitter: <a href="https://twitter.com/hirschauerdev" target="_blank">@hirschauerdev</a></p>
-      <a href="mailto:chris@yourdomain.com" class="btn">Get in Touch</a>
-    </div>
-  </div>
-</section>
+      <div class="item">
+        <div class="item-header">
+          <h3>Escort / Pilot Car Driver — Pilot Cars America</h3>
+          <span>Jul 2016 – Nov 2019</span>
+        </div>
+        <p class="item-subtitle">Various Locations</p>
+        <ul>
+          <li>Provided safe escort services for oversized load transport.</li>
+          <li>Maintained communication with drivers and coordinated route safety.</li>
+        </ul>
+      </div>
 
-<footer>
-  Built by Chris Hirschauer — Self-taught Web3 / DeFi Architect
-</footer>
+      <div class="item">
+        <div class="item-header">
+          <h3>Customer Service — Alorica, Inc.</h3>
+          <span>Aug 2006 – Aug 2013</span>
+        </div>
+        <p class="item-subtitle">Sioux City, IA</p>
+        <ul>
+          <li>Delivered high‑volume call center support with strong customer satisfaction.</li>
+          <li>Developed advanced communication and problem‑solving skills.</li>
+        </ul>
+      </div>
 
-<script>
-  // Animated counters
-  const counters = document.querySelectorAll('.counter');
-  counters.forEach(counter => {
-    const updateCount = () => {
-      const target = +counter.getAttribute('data-count');
-      const count = +counter.innerText;
-      const speed = 50;
-      const inc = target / speed;
-      if(count < target) {
-        counter.innerText = Math.ceil(count + inc);
-        setTimeout(updateCount, 20);
-      } else {
-        counter.innerText = target;
-      }
-    }
-    updateCount();
-  });
-</script>
+      <div class="item">
+        <div class="item-header">
+          <h3>Platinum NCRC</h3>
+          <span>Certification</span>
+        </div>
+        <p class="item-subtitle">
+          Verified high‑level workplace readiness and applied skills.
+        </p>
+      </div>
 
+    </section>
+
+    <!-- EDUCATION -->
+    <section class="section">
+      <h2>Education</h2>
+      <div class="item">
+        <div class="item-header">
+          <h3>Information Technologies — Western Iowa Tech</h3>
+          <span>Sioux City, IA</span>
+        </div>
+        <p class="item-subtitle">Maintained a 3.57 GPA</p>
+      </div>
+    </section>
+
+    <!-- COMMUNICATION -->
+    <section class="section">
+      <h2>Communication</h2>
+      <p>
+        Excellent customer service and sales skills developed through years of call center
+        and client‑facing work. Strong technical proficiency and computer expertise.
+      </p>
+    </section>
+
+    <!-- LEADERSHIP -->
+    <section class="section">
+      <h2>Leadership</h2>
+      <p>
+        Team‑oriented, adaptable, and quick to learn. Able to adjust to new environments
+        and responsibilities with ease.
+      </p>
+    </section>
+
+    <!-- REFERENCES -->
+    <section class="section">
+      <h2>References</h2>
+      <ul>
+        <li>Jim Claven — Claven Painting — 515.570.1596</li>
+        <li>Steve Pedersen — Business Owner — 515.570.2425</li>
+        <li>Heather Albrecht — Sioux City PD — 712.253.3405</li>
+      </ul>
+    </section>
+
+  </main>
 </body>
 </html>
+
